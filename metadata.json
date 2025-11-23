@@ -1,0 +1,5 @@
+{
+  "name": "OS Master - Gerenciador de Ordens de Serviço",
+  "description": "Sistema completo para gerenciamento de Ordens de Serviço com sincronização em tempo real via Firebase Firestore.",
+  "requestFramePermissions": []
+}
