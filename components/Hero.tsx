@@ -7,7 +7,7 @@ interface HeroProps {
 }
 
 const CupSVG: React.FC = () => (
-  <img src="/copo.jpg" alt="Copo Térmico 475ml" className="w-full h-full object-contain drop-shadow-2xl" />
+  <img src="/Copo.jpg.png" alt="Copo Térmico 475ml" className="w-full h-full object-contain drop-shadow-2xl" />
 );
 
 export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
