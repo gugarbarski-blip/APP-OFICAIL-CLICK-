@@ -25,22 +25,7 @@ export const ProductShowcase: React.FC<ProductShowcaseProps> = ({ onCtaClick }) 
         <div className="grid md:grid-cols-2 gap-12 items-start">
           {/* Cup visual + price */}
           <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-10 flex flex-col items-center gap-6 shadow-xl">
-            <svg viewBox="0 0 200 280" className="w-48 h-64 drop-shadow-2xl" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="100" cy="32" rx="52" ry="12" fill="#2a2a2a" />
-              <rect x="52" y="28" width="96" height="18" rx="4" fill="#222222" />
-              <rect x="68" y="34" width="64" height="6" rx="3" fill="#333333" />
-              <rect x="88" y="16" width="24" height="16" rx="4" fill="#1a1a1a" />
-              <rect x="93" y="10" width="14" height="10" rx="3" fill="#111111" />
-              <path d="M58 44 Q52 46 50 55 L44 220 Q43 235 58 240 L142 240 Q157 235 156 220 L150 55 Q148 46 142 44 Z" fill="#1a1a1a" />
-              <path d="M68 50 Q62 52 60 60 L56 190 Q58 195 65 196 L75 196 L79 60 Q78 52 72 50 Z" fill="rgba(255,255,255,0.07)" />
-              <rect x="68" y="105" width="64" height="70" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.15)" strokeWidth="1" strokeDasharray="4 3" />
-              <text x="100" y="136" textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="8" fontFamily="Inter, sans-serif">Seu Logo</text>
-              <text x="100" y="148" textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="8" fontFamily="Inter, sans-serif">Aqui</text>
-              <ellipse cx="100" cy="238" rx="42" ry="9" fill="#111111" />
-              <ellipse cx="100" cy="236" rx="36" ry="7" fill="#0d0d0d" />
-              <rect x="143" y="120" width="18" height="50" rx="9" fill="#222222" />
-              <rect x="145" y="124" width="14" height="42" rx="7" fill="#1a1a1a" />
-            </svg>
+            <img src="/copo.jpg" alt="Copo Térmico 475ml" className="w-48 h-64 object-contain drop-shadow-2xl" />
 
             <div className="text-center text-white">
               <p className="text-gray-400 text-sm">Cor: {PRODUCT.color}</p>
