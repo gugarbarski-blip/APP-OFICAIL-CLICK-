@@ -25,7 +25,7 @@ export const ProductShowcase: React.FC<ProductShowcaseProps> = ({ onCtaClick }) 
         <div className="grid md:grid-cols-2 gap-12 items-start">
           {/* Cup visual + price */}
           <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-10 flex flex-col items-center gap-6 shadow-xl">
-            <img src="/copo.jpg" alt="Copo Térmico 475ml" className="w-48 h-64 object-contain drop-shadow-2xl" />
+            <img src="/Copo.jpg.png" alt="Copo Térmico 475ml" className="w-48 h-64 object-contain drop-shadow-2xl" />
 
             <div className="text-center text-white">
               <p className="text-gray-400 text-sm">Cor: {PRODUCT.color}</p>
