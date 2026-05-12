@@ -45,7 +45,7 @@ export const PRODUCT = {
     'Capacidade: 475ml',
     'Cor: Preto fosco',
   ],
-  basePrice: 49.90,
+  basePrice: 23.00,
   customizations: {
     serigrafia: { label: 'Serigrafia 1 Cor', extraPrice: 0, description: 'Impressão em tinta de alta durabilidade' },
     laser: { label: 'Gravação a Laser', extraPrice: 5.00, description: 'Gravação permanente na superfície do copo' },
