@@ -28,7 +28,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
 
           <p className="text-gray-300 text-lg leading-relaxed">
             Copos Térmicos 475ml personalizados com a identidade da sua empresa.
-            Qualidade premium, gravação permanente e entrega para todo o Brasil.
+            Qualidade premium e entrega para todo o Brasil.
           </p>
 
           {/* Price badge */}
