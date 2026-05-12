@@ -53,7 +53,7 @@ export const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
             onClick={onCtaClick}
             className="bg-primary hover:bg-primaryDark text-white font-semibold px-5 py-2 rounded-lg text-sm transition-colors"
           >
-            Personalizar Agora
+            Compre Já!
           </button>
         </div>
 
@@ -84,7 +84,7 @@ export const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
               onClick={() => { setMenuOpen(false); onCtaClick(); }}
               className="mt-2 bg-primary hover:bg-primaryDark text-white font-semibold py-3 rounded-lg text-sm transition-colors"
             >
-              Personalizar Agora
+              Compre Já!
             </button>
           </nav>
         </div>

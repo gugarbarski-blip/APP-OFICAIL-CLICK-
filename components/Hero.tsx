@@ -84,7 +84,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
               onClick={onCtaClick}
               className="flex items-center justify-center gap-2 bg-primary hover:bg-primaryDark text-white font-semibold px-8 py-4 rounded-xl text-base transition-all hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5"
             >
-              Personalizar Agora
+              Compre Já!
               <ArrowRight size={18} />
             </button>
             <a
