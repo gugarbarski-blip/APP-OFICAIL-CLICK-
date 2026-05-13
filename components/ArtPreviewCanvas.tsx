@@ -2,17 +2,14 @@ import React, { useRef, useEffect, useCallback } from 'react';
 
 interface ArtPreviewCanvasProps {
   artUrl: string | null;
+  cupImageUrl: string;
 }
 
 const W = 300;
 const H = 420;
-// Print area mapped to the black body of the cup photo
 const PRINT = { x: 78, y: 130, w: 144, h: 160 };
 
-const cupImage = new Image();
-cupImage.src = '/Copo.jpg.png';
-
-export const ArtPreviewCanvas: React.FC<ArtPreviewCanvasProps> = ({ artUrl }) => {
+export const ArtPreviewCanvas: React.FC<ArtPreviewCanvasProps> = ({ artUrl, cupImageUrl }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const render = useCallback(() => {
@@ -21,10 +18,12 @@ export const ArtPreviewCanvas: React.FC<ArtPreviewCanvasProps> = ({ artUrl }) =>
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const cupImage = new Image();
+    cupImage.src = cupImageUrl;
+
     const draw = () => {
       ctx.clearRect(0, 0, W, H);
 
-      // Draw cup photo filling the canvas (center-crop)
       const imgRatio = cupImage.naturalWidth / cupImage.naturalHeight;
       const canvasRatio = W / H;
       let sx = 0, sy = 0, sw = cupImage.naturalWidth, sh = cupImage.naturalHeight;
@@ -38,7 +37,6 @@ export const ArtPreviewCanvas: React.FC<ArtPreviewCanvasProps> = ({ artUrl }) =>
       ctx.drawImage(cupImage, sx, sy, sw, sh, 0, 0, W, H);
 
       if (!artUrl) {
-        // Dashed border placeholder
         ctx.save();
         ctx.strokeStyle = 'rgba(255,255,255,0.6)';
         ctx.lineWidth = 1.5;
@@ -55,20 +53,17 @@ export const ArtPreviewCanvas: React.FC<ArtPreviewCanvasProps> = ({ artUrl }) =>
         return;
       }
 
-      // Draw uploaded art clipped to print area
       const art = new Image();
       art.onload = () => {
         ctx.save();
         ctx.beginPath();
         ctx.rect(PRINT.x, PRINT.y, PRINT.w, PRINT.h);
         ctx.clip();
-
         const ratio = Math.min(PRINT.w / art.width, PRINT.h / art.height);
         const dw = art.width * ratio;
         const dh = art.height * ratio;
         const dx = PRINT.x + (PRINT.w - dw) / 2;
         const dy = PRINT.y + (PRINT.h - dh) / 2;
-
         ctx.globalAlpha = 0.88;
         ctx.drawImage(art, dx, dy, dw, dh);
         ctx.restore();
@@ -81,7 +76,7 @@ export const ArtPreviewCanvas: React.FC<ArtPreviewCanvasProps> = ({ artUrl }) =>
     } else {
       cupImage.onload = draw;
     }
-  }, [artUrl]);
+  }, [artUrl, cupImageUrl]);
 
   useEffect(() => {
     render();
