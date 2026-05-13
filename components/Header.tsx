@@ -16,7 +16,7 @@ export const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
   }, []);
 
   const navLinks = [
-    { label: 'Produto', href: '#produto' },
+    { label: 'Produtos', href: '#produto' },
     { label: 'Como Funciona', href: '#como-funciona' },
     { label: 'Diferenciais', href: '#diferenciais' },
   ];

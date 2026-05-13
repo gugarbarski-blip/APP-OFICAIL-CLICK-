@@ -28,7 +28,7 @@ export const Footer: React.FC = () => {
             <h4 className="font-semibold text-white mb-3 text-sm uppercase tracking-wider">Navegação</h4>
             <ul className="space-y-2 text-sm">
               {[
-                { label: 'Produto', href: '#produto' },
+                { label: 'Produtos', href: '#produto' },
                 { label: 'Como Funciona', href: '#como-funciona' },
                 { label: 'Diferenciais', href: '#diferenciais' },
               ].map(link => (
