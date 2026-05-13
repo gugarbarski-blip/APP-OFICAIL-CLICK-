@@ -102,7 +102,7 @@ const App: React.FC = () => {
             Faça o upload da sua arte agora e veja como seu copo ficará antes de finalizar o pedido.
           </p>
           <button
-            onClick={() => startOrder(PRODUCTS['copo-475'])}
+            onClick={() => document.getElementById('produto')?.scrollIntoView({ behavior: 'smooth' })}
             className="inline-flex items-center gap-3 bg-accent hover:bg-accentDark text-white font-semibold px-10 py-4 rounded-xl text-lg transition-all hover:shadow-xl hover:-translate-y-0.5"
           >
             Começar Agora
