@@ -6,6 +6,11 @@ interface HeroProps {
   onCtaClick: () => void;
 }
 
+const CupSVG: React.FC = () => (
+  <img src="/Copo.jpg.png" alt="Copo Térmico 475ml" className="w-full h-full object-contain drop-shadow-2xl" />
+);
+
+
 export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
   return (
     <section className="min-h-screen pt-16 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center">
@@ -24,7 +29,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
 
           <p className="text-gray-300 text-lg leading-relaxed">
             Copos Térmicos 475ml personalizados com a identidade da sua empresa.
-            Qualidade premium, gravação permanente e entrega para todo o Brasil.
+            Qualidade premium e entrega para todo o Brasil.
           </p>
 
           {/* Price badge */}
@@ -43,7 +48,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
               onClick={onCtaClick}
               className="flex items-center justify-center gap-2 bg-primary hover:bg-primaryDark text-white font-semibold px-8 py-4 rounded-xl text-base transition-all hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5"
             >
-              Faça seu pedido já!
+              Compre Já!
               <ArrowRight size={18} />
             </button>
             <a
