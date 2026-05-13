@@ -77,7 +77,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
           <div className="relative">
             <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl scale-75 translate-y-8" />
             <img
-              src="/images/copo-mockup.png"
+              src="/Copo.jpg.png"
               alt="Copo Térmico 475ml personalizado - Click Brindes"
               className="relative w-64 sm:w-80 object-contain drop-shadow-2xl"
               style={{ filter: 'drop-shadow(0 30px 50px rgba(0,0,0,0.6))' }}
