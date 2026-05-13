@@ -6,47 +6,6 @@ interface HeroProps {
   onCtaClick: () => void;
 }
 
-const CupSVG: React.FC = () => (
-  <svg viewBox="0 0 200 280" className="w-full h-full drop-shadow-2xl" xmlns="http://www.w3.org/2000/svg">
-    {/* Lid */}
-    <ellipse cx="100" cy="32" rx="52" ry="12" fill="#2a2a2a" />
-    <rect x="52" y="28" width="96" height="18" rx="4" fill="#222222" />
-    <rect x="68" y="34" width="64" height="6" rx="3" fill="#333333" />
-    {/* Lid button */}
-    <rect x="88" y="16" width="24" height="16" rx="4" fill="#1a1a1a" />
-    <rect x="93" y="10" width="14" height="10" rx="3" fill="#111111" />
-
-    {/* Body */}
-    <path
-      d="M58 44 Q52 46 50 55 L44 220 Q43 235 58 240 L142 240 Q157 235 156 220 L150 55 Q148 46 142 44 Z"
-      fill="#1a1a1a"
-    />
-    {/* Gloss highlight */}
-    <path
-      d="M68 50 Q62 52 60 60 L56 190 Q58 195 65 196 L75 196 L79 60 Q78 52 72 50 Z"
-      fill="rgba(255,255,255,0.07)"
-    />
-
-    {/* Print area */}
-    <rect x="68" y="105" width="64" height="70" rx="4"
-      fill="rgba(255,255,255,0.05)"
-      stroke="rgba(255,255,255,0.15)"
-      strokeWidth="1"
-      strokeDasharray="4 3"
-    />
-    <text x="100" y="136" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="8" fontFamily="Inter, sans-serif">Seu Logo</text>
-    <text x="100" y="148" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="8" fontFamily="Inter, sans-serif">Aqui</text>
-
-    {/* Bottom */}
-    <ellipse cx="100" cy="238" rx="42" ry="9" fill="#111111" />
-    <ellipse cx="100" cy="236" rx="36" ry="7" fill="#0d0d0d" />
-
-    {/* Handle / grip detail */}
-    <rect x="143" y="120" width="18" height="50" rx="9" fill="#222222" />
-    <rect x="145" y="124" width="14" height="42" rx="7" fill="#1a1a1a" />
-  </svg>
-);
-
 export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
   return (
     <section className="min-h-screen pt-16 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center">
@@ -84,7 +43,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
               onClick={onCtaClick}
               className="flex items-center justify-center gap-2 bg-primary hover:bg-primaryDark text-white font-semibold px-8 py-4 rounded-xl text-base transition-all hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5"
             >
-              Personalizar Agora
+              Faça seu pedido já!
               <ArrowRight size={18} />
             </button>
             <a
@@ -108,11 +67,16 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
           </div>
         </div>
 
-        {/* Cup mockup */}
+        {/* Cup photo */}
         <div className="order-1 md:order-2 flex justify-center">
-          <div className="relative w-56 h-80 sm:w-64 sm:h-96">
+          <div className="relative">
             <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl scale-75 translate-y-8" />
-            <CupSVG />
+            <img
+              src="/images/copo-mockup.png"
+              alt="Copo Térmico 475ml personalizado - Click Brindes"
+              className="relative w-64 sm:w-80 object-contain drop-shadow-2xl"
+              style={{ filter: 'drop-shadow(0 30px 50px rgba(0,0,0,0.6))' }}
+            />
           </div>
         </div>
       </div>
