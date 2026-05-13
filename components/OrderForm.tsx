@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, MapPin, Loader } from 'lucide-react';
-import { OrderFormData, Address, PRODUCT, CustomizationType, calcUnitPrice, calcTotal } from '../types';
+import { OrderFormData, Address, ProductDef, CustomizationType, calcUnitPrice, calcTotal } from '../types';
 import { lookupCEP, formatCEP, formatPhone } from '../services/cep';
 
 interface OrderFormProps {
+  product: ProductDef;
   customizationType: CustomizationType;
   initialData: OrderFormData;
   onChange: (data: OrderFormData) => void;
@@ -11,9 +12,8 @@ interface OrderFormProps {
   onNext: () => void;
 }
 
-const MIN_QTY = PRODUCT.minQuantity;
-
-export const OrderForm: React.FC<OrderFormProps> = ({ customizationType, initialData, onChange, onBack, onNext }) => {
+export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType, initialData, onChange, onBack, onNext }) => {
+  const MIN_QTY = product.minQuantity;
   const [cepLoading, setCepLoading] = useState(false);
   const [cepError, setCepError] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -75,8 +75,8 @@ export const OrderForm: React.FC<OrderFormProps> = ({ customizationType, initial
     if (validate()) onNext();
   };
 
-  const unitPrice = calcUnitPrice(customizationType);
-  const total = calcTotal(customizationType, d.quantity);
+  const unitPrice = calcUnitPrice(product, customizationType);
+  const total = calcTotal(product, customizationType, d.quantity);
 
   return (
     <div className="min-h-screen pt-16 bg-gray-50">

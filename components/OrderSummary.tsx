@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
-import { ArrowLeft, CreditCard, CheckCircle, Package, MapPin, User, Palette } from 'lucide-react';
-import { Customization, OrderFormData, PRODUCT, calcUnitPrice, calcTotal } from '../types';
+import { ArrowLeft, CreditCard, Package, MapPin, User, Palette } from 'lucide-react';
+import { Customization, OrderFormData, ProductDef, calcUnitPrice, calcTotal } from '../types';
 import { redirectToPagSeguro } from '../services/pagseguro';
 import { ArtPreviewCanvas } from './ArtPreviewCanvas';
 
 interface OrderSummaryProps {
+  product: ProductDef;
   customization: Customization;
   formData: OrderFormData;
   onBack: () => void;
   onConfirm: () => void;
 }
 
-export const OrderSummary: React.FC<OrderSummaryProps> = ({ customization, formData, onBack, onConfirm }) => {
+export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customization, formData, onBack, onConfirm }) => {
   const [loading, setLoading] = useState(false);
 
-  const custOption = PRODUCT.customizations[customization.type];
-  const unitPrice = calcUnitPrice(customization.type);
-  const total = calcTotal(customization.type, formData.quantity);
+  const custOption = product.customizations[customization.type];
+  const unitPrice = calcUnitPrice(product, customization.type);
+  const total = calcTotal(product, customization.type, formData.quantity);
 
   const handlePay = () => {
     setLoading(true);
@@ -52,11 +53,11 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ customization, formD
             </h3>
             <div className="flex gap-6 items-start">
               <div className="w-28 flex-shrink-0">
-                <ArtPreviewCanvas artUrl={customization.artPreviewUrl} />
+                <ArtPreviewCanvas artUrl={customization.artPreviewUrl} cupImageUrl={product.image} />
               </div>
               <div className="space-y-2 flex-1">
-                <p className="font-semibold text-gray-900">{PRODUCT.name}</p>
-                <p className="text-gray-500 text-sm">Cor: {PRODUCT.color}</p>
+                <p className="font-semibold text-gray-900">{product.name}</p>
+                <p className="text-gray-500 text-sm">Cor: {product.color}</p>
                 <div className="flex items-center gap-2">
                   <Palette size={14} className="text-primary" />
                   <p className="text-gray-700 text-sm">{custOption.label}</p>

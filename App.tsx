@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { CheckCircle, Gift, ArrowRight } from 'lucide-react';
-import { AppStep, Customization, OrderFormData, PRODUCT, calcTotal } from './types';
+import { Gift, ArrowRight } from 'lucide-react';
+import { AppStep, Customization, OrderFormData, ProductDef, PRODUCTS } from './types';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { ProductShowcase } from './components/ProductShowcase';
@@ -11,21 +11,13 @@ import { CustomizationStep } from './components/CustomizationStep';
 import { OrderForm } from './components/OrderForm';
 import { OrderSummary } from './components/OrderSummary';
 
-const EMPTY_ORDER: OrderFormData = {
+const makeEmptyOrder = (product: ProductDef): OrderFormData => ({
   name: '',
   email: '',
   phone: '',
-  quantity: PRODUCT.minQuantity,
-  address: {
-    cep: '',
-    street: '',
-    neighborhood: '',
-    city: '',
-    state: '',
-    number: '',
-    complement: '',
-  },
-};
+  quantity: product.minQuantity,
+  address: { cep: '', street: '', neighborhood: '', city: '', state: '', number: '', complement: '' },
+});
 
 const EMPTY_CUSTOMIZATION: Customization = {
   type: 'serigrafia',
@@ -35,17 +27,26 @@ const EMPTY_CUSTOMIZATION: Customization = {
 
 const App: React.FC = () => {
   const [step, setStep] = useState<AppStep>('landing');
+  const [selectedProduct, setSelectedProduct] = useState<ProductDef>(PRODUCTS['copo-475']);
   const [customization, setCustomization] = useState<Customization>(EMPTY_CUSTOMIZATION);
-  const [orderData, setOrderData] = useState<OrderFormData>(EMPTY_ORDER);
+  const [orderData, setOrderData] = useState<OrderFormData>(makeEmptyOrder(PRODUCTS['copo-475']));
 
   const goTo = (s: AppStep) => {
     setStep(s);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const startOrder = (product: ProductDef) => {
+    setSelectedProduct(product);
+    setOrderData(makeEmptyOrder(product));
+    setCustomization(EMPTY_CUSTOMIZATION);
+    goTo('customize');
+  };
+
   if (step === 'customize') {
     return (
       <CustomizationStep
+        product={selectedProduct}
         value={customization}
         onChange={setCustomization}
         onBack={() => goTo('landing')}
@@ -57,6 +58,7 @@ const App: React.FC = () => {
   if (step === 'order') {
     return (
       <OrderForm
+        product={selectedProduct}
         customizationType={customization.type}
         initialData={orderData}
         onChange={setOrderData}
@@ -69,6 +71,7 @@ const App: React.FC = () => {
   if (step === 'confirmation') {
     return (
       <OrderSummary
+        product={selectedProduct}
         customization={customization}
         formData={orderData}
         onBack={() => goTo('order')}
@@ -77,16 +80,14 @@ const App: React.FC = () => {
     );
   }
 
-  // Landing page
   return (
     <div className="min-h-screen">
-      <Header onCtaClick={() => goTo('customize')} />
-      <Hero onCtaClick={() => goTo('customize')} />
-      <ProductShowcase onCtaClick={() => goTo('customize')} />
+      <Header onCtaClick={() => startOrder(PRODUCTS['copo-475'])} />
+      <Hero onCtaClick={() => startOrder(PRODUCTS['copo-475'])} />
+      <ProductShowcase onSelectProduct={startOrder} />
       <HowItWorks />
       <WhyChooseUs />
 
-      {/* CTA Banner */}
       <section className="bg-gradient-to-r from-primary to-primaryDark py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <div className="flex justify-center mb-4">
@@ -101,7 +102,7 @@ const App: React.FC = () => {
             Faça o upload da sua arte agora e veja como seu copo ficará antes de finalizar o pedido.
           </p>
           <button
-            onClick={() => goTo('customize')}
+            onClick={() => startOrder(PRODUCTS['copo-475'])}
             className="inline-flex items-center gap-3 bg-accent hover:bg-accentDark text-white font-semibold px-10 py-4 rounded-xl text-lg transition-all hover:shadow-xl hover:-translate-y-0.5"
           >
             Começar Agora
