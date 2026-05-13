@@ -5,7 +5,7 @@ const steps = [
   {
     icon: ShoppingBag,
     title: 'Escolha o Produto',
-    description: 'Navegue pelo catálogo e selecione o Copo Térmico 475ml.',
+    description: 'Navegue pelo catálogo e selecione o produto desejado.',
     color: 'bg-blue-500',
   },
   {
