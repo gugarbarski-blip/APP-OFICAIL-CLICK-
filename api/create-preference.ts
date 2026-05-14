@@ -1,10 +1,13 @@
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { getSupabaseAdmin } from '../lib/supabase-admin';
 
-const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN! });
-
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const accessToken = process.env.MP_ACCESS_TOKEN;
+  if (!accessToken) {
+    return res.status(500).json({ error: 'MP_ACCESS_TOKEN not configured', detail: 'env var missing' });
+  }
 
   const { productName, quantity, unitPrice, buyerName, buyerEmail, address, customizationType, serigrafiaColor } = req.body;
 
@@ -32,6 +35,7 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
+    const client = new MercadoPagoConfig({ accessToken });
     const preference = new Preference(client);
     const result = await preference.create({
       body: {
