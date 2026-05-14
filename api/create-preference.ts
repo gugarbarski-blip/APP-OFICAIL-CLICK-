@@ -1,11 +1,10 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 
 const client = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN!,
 });
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -34,9 +33,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           email: buyerEmail,
         },
         back_urls: {
-          success: `${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:5173'}/?pagamento=sucesso`,
-          failure: `${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:5173'}/?pagamento=erro`,
-          pending: `${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:5173'}/?pagamento=pendente`,
+          success: 'https://app-oficail-click.vercel.app/?pagamento=sucesso',
+          failure: 'https://app-oficail-click.vercel.app/?pagamento=erro',
+          pending: 'https://app-oficail-click.vercel.app/?pagamento=pendente',
         },
         auto_return: 'approved',
         statement_descriptor: 'CLICK BRINDES',
