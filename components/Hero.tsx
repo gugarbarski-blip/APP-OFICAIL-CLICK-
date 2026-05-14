@@ -22,9 +22,13 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
         <div className="text-white space-y-6 order-2 md:order-1">
           
           {/* Logo Grande do Hero (ClickBrindes Bronze) */}
-          <div className="flex items-center gap-3 mb-8">
-            <div className="bg-[#b86a34] p-3 rounded-2xl shadow-[0_4px_15px_rgba(184,106,52,0.4)]">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3b2a20" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7"/></svg>
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-20 h-20 rounded-full overflow-hidden shadow-[0_4px_15px_rgba(184,106,52,0.4)] bg-white flex items-center justify-center">
+              <img 
+                src="/Logo.pjg.png" 
+                alt="ClickBrindes Logo" 
+                className="w-[115%] h-[115%] max-w-none object-cover" 
+              />
             </div>
             <span className="font-poppins font-extrabold text-4xl text-[#c78252] drop-shadow-md tracking-tight">
               ClickBrindes
