@@ -22,9 +22,9 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
             Brindes Personalizados Premium
           </div>
 
-          <h1 className="font-poppins text-4xl sm:text-5xl font-bold leading-tight">
+          <h1 className="font-poppins text-4xl sm:text-5xl font-bold leading-tight text-gold">
             Brindes que<br />
-            <span className="text-primary">Marcam</span> Momentos
+            <span className="text-white">Marcam</span> Momentos
           </h1>
 
           <p className="text-gray-300 text-lg leading-relaxed">

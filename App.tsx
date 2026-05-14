@@ -95,7 +95,7 @@ const App: React.FC = () => {
               <Gift size={32} className="text-white" />
             </div>
           </div>
-          <h2 className="font-poppins text-3xl sm:text-4xl font-bold text-white mb-4">
+          <h2 className="font-poppins text-3xl sm:text-4xl font-bold text-gold mb-4">
             Pronto para Personalizar?
           </h2>
           <p className="text-white/80 text-lg mb-8 max-w-xl mx-auto">
