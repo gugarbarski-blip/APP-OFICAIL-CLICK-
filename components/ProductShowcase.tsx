@@ -12,11 +12,13 @@ const ProductCard: React.FC<{ product: ProductDef; onSelect: () => void }> = ({ 
   return (
     <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg transition-shadow flex flex-col">
       {/* Image area */}
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-8 h-56">
+      <div className="bg-[#423d38] bg-gradient-to-br from-[#6b6257] via-[#4d473f] to-[#36322c] flex items-center justify-center p-8 h-64 relative overflow-hidden">
+        {/* Luz rebatida para simular a iluminação do Hero */}
+        <div className="absolute top-0 left-1/4 w-full h-full bg-[#c78252]/15 blur-[60px] rounded-full pointer-events-none"></div>
         <img
           src={product.image}
           alt={product.name}
-          className="h-full object-contain drop-shadow-2xl"
+          className="h-full object-contain drop-shadow-[0_25px_25px_rgba(0,0,0,0.6)] relative z-10"
         />
       </div>
 
