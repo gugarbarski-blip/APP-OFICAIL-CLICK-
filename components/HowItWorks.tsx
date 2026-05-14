@@ -17,7 +17,7 @@ const steps = [
   {
     icon: CreditCard,
     title: 'Realize o Pagamento',
-    description: 'Pague com segurança via PagSeguro: PIX, cartão ou boleto.',
+    description: 'Pague com segurança via Mercado Pago: PIX, cartão ou boleto.',
     color: 'bg-accent',
   },
   {
