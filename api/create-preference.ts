@@ -54,6 +54,10 @@ export default async function handler(req: any, res: any) {
           failure: 'https://app-oficail-click.vercel.app/?pagamento=erro',
           pending: 'https://app-oficail-click.vercel.app/?pagamento=pendente',
         },
+        payment_methods: {
+          excluded_payment_types: [],
+          installments: 12,
+        },
         auto_return: 'approved',
         statement_descriptor: 'CLICK BRINDES',
       },
