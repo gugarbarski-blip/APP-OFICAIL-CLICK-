@@ -89,22 +89,24 @@ const App: React.FC = () => {
       <HowItWorks />
       <WhyChooseUs />
 
-      <section className="bg-gradient-to-r from-primary to-primaryDark py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+      <section className="bg-gradient-to-br from-[#858079] via-[#6B6862] to-[#514F4A] py-16 relative overflow-hidden">
+        {/* Subtle background glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl h-full bg-[#D4AF37]/5 blur-[100px] rounded-full pointer-events-none"></div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-10">
           <div className="flex justify-center mb-4">
-            <div className="bg-white/20 p-3 rounded-2xl">
-              <Gift size={32} className="text-white" />
+            <div className="bg-[#514F4A] shadow-[0_4px_15px_rgba(212,175,55,0.3)] p-3 rounded-2xl border border-white/10">
+              <Gift size={32} className="text-[#F1C40F]" />
             </div>
           </div>
-          <h2 className="font-poppins text-3xl sm:text-4xl font-bold text-white mb-4">
+          <h2 className="font-poppins text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#F1C40F] drop-shadow-md mb-4">
             Pronto para Personalizar?
           </h2>
-          <p className="text-white/80 text-lg mb-8 max-w-xl mx-auto">
+          <p className="text-gray-200 font-medium text-lg mb-8 max-w-xl mx-auto">
             Faça o upload da sua arte agora e veja como seu copo ficará antes de finalizar o pedido.
           </p>
           <button
             onClick={() => document.getElementById('produto')?.scrollIntoView({ behavior: 'smooth' })}
-            className="inline-flex items-center gap-3 bg-accent hover:bg-accentDark text-white font-semibold px-10 py-4 rounded-xl text-lg transition-all hover:shadow-xl hover:-translate-y-0.5"
+            className="inline-flex items-center gap-3 bg-gradient-to-r from-[#D4AF37] to-[#d49924] hover:from-[#d49924] hover:to-[#c28511] text-gray-900 font-extrabold px-10 py-4 rounded-xl text-lg transition-all shadow-[0_8px_20px_rgba(212,175,55,0.4)] hover:-translate-y-0.5"
           >
             Começar Agora
             <ArrowRight size={20} />
