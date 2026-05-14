@@ -71,8 +71,17 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
 // Keep backward compat helper
 export const PRODUCT = PRODUCTS['copo-475'];
 
+export type SerigrafiaColor = 'preto' | 'branco' | 'azul-escuro';
+
+export const SERIGRAFIA_COLORS: { key: SerigrafiaColor; label: string; hex: string }[] = [
+  { key: 'preto', label: 'Preto', hex: '#1a1a1a' },
+  { key: 'branco', label: 'Branco', hex: '#ffffff' },
+  { key: 'azul-escuro', label: 'Azul Escuro', hex: '#1b3a6b' },
+];
+
 export interface Customization {
   type: CustomizationType;
+  serigrafiaColor: SerigrafiaColor;
   artFile: File | null;
   artPreviewUrl: string | null;
 }

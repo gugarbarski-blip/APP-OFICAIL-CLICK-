@@ -21,6 +21,7 @@ const makeEmptyOrder = (product: ProductDef): OrderFormData => ({
 
 const EMPTY_CUSTOMIZATION: Customization = {
   type: 'serigrafia',
+  serigrafiaColor: 'preto',
   artFile: null,
   artPreviewUrl: null,
 };

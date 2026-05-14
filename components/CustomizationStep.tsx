@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { Upload, X, ArrowRight, ArrowLeft, Zap, Printer } from 'lucide-react';
-import { Customization, CustomizationType, ProductDef, calcUnitPrice } from '../types';
+import { Customization, CustomizationType, ProductDef, SerigrafiaColor, SERIGRAFIA_COLORS, calcUnitPrice } from '../types';
 import { ArtPreviewCanvas } from './ArtPreviewCanvas';
 
 interface CustomizationStepProps {
@@ -20,6 +20,7 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({ product, v
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleTypeChange = (type: CustomizationType) => onChange({ ...value, type });
+  const handleColorChange = (serigrafiaColor: SerigrafiaColor) => onChange({ ...value, serigrafiaColor });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -82,6 +83,33 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({ product, v
                 })}
               </div>
             </div>
+
+            {value.type === 'serigrafia' && (
+              <div>
+                <label className="block font-semibold text-gray-900 mb-3">Cor da Impressão</label>
+                <div className="flex gap-3">
+                  {SERIGRAFIA_COLORS.map(({ key, label, hex }) => {
+                    const selected = value.serigrafiaColor === key;
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => handleColorChange(key)}
+                        title={label}
+                        className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border-2 transition-all ${
+                          selected ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <span
+                          className="w-8 h-8 rounded-full border border-gray-300 block"
+                          style={{ backgroundColor: hex }}
+                        />
+                        <span className={`text-xs font-medium ${selected ? 'text-primary' : 'text-gray-600'}`}>{label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div>
               <label className="block font-semibold text-gray-900 mb-1">Sua Arte / Logo</label>

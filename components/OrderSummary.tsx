@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, CreditCard, Package, MapPin, User, Palette } from 'lucide-react';
-import { Customization, OrderFormData, ProductDef, calcUnitPrice, calcTotal } from '../types';
+import { Customization, OrderFormData, ProductDef, SERIGRAFIA_COLORS, calcUnitPrice, calcTotal } from '../types';
 import { redirectToPagSeguro } from '../services/pagseguro';
 import { ArtPreviewCanvas } from './ArtPreviewCanvas';
 
@@ -61,6 +61,16 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
                 <div className="flex items-center gap-2">
                   <Palette size={14} className="text-primary" />
                   <p className="text-gray-700 text-sm">{custOption.label}</p>
+                  {customization.type === 'serigrafia' && (() => {
+                    const colorOpt = SERIGRAFIA_COLORS.find(c => c.key === customization.serigrafiaColor);
+                    return colorOpt ? (
+                      <span className="flex items-center gap-1.5 text-xs text-gray-500">
+                        — Cor:
+                        <span className="w-3.5 h-3.5 rounded-full border border-gray-300 inline-block" style={{ backgroundColor: colorOpt.hex }} />
+                        {colorOpt.label}
+                      </span>
+                    ) : null;
+                  })()}
                 </div>
                 <p className="text-gray-700 text-sm">Quantidade: <span className="font-semibold">{formData.quantity} unidades</span></p>
                 <div className="border-t border-gray-100 pt-2 mt-2">
