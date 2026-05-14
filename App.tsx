@@ -11,6 +11,7 @@ import { CustomizationStep } from './components/CustomizationStep';
 import { OrderForm } from './components/OrderForm';
 import { OrderSummary } from './components/OrderSummary';
 import { AdminPanel, AdminLogin } from './components/AdminPanel';
+import { MeusPedidos } from './components/MeusPedidos';
 
 const makeEmptyOrder = (product: ProductDef): OrderFormData => ({
   name: '',
@@ -37,6 +38,11 @@ const PAYMENT_BANNERS: Record<NonNullable<PaymentStatus>, { icon: React.FC<{size
 
 const App: React.FC = () => {
   const [step, setStep] = useState<AppStep>('landing');
+
+  // Meus Pedidos route
+  if (window.location.pathname === '/meus-pedidos') {
+    return <MeusPedidos onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} />;
+  }
   const [selectedProduct, setSelectedProduct] = useState<ProductDef>(PRODUCTS['copo-475']);
   const [customization, setCustomization] = useState<Customization>(EMPTY_CUSTOMIZATION);
   const [orderData, setOrderData] = useState<OrderFormData>(makeEmptyOrder(PRODUCTS['copo-475']));
@@ -110,7 +116,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen">
-      <Header onCtaClick={() => startOrder(PRODUCTS['copo-475'])} />
+      <Header onCtaClick={() => startOrder(PRODUCTS['copo-475'])} onMeusPedidos={() => { window.history.pushState({}, '', '/meus-pedidos'); window.location.reload(); }} />
       {paymentStatus && (() => {
         const b = PAYMENT_BANNERS[paymentStatus];
         const Icon = b.icon;

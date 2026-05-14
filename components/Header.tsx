@@ -3,9 +3,10 @@ import { Menu, X } from 'lucide-react';
 
 interface HeaderProps {
   onCtaClick: () => void;
+  onMeusPedidos: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
+export const Header: React.FC<HeaderProps> = ({ onCtaClick, onMeusPedidos }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -49,6 +50,12 @@ export const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
               {link.label}
             </a>
           ))}
+          <button
+            onClick={onMeusPedidos}
+            className="text-sm font-semibold text-[#D4AF37] hover:text-[#F1C40F] transition-colors"
+          >
+            Meus Pedidos
+          </button>
         </nav>
 
         {/* CTA */}
@@ -84,6 +91,12 @@ export const Header: React.FC<HeaderProps> = ({ onCtaClick }) => {
                 {link.label}
               </a>
             ))}
+            <button
+              onClick={() => { setMenuOpen(false); onMeusPedidos(); }}
+              className="text-sm font-semibold text-[#D4AF37] py-2 hover:text-[#F1C40F] transition-colors text-left"
+            >
+              Meus Pedidos
+            </button>
             <button
               onClick={() => { setMenuOpen(false); onCtaClick(); }}
               className="mt-2 flex items-center justify-center gap-2 bg-gradient-to-r from-[#D4AF37] to-[#d49924] hover:from-[#d49924] hover:to-[#c28511] text-gray-900 font-bold py-3 rounded-lg text-sm transition-all shadow-[0_4px_10px_rgba(212,175,55,0.3)]"
