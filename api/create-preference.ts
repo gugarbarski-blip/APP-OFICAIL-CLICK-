@@ -1,5 +1,5 @@
 import { MercadoPagoConfig, Preference } from 'mercadopago';
-import { supabaseAdmin } from '../lib/supabase-admin';
+import { getSupabaseAdmin } from '../lib/supabase-admin';
 
 const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN! });
 
@@ -12,9 +12,9 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
+  let pedidoId: string | undefined;
   try {
-    // Save pending order first
-    const { data: pedido } = await supabaseAdmin.from('pedidos').insert({
+    const { data: pedido } = await getSupabaseAdmin().from('pedidos').insert({
       status: 'pendente',
       nome: buyerName || '',
       email: buyerEmail,
@@ -26,7 +26,12 @@ export default async function handler(req: any, res: any) {
       cor_serigrafia: serigrafiaColor || '',
       created_at: new Date().toISOString(),
     }).select('id').single();
+    pedidoId = pedido?.id;
+  } catch (dbErr) {
+    console.error('Supabase insert error (non-fatal):', dbErr);
+  }
 
+  try {
     const preference = new Preference(client);
     const result = await preference.create({
       body: {
@@ -39,7 +44,7 @@ export default async function handler(req: any, res: any) {
         }],
         payer: { name: buyerName, email: buyerEmail },
         metadata: {
-          pedido_id: pedido?.id,
+          pedido_id: pedidoId,
           product_name: productName,
           quantity: String(quantity),
           buyer_name: buyerName,
