@@ -59,7 +59,7 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
       'Formato cuia ergonômico',
     ],
     basePrice: 23.00,
-    image: '/Copo .png',
+    image: '/CopoCuiaSeuNome.png',
     customizations: {
       serigrafia: { label: 'Serigrafia 1 Cor', extraPrice: 0, description: 'Impressão em tinta de alta durabilidade' },
       laser: { label: 'Gravação a Laser', extraPrice: 5.00, description: 'Gravação permanente na superfície do copo' },
