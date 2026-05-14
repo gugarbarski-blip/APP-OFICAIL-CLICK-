@@ -1,5 +1,12 @@
 import { MercadoPagoConfig, Payment } from 'mercadopago';
-import { getSupabaseAdmin } from '../lib/supabase-admin';
+import { createClient } from '@supabase/supabase-js';
+
+function getDb() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  if (!url || !key) throw new Error('Supabase env vars missing');
+  return createClient(url, key);
+}
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).end();
@@ -8,16 +15,14 @@ export default async function handler(req: any, res: any) {
   if (type !== 'payment') return res.status(200).end();
 
   try {
-    const accessToken = process.env.MP_ACCESS_TOKEN!;
-    const client = new MercadoPagoConfig({ accessToken });
+    const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN! });
     const payment = new Payment(client);
     const mp = await payment.get({ id: data.id });
 
     if (mp.status !== 'approved') return res.status(200).end();
 
     const meta = mp.metadata || {};
-
-    await getSupabaseAdmin().from('pedidos').insert({
+    await getDb().from('pedidos').insert({
       mp_payment_id: String(mp.id),
       status: 'pago',
       nome: mp.payer?.first_name ? `${mp.payer.first_name} ${mp.payer.last_name || ''}`.trim() : meta.buyer_name || '',

@@ -1,14 +1,18 @@
 import { MercadoPagoConfig, Preference } from 'mercadopago';
-import { getSupabaseAdmin } from '../lib/supabase-admin';
+import { createClient } from '@supabase/supabase-js';
+
+function getDb() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  if (!url || !key) throw new Error('Supabase env vars missing');
+  return createClient(url, key);
+}
 
 export default async function handler(req: any, res: any) {
-  try {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const accessToken = process.env.MP_ACCESS_TOKEN;
-  if (!accessToken) {
-    return res.status(500).json({ error: 'MP_ACCESS_TOKEN not configured', detail: 'env var missing' });
-  }
+  if (!accessToken) return res.status(500).json({ error: 'MP_ACCESS_TOKEN not configured' });
 
   const body = req.body || {};
   const { productName, quantity, unitPrice, buyerName, buyerEmail, address, customizationType, serigrafiaColor } = body;
@@ -19,7 +23,7 @@ export default async function handler(req: any, res: any) {
 
   let pedidoId: string | undefined;
   try {
-    const { data: pedido } = await getSupabaseAdmin().from('pedidos').insert({
+    const { data: pedido } = await getDb().from('pedidos').insert({
       status: 'pendente',
       nome: buyerName || '',
       email: buyerEmail,
@@ -33,7 +37,7 @@ export default async function handler(req: any, res: any) {
     }).select('id').single();
     pedidoId = pedido?.id;
   } catch (dbErr) {
-    console.error('Supabase insert error (non-fatal):', dbErr);
+    console.error('Supabase error (non-fatal):', dbErr);
   }
 
   try {
@@ -41,24 +45,9 @@ export default async function handler(req: any, res: any) {
     const preference = new Preference(client);
     const result = await preference.create({
       body: {
-        items: [{
-          id: 'copo-termico',
-          title: productName,
-          quantity: Number(quantity),
-          unit_price: Number(unitPrice),
-          currency_id: 'BRL',
-        }],
+        items: [{ id: 'copo-termico', title: productName, quantity: Number(quantity), unit_price: Number(unitPrice), currency_id: 'BRL' }],
         payer: { name: buyerName, email: buyerEmail },
-        metadata: {
-          pedido_id: pedidoId,
-          product_name: productName,
-          quantity: String(quantity),
-          buyer_name: buyerName,
-          buyer_email: buyerEmail,
-          address: address || '',
-          customization_type: customizationType || '',
-          serigrafia_color: serigrafiaColor || '',
-        },
+        metadata: { pedido_id: pedidoId, product_name: productName, quantity: String(quantity), buyer_name: buyerName, buyer_email: buyerEmail, address: address || '', customization_type: customizationType || '', serigrafia_color: serigrafiaColor || '' },
         notification_url: 'https://app-oficail-click.vercel.app/api/webhook-mp',
         back_urls: {
           success: 'https://app-oficail-click.vercel.app/?pagamento=sucesso',
@@ -69,15 +58,9 @@ export default async function handler(req: any, res: any) {
         statement_descriptor: 'CLICK BRINDES',
       },
     });
-
     return res.status(200).json({ checkoutUrl: result.init_point });
-  } catch (err: unknown) {
+  } catch (err: any) {
     console.error('MP error:', err);
-    const msg = err instanceof Error ? err.message : JSON.stringify(err);
-    return res.status(500).json({ error: 'Failed to create payment preference', detail: msg });
-  }
-  } catch (fatal: unknown) {
-    const msg = fatal instanceof Error ? fatal.message : JSON.stringify(fatal);
-    return res.status(500).json({ error: 'fatal', detail: msg });
+    return res.status(500).json({ error: 'Falha ao criar preferência', detail: err?.message });
   }
 }
