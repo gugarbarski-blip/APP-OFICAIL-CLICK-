@@ -16,7 +16,7 @@ const ProductCard: React.FC<{ product: ProductDef; onSelect: () => void }> = ({ 
         {/* Luz rebatida para simular a iluminação do Hero */}
         <div className="absolute top-0 left-1/4 w-full h-full bg-[#c78252]/15 blur-[60px] rounded-full pointer-events-none"></div>
         <img
-          src={product.image}
+          src={product.cardImage}
           alt={product.name}
           className="h-full object-contain drop-shadow-[0_25px_25px_rgba(0,0,0,0.6)] relative z-10"
         />

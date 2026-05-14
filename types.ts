@@ -12,6 +12,7 @@ export interface ProductDef {
   features: readonly string[];
   basePrice: number;
   image: string;
+  cardImage: string;
   customizations: {
     serigrafia: { label: string; extraPrice: number; description: string };
     laser: { label: string; extraPrice: number; description: string };
@@ -38,6 +39,7 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
     ],
     basePrice: 23.00,
     image: '/Copo.jpg.png',
+    cardImage: '/CopoTermicoSeuLogo.png',
     customizations: {
       serigrafia: { label: 'Serigrafia 1 Cor', extraPrice: 0, description: 'Impressão em tinta de alta durabilidade' },
       laser: { label: 'Gravação a Laser', extraPrice: 5.00, description: 'Gravação permanente na superfície do copo' },
@@ -60,6 +62,7 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
     ],
     basePrice: 23.00,
     image: '/CopoCuia.jpg.png',
+    cardImage: '/CopoCuiaSeuNome.png',
     customizations: {
       serigrafia: { label: 'Serigrafia 1 Cor', extraPrice: 0, description: 'Impressão em tinta de alta durabilidade' },
       laser: { label: 'Gravação a Laser', extraPrice: 5.00, description: 'Gravação permanente na superfície do copo' },
