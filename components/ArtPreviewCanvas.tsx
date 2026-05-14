@@ -24,6 +24,15 @@ export const ArtPreviewCanvas: React.FC<ArtPreviewCanvasProps> = ({ artUrl, cupI
     const draw = () => {
       ctx.clearRect(0, 0, W, H);
 
+      // Dark background so the cup floats without white canvas artifact
+      const grad = ctx.createLinearGradient(0, 0, W, H);
+      grad.addColorStop(0, '#6b6257');
+      grad.addColorStop(0.5, '#4d473f');
+      grad.addColorStop(1, '#36322c');
+      ctx.fillStyle = grad;
+      ctx.roundRect(0, 0, W, H, 12);
+      ctx.fill();
+
       const imgRatio = cupImage.naturalWidth / cupImage.naturalHeight;
       const canvasRatio = W / H;
       let sx = 0, sy = 0, sw = cupImage.naturalWidth, sh = cupImage.naturalHeight;
