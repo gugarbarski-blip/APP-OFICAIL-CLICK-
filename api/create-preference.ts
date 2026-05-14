@@ -2,6 +2,7 @@ import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { getSupabaseAdmin } from '../lib/supabase-admin';
 
 export default async function handler(req: any, res: any) {
+  try {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const accessToken = process.env.MP_ACCESS_TOKEN;
@@ -9,7 +10,8 @@ export default async function handler(req: any, res: any) {
     return res.status(500).json({ error: 'MP_ACCESS_TOKEN not configured', detail: 'env var missing' });
   }
 
-  const { productName, quantity, unitPrice, buyerName, buyerEmail, address, customizationType, serigrafiaColor } = req.body;
+  const body = req.body || {};
+  const { productName, quantity, unitPrice, buyerName, buyerEmail, address, customizationType, serigrafiaColor } = body;
 
   if (!productName || !quantity || !unitPrice || !buyerEmail) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -73,5 +75,9 @@ export default async function handler(req: any, res: any) {
     console.error('MP error:', err);
     const msg = err instanceof Error ? err.message : JSON.stringify(err);
     return res.status(500).json({ error: 'Failed to create payment preference', detail: msg });
+  }
+  } catch (fatal: unknown) {
+    const msg = fatal instanceof Error ? fatal.message : JSON.stringify(fatal);
+    return res.status(500).json({ error: 'fatal', detail: msg });
   }
 }
