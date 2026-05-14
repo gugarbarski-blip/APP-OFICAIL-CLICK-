@@ -29,7 +29,7 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
       'Aço inox de alta qualidade',
       'Parede dupla a vácuo',
       'Mantém bebidas quentes e frias por 6 horas',
-      'Tampa com vedação hermética',
+      'Contém tampa com abridor.',
       'Capacidade: 475ml',
       'Cor: Preto fosco',
       'Altura: 17,1 cm',
