@@ -37,6 +37,19 @@ export const ArtPreviewCanvas: React.FC<ArtPreviewCanvasProps> = ({ artUrl, cupI
       ctx.drawImage(cupImage, sx, sy, sw, sh, 0, 0, W, H);
 
       if (!artUrl) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([5, 4]);
+        ctx.strokeRect(PRINT.x, PRINT.y, PRINT.w, PRINT.h);
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.font = 'bold 12px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Seu Logo Aqui', PRINT.x + PRINT.w / 2, PRINT.y + PRINT.h / 2 - 6);
+        ctx.font = '10px Inter, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.fillText('Área de Impressão', PRINT.x + PRINT.w / 2, PRINT.y + PRINT.h / 2 + 12);
+        ctx.restore();
         return;
       }
 
