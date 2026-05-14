@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { ArrowLeft, CreditCard, Package, MapPin, User, Palette } from 'lucide-react';
+import { ArrowLeft, CreditCard, Package, MapPin, User, Palette, AlertCircle } from 'lucide-react';
 import { Customization, OrderFormData, ProductDef, SERIGRAFIA_COLORS, calcUnitPrice, calcTotal } from '../types';
-import { redirectToPagSeguro } from '../services/pagseguro';
 import { ArtPreviewCanvas } from './ArtPreviewCanvas';
 
 interface OrderSummaryProps {
@@ -14,18 +13,35 @@ interface OrderSummaryProps {
 
 export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customization, formData, onBack, onConfirm }) => {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const custOption = product.customizations[customization.type];
   const unitPrice = calcUnitPrice(product, customization.type);
   const total = calcTotal(product, customization.type, formData.quantity);
 
-  const handlePay = () => {
+  const handlePay = async () => {
     setLoading(true);
+    setError(null);
     try {
-      redirectToPagSeguro({ formData, customization, totalPrice: total });
-      setTimeout(onConfirm, 1500);
-    } finally {
-      setTimeout(() => setLoading(false), 2000);
+      const res = await fetch('/api/create-preference', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productName: `${product.name} — ${custOption.label}`,
+          quantity: formData.quantity,
+          unitPrice,
+          buyerName: formData.name,
+          buyerEmail: formData.email,
+        }),
+      });
+
+      if (!res.ok) throw new Error('Erro ao criar preferência de pagamento');
+
+      const { checkoutUrl } = await res.json();
+      window.location.href = checkoutUrl;
+    } catch (err) {
+      setError('Não foi possível iniciar o pagamento. Tente novamente.');
+      setLoading(false);
     }
   };
 
@@ -127,26 +143,32 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
               <span className="font-poppins font-semibold text-lg">Total estimado</span>
               <span className="font-poppins text-3xl font-bold text-accent">R$ {total.toFixed(2).replace('.', ',')}</span>
             </div>
+            {error && (
+              <div className="mt-4 flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl px-4 py-3 text-sm">
+                <AlertCircle size={16} className="flex-shrink-0" />
+                {error}
+              </div>
+            )}
             <button
               onClick={handlePay}
               disabled={loading}
               className={`mt-6 w-full flex items-center justify-center gap-3 py-4 rounded-xl font-semibold text-base transition-all ${
                 loading
                   ? 'bg-gray-700 text-gray-400 cursor-wait'
-                  : 'bg-primary hover:bg-primaryDark text-white hover:shadow-lg hover:shadow-primary/30'
+                  : 'bg-[#009EE3] hover:bg-[#008CC7] text-white hover:shadow-lg hover:shadow-[#009EE3]/30'
               }`}
             >
               {loading ? (
-                <>Redirecionando para o PagSeguro...</>
+                <>Redirecionando para o Mercado Pago...</>
               ) : (
                 <>
                   <CreditCard size={20} />
-                  Ir para Pagamento — PagSeguro
+                  Ir para Pagamento — Mercado Pago
                 </>
               )}
             </button>
             <p className="text-gray-500 text-xs text-center mt-3">
-              Pagamento seguro via PagSeguro · PIX, Cartão ou Boleto
+              Pagamento seguro via Mercado Pago · PIX, Cartão ou Boleto
             </p>
           </div>
         </div>

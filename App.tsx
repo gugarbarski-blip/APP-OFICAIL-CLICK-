@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Gift, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Gift, ArrowRight, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { AppStep, Customization, OrderFormData, ProductDef, PRODUCTS } from './types';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
@@ -26,11 +26,29 @@ const EMPTY_CUSTOMIZATION: Customization = {
   artPreviewUrl: null,
 };
 
+type PaymentStatus = 'sucesso' | 'pendente' | 'erro' | null;
+
+const PAYMENT_BANNERS: Record<NonNullable<PaymentStatus>, { icon: React.FC<{size:number;className?:string}>, bg: string; text: string; msg: string }> = {
+  sucesso:  { icon: CheckCircle, bg: 'bg-green-50 border-green-200 text-green-800',  text: 'Pagamento aprovado!',   msg: 'Recebemos seu pagamento. Entraremos em contato para confirmar o pedido.' },
+  pendente: { icon: Clock,        bg: 'bg-yellow-50 border-yellow-200 text-yellow-800', text: 'Pagamento pendente',    msg: 'Seu pagamento está sendo processado. Você receberá uma confirmação em breve.' },
+  erro:     { icon: XCircle,      bg: 'bg-red-50 border-red-200 text-red-800',      text: 'Pagamento não concluído', msg: 'Houve um problema com seu pagamento. Tente novamente.' },
+};
+
 const App: React.FC = () => {
   const [step, setStep] = useState<AppStep>('landing');
   const [selectedProduct, setSelectedProduct] = useState<ProductDef>(PRODUCTS['copo-475']);
   const [customization, setCustomization] = useState<Customization>(EMPTY_CUSTOMIZATION);
   const [orderData, setOrderData] = useState<OrderFormData>(makeEmptyOrder(PRODUCTS['copo-475']));
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('pagamento') as PaymentStatus;
+    if (status && PAYMENT_BANNERS[status]) {
+      setPaymentStatus(status);
+      window.history.replaceState({}, '', '/');
+    }
+  }, []);
 
   const goTo = (s: AppStep) => {
     setStep(s);
@@ -84,6 +102,22 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen">
       <Header onCtaClick={() => startOrder(PRODUCTS['copo-475'])} />
+      {paymentStatus && (() => {
+        const b = PAYMENT_BANNERS[paymentStatus];
+        const Icon = b.icon;
+        return (
+          <div className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 w-full max-w-lg mx-auto px-4`}>
+            <div className={`flex items-start gap-3 border rounded-2xl px-5 py-4 shadow-lg ${b.bg}`}>
+              <Icon size={22} className="flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="font-semibold">{b.text}</p>
+                <p className="text-sm opacity-80 mt-0.5">{b.msg}</p>
+              </div>
+              <button onClick={() => setPaymentStatus(null)} className="opacity-50 hover:opacity-100 text-lg leading-none">×</button>
+            </div>
+          </div>
+        );
+      })()}
       <Hero onCtaClick={() => startOrder(PRODUCTS['copo-475'])} />
       <ProductShowcase onSelectProduct={startOrder} />
       <HowItWorks />
