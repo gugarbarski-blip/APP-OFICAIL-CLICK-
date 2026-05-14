@@ -67,6 +67,7 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json({ checkoutUrl: result.init_point });
   } catch (err: unknown) {
     console.error('MP error:', err);
-    return res.status(500).json({ error: 'Failed to create payment preference' });
+    const msg = err instanceof Error ? err.message : JSON.stringify(err);
+    return res.status(500).json({ error: 'Failed to create payment preference', detail: msg });
   }
 }
