@@ -10,6 +10,7 @@ import { Footer } from './components/Footer';
 import { CustomizationStep } from './components/CustomizationStep';
 import { OrderForm } from './components/OrderForm';
 import { OrderSummary } from './components/OrderSummary';
+import { AdminPanel, AdminLogin } from './components/AdminPanel';
 
 const makeEmptyOrder = (product: ProductDef): OrderFormData => ({
   name: '',
@@ -61,6 +62,14 @@ const App: React.FC = () => {
     setCustomization(EMPTY_CUSTOMIZATION);
     goTo('customize');
   };
+
+  // Admin route
+  const isAdmin = window.location.pathname === '/admin';
+  const [adminAuth, setAdminAuth] = useState(() => sessionStorage.getItem('admin_auth') === '1');
+  if (isAdmin) {
+    if (!adminAuth) return <AdminLogin onLogin={() => { sessionStorage.setItem('admin_auth', '1'); setAdminAuth(true); }} />;
+    return <AdminPanel onLogout={() => { sessionStorage.removeItem('admin_auth'); setAdminAuth(false); }} />;
+  }
 
   if (step === 'customize') {
     return (
