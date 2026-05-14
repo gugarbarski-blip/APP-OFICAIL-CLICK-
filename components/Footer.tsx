@@ -1,5 +1,5 @@
 import React from 'react';
-import { Gift, Instagram, Mail, Phone } from 'lucide-react';
+import { Instagram, Mail, Phone } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   const year = new Date().getFullYear();
@@ -10,12 +10,16 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Brand */}
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="bg-primary p-1.5 rounded-lg">
-                <Gift size={18} className="text-white" />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full overflow-hidden shadow-[0_2px_8px_rgba(212,175,55,0.4)] bg-[#514F4A] flex items-center justify-center">
+                <img 
+                  src="/Logo.pjg.png" 
+                  alt="ClickBrindes Logo" 
+                  className="w-[115%] h-[115%] max-w-none object-cover" 
+                />
               </div>
-              <span className="font-poppins font-bold text-lg text-white">
-                Click<span className="text-primary">Brindes</span>
+              <span className="font-poppins font-bold text-xl text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#F1C40F]">
+                ClickBrindes
               </span>
             </div>
             <p className="text-sm leading-relaxed">
@@ -33,7 +37,7 @@ export const Footer: React.FC = () => {
                 { label: 'Diferenciais', href: '#diferenciais' },
               ].map(link => (
                 <li key={link.href}>
-                  <a href={link.href} className="hover:text-primary transition-colors">
+                  <a href={link.href} className="hover:text-[#F1C40F] transition-colors">
                     {link.label}
                   </a>
                 </li>
@@ -46,15 +50,15 @@ export const Footer: React.FC = () => {
             <h4 className="font-semibold text-white mb-3 text-sm uppercase tracking-wider">Contato</h4>
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2">
-                <Mail size={14} className="text-primary flex-shrink-0" />
+                <Mail size={14} className="text-[#D4AF37] flex-shrink-0" />
                 contato@clickbrindes.com.br
               </li>
               <li className="flex items-center gap-2">
-                <Phone size={14} className="text-primary flex-shrink-0" />
+                <Phone size={14} className="text-[#D4AF37] flex-shrink-0" />
                 (11) 99999-9999
               </li>
               <li className="flex items-center gap-2">
-                <Instagram size={14} className="text-primary flex-shrink-0" />
+                <Instagram size={14} className="text-[#D4AF37] flex-shrink-0" />
                 @clickbrindes
               </li>
             </ul>
