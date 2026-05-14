@@ -34,7 +34,7 @@ export const HowItWorks: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <span className="text-primary font-semibold text-sm uppercase tracking-wider">Simples e Rápido</span>
-          <h2 className="font-poppins text-3xl sm:text-4xl font-bold text-gray-900 mt-2">
+          <h2 className="font-poppins text-3xl sm:text-4xl font-bold text-gold mt-2">
             Como Funciona
           </h2>
           <p className="text-gray-500 mt-3 max-w-lg mx-auto">
