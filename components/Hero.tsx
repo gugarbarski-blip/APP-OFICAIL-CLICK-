@@ -41,8 +41,10 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
           </div>
 
           <h1 className="font-poppins text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight drop-shadow-lg">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#F1C40F]">Brindes que</span><br />
-            <span className="text-white">Marcam</span> <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#F1C40F]">Momentos</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#F1C40F] to-[#D4AF37]">
+              Brindes que<br />
+              Marcam Momentos
+            </span>
           </h1>
 
           <p className="text-gray-200 text-lg leading-relaxed font-medium max-w-md">
