@@ -99,12 +99,20 @@ export interface Address {
   complement: string;
 }
 
+export interface ShippingOption {
+  service: 'PAC' | 'SEDEX';
+  price: number;
+  deadlineDays: number;
+  label: string;
+}
+
 export interface OrderFormData {
   name: string;
   email: string;
   phone: string;
   quantity: number;
   address: Address;
+  shipping: ShippingOption | null;
 }
 
 export interface Order {

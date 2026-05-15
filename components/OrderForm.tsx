@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { ArrowLeft, ArrowRight, MapPin, Loader } from 'lucide-react';
-import { OrderFormData, Address, ProductDef, CustomizationType, calcUnitPrice, calcTotal } from '../types';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, ArrowRight, MapPin, Loader, Truck } from 'lucide-react';
+import { OrderFormData, Address, ProductDef, CustomizationType, ShippingOption, calcUnitPrice, calcTotal } from '../types';
 import { lookupCEP, formatCEP, formatPhone } from '../services/cep';
+import { calcularFrete } from '../services/shipping';
 
 interface OrderFormProps {
   product: ProductDef;
@@ -17,8 +18,24 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
   const [cepLoading, setCepLoading] = useState(false);
   const [cepError, setCepError] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+  const [shippingLoading, setShippingLoading] = useState(false);
+  const [shippingError, setShippingError] = useState('');
 
   const d = initialData;
+
+  // Se o CEP já está preenchido ao entrar na tela (ex: usuário voltou), calcula frete automaticamente
+  useEffect(() => {
+    const cep = d.address.cep.replace(/\D/g, '');
+    if (cep.length === 8 && shippingOptions.length === 0 && !shippingLoading) {
+      setShippingLoading(true);
+      calcularFrete(d.address.cep, d.quantity, product.id)
+        .then(opts => setShippingOptions(opts))
+        .catch(() => setShippingError('Não foi possível calcular o frete. Verifique o CEP.'))
+        .finally(() => setShippingLoading(false));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const set = (field: keyof Omit<OrderFormData, 'address'>, value: string | number) => {
     onChange({ ...d, [field]: value });
@@ -34,11 +51,15 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
     const formatted = formatCEP(raw);
     setAddr('cep', formatted);
     setCepError('');
+    setShippingOptions([]);
+    setShippingError('');
+    onChange({ ...d, address: { ...d.address, cep: formatted }, shipping: null });
+
     if (formatted.replace(/\D/g, '').length === 8) {
       setCepLoading(true);
       try {
         const addr = await lookupCEP(formatted);
-        onChange({
+        const updatedData = {
           ...d,
           address: {
             ...d.address,
@@ -48,13 +69,31 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
             city: addr.city,
             state: addr.state,
           },
-        });
+          shipping: null,
+        };
+        onChange(updatedData);
+
+        // Calcular frete após obter o endereço
+        setShippingLoading(true);
+        try {
+          const options = await calcularFrete(formatted, d.quantity, product.id);
+          setShippingOptions(options);
+        } catch {
+          setShippingError('Não foi possível calcular o frete. Verifique o CEP.');
+        } finally {
+          setShippingLoading(false);
+        }
       } catch {
         setCepError('CEP não encontrado. Verifique e tente novamente.');
       } finally {
         setCepLoading(false);
       }
     }
+  };
+
+  const selectShipping = (option: ShippingOption) => {
+    onChange({ ...d, shipping: option });
+    setErrors(e => ({ ...e, shipping: '' }));
   };
 
   const validate = (): boolean => {
@@ -67,6 +106,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
     if (!d.address.street.trim()) e.street = 'Rua é obrigatória';
     if (!d.address.number.trim()) e.number = 'Número é obrigatório';
     if (!d.address.city.trim()) e.city = 'Cidade é obrigatória';
+    if (!d.shipping) e.shipping = 'Selecione uma opção de frete';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -254,6 +294,62 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
               </div>
             </div>
           </div>
+
+          {/* Shipping options */}
+          {(shippingLoading || shippingOptions.length > 0 || shippingError) && (
+            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+              <h3 className="font-poppins font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Truck size={18} className="text-primary" />
+                Opções de Frete
+              </h3>
+
+              {shippingLoading && (
+                <div className="flex items-center gap-3 text-gray-500 text-sm py-2">
+                  <Loader size={16} className="animate-spin text-primary" />
+                  Calculando frete para o seu CEP...
+                </div>
+              )}
+
+              {shippingError && (
+                <p className="text-red-500 text-sm">{shippingError}</p>
+              )}
+
+              {!shippingLoading && shippingOptions.length > 0 && (
+                <div className="space-y-3">
+                  {shippingOptions.map(opt => {
+                    const selected = d.shipping?.service === opt.service;
+                    return (
+                      <button
+                        key={opt.service}
+                        type="button"
+                        onClick={() => selectShipping(opt)}
+                        className={`w-full flex items-center justify-between rounded-xl border-2 px-5 py-4 transition-all text-left ${
+                          selected
+                            ? 'border-primary bg-primary/5'
+                            : 'border-gray-200 hover:border-primary/40'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${selected ? 'border-primary bg-primary' : 'border-gray-300'}`} />
+                          <div>
+                            <p className={`font-semibold text-sm ${selected ? 'text-primary' : 'text-gray-800'}`}>
+                              {opt.service === 'PAC' ? 'PAC — Econômico' : 'SEDEX — Expresso'}
+                            </p>
+                            <p className="text-xs text-gray-500">{opt.label}</p>
+                          </div>
+                        </div>
+                        <span className={`font-bold text-base ${selected ? 'text-primary' : 'text-gray-900'}`}>
+                          R$ {opt.price.toFixed(2).replace('.', ',')}
+                        </span>
+                      </button>
+                    );
+                  })}
+                  <p className="text-xs text-gray-400 pt-1">* Prazo estimado a partir da postagem. Valores baseados na tabela Correios 2025.</p>
+                  {errors.shipping && <p className="text-red-500 text-xs">{errors.shipping}</p>}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex gap-3">
