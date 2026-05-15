@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, MapPin, Loader, Truck } from 'lucide-react';
 import { OrderFormData, Address, ProductDef, CustomizationType, ShippingOption, calcUnitPrice, calcTotal } from '../types';
 import { lookupCEP, formatCEP, formatPhone } from '../services/cep';
@@ -23,6 +23,19 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
   const [shippingError, setShippingError] = useState('');
 
   const d = initialData;
+
+  // Se o CEP já está preenchido ao entrar na tela (ex: usuário voltou), calcula frete automaticamente
+  useEffect(() => {
+    const cep = d.address.cep.replace(/\D/g, '');
+    if (cep.length === 8 && shippingOptions.length === 0 && !shippingLoading) {
+      setShippingLoading(true);
+      calcularFrete(d.address.cep, d.quantity, product.id)
+        .then(opts => setShippingOptions(opts))
+        .catch(() => setShippingError('Não foi possível calcular o frete. Verifique o CEP.'))
+        .finally(() => setShippingLoading(false));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const set = (field: keyof Omit<OrderFormData, 'address'>, value: string | number) => {
     onChange({ ...d, [field]: value });
