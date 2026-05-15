@@ -1,5 +1,5 @@
 import React from 'react';
-import { Award, Zap, Users, Headphones, Shield } from 'lucide-react';
+import { Award, Zap, Users, Headphones } from 'lucide-react';
 
 const differentials = [
   {
@@ -21,11 +21,6 @@ const differentials = [
     icon: Headphones,
     title: 'Atendimento Especializado',
     description: 'Nossa equipe te acompanha em cada etapa do pedido.',
-  },
-  {
-    icon: Shield,
-    title: 'Garantia de Satisfação',
-    description: 'Reprocessamos sem custo caso não fique dentro do esperado.',
   },
 ];
 
