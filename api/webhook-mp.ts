@@ -9,6 +9,52 @@ function getDb() {
   return createClient(url, key);
 }
 
+async function sendOwnerNotification(opts: {
+  nome: string;
+  email: string;
+  produto: string;
+  quantidade: number;
+  valorTotal: number;
+  endereco: string;
+  tipoPersonalizacao: string;
+  corSerigrafia: string;
+  mpPaymentId: string;
+}) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+
+  const resend = new Resend(apiKey);
+  const total = `R$ ${opts.valorTotal.toFixed(2).replace('.', ',')}`;
+  const personalizacao = opts.tipoPersonalizacao === 'laser'
+    ? 'Gravação a Laser'
+    : `Serigrafia 1 Cor${opts.corSerigrafia ? ` — ${opts.corSerigrafia}` : ''}`;
+
+  await resend.emails.send({
+    from: 'ClickBrindes <pedidos@imprebrindes.com.br>',
+    to: ['gugarbarski@gmail.com', 'gustavo@impresul.com.br'],
+    subject: `🛒 Novo pedido aprovado! ${opts.nome} — ${total}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+        <div style="background: #1a1a1a; padding: 24px; border-radius: 12px 12px 0 0; text-align: center;">
+          <h1 style="color: #D4AF37; margin: 0; font-size: 22px;">Novo Pedido Recebido!</h1>
+        </div>
+        <div style="background: #f9f9f9; padding: 32px; border-radius: 0 0 12px 12px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+            <tr><td style="padding: 6px 0; color: #888;">Cliente</td><td style="padding: 6px 0; font-weight: 600;">${opts.nome}</td></tr>
+            <tr><td style="padding: 6px 0; color: #888;">E-mail</td><td style="padding: 6px 0;">${opts.email}</td></tr>
+            <tr><td style="padding: 6px 0; color: #888;">Produto</td><td style="padding: 6px 0; font-weight: 600;">${opts.produto}</td></tr>
+            <tr><td style="padding: 6px 0; color: #888;">Personalização</td><td style="padding: 6px 0;">${personalizacao}</td></tr>
+            <tr><td style="padding: 6px 0; color: #888;">Quantidade</td><td style="padding: 6px 0;">${opts.quantidade} unidades</td></tr>
+            <tr><td style="padding: 6px 0; color: #888;">Endereço</td><td style="padding: 6px 0;">${opts.endereco}</td></tr>
+            <tr style="border-top: 2px solid #D4AF37;"><td style="padding: 10px 0 0; font-weight: 700; font-size: 16px;">Total</td><td style="padding: 10px 0 0; font-weight: 700; font-size: 18px; color: #D4AF37;">${total}</td></tr>
+          </table>
+          <p style="font-size: 12px; color: #aaa; margin-top: 24px;">Pedido #${opts.mpPaymentId}</p>
+        </div>
+      </div>
+    `,
+  });
+}
+
 async function sendConfirmationEmail(opts: {
   to: string;
   nome: string;
@@ -130,6 +176,18 @@ export default async function handler(req: any, res: any) {
         created_at: new Date().toISOString(),
       });
     }
+
+    await sendOwnerNotification({
+      nome,
+      email: emailTo,
+      produto: meta.product_name || '',
+      quantidade: Number(meta.quantity) || 0,
+      valorTotal: mp.transaction_amount ?? 0,
+      endereco: meta.address || '',
+      tipoPersonalizacao: meta.customization_type || '',
+      corSerigrafia: meta.serigrafia_color || '',
+      mpPaymentId: String(mp.id),
+    });
 
     await sendConfirmationEmail({
       to: emailTo,
