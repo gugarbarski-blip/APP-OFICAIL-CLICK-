@@ -7,7 +7,7 @@ interface HeroProps {
 }
 
 const CupSVG: React.FC = () => (
-  <img src="/Copo.jpg.png" alt="Copo Térmico 475ml" className="w-full h-full object-contain drop-shadow-2xl" />
+  <img src="/Copo.webp" alt="Copo Térmico 475ml" className="w-full h-full object-contain drop-shadow-2xl" />
 );
 
 
@@ -25,8 +25,8 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
           <div className="flex items-center gap-4 mb-8">
             <div className="w-20 h-20 rounded-full overflow-hidden shadow-[0_4px_15px_rgba(212,175,55,0.4)] bg-white flex items-center justify-center">
               <img 
-                src="/Logo.pjg.png" 
-                alt="ImpreBrindes Logo" 
+                src="/Logo.webp"
+                alt="ImpreBrindes Logo"
                 className="w-[115%] h-[115%] max-w-none object-cover" 
               />
             </div>
@@ -98,10 +98,11 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
         <div className="order-1 md:order-2 flex justify-center relative">
           <div className="relative w-full max-w-sm">
             <img
-              src="/Copo.jpg.png"
+              src="/Copo.webp"
               alt="Copo Térmico 475ml personalizado - ImpreBrindes"
               className="relative w-full h-auto object-contain drop-shadow-2xl z-10"
               style={{ filter: 'drop-shadow(0 35px 35px rgba(0,0,0,0.6))' }}
+              fetchPriority="high"
             />
             {/* Sombra base do copo para simular o chão/mesa da foto */}
             <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-3/4 h-8 bg-black/60 blur-xl rounded-[100%] z-0"></div>

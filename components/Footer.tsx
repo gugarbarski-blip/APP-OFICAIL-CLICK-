@@ -12,10 +12,11 @@ export const Footer: React.FC = () => {
           <div>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full overflow-hidden shadow-[0_2px_8px_rgba(212,175,55,0.4)] bg-[#514F4A] flex items-center justify-center">
-                <img 
-                  src="/Logo.pjg.png" 
+                <img
+                  src="/Logo.webp"
                   alt="ImpreBrindes Logo"
-                  className="w-[115%] h-[115%] max-w-none object-cover" 
+                  className="w-[115%] h-[115%] max-w-none object-cover"
+                  loading="lazy"
                 />
               </div>
               <span className="font-poppins font-bold text-xl text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#F1C40F]">

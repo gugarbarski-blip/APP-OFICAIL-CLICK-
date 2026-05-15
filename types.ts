@@ -38,8 +38,8 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
       'Circunferência: 29,3 cm',
     ],
     basePrice: 23.00,
-    image: '/Copo.jpg.png',
-    cardImage: '/CopoTermicoSeuLogo.png',
+    image: '/Copo.webp',
+    cardImage: '/CopoTermicoSeuLogo.webp',
     customizations: {
       serigrafia: { label: 'Serigrafia 1 Cor', extraPrice: 0, description: 'Impressão em tinta de alta durabilidade' },
       laser: { label: 'Gravação a Laser', extraPrice: 5.00, description: 'Gravação permanente na superfície do copo' },
@@ -61,8 +61,8 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
       'Formato cuia ergonômico',
     ],
     basePrice: 23.00,
-    image: '/CopoCuia.jpg.png',
-    cardImage: '/CopoCuiaSeuNome.png',
+    image: '/CopoCuia.webp',
+    cardImage: '/CopoCuiaSeuNome.webp',
     customizations: {
       serigrafia: { label: 'Serigrafia 1 Cor', extraPrice: 0, description: 'Impressão em tinta de alta durabilidade' },
       laser: { label: 'Gravação a Laser', extraPrice: 5.00, description: 'Gravação permanente na superfície do copo' },
