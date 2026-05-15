@@ -12,6 +12,9 @@ import { OrderForm } from './components/OrderForm';
 import { OrderSummary } from './components/OrderSummary';
 import { AdminPanel, AdminLogin } from './components/AdminPanel';
 import { MeusPedidos } from './components/MeusPedidos';
+import { Testimonials } from './components/Testimonials';
+import { FAQ } from './components/FAQ';
+import { PrivacyPolicy } from './components/PrivacyPolicy';
 
 const makeEmptyOrder = (product: ProductDef): OrderFormData => ({
   name: '',
@@ -43,6 +46,11 @@ const App: React.FC = () => {
   // Meus Pedidos route
   if (window.location.pathname === '/meus-pedidos') {
     return <MeusPedidos onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} />;
+  }
+
+  // Privacy policy route
+  if (window.location.pathname === '/privacidade') {
+    return <PrivacyPolicy onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} />;
   }
   const [selectedProduct, setSelectedProduct] = useState<ProductDef>(PRODUCTS['copo-475']);
   const [customization, setCustomization] = useState<Customization>(EMPTY_CUSTOMIZATION);
@@ -138,6 +146,8 @@ const App: React.FC = () => {
       <ProductShowcase onSelectProduct={startOrder} />
       <HowItWorks />
       <WhyChooseUs />
+      <Testimonials />
+      <FAQ />
 
       <section className="bg-gradient-to-br from-[#858079] via-[#6B6862] to-[#514F4A] py-16 relative overflow-hidden">
         {/* Subtle background glow */}

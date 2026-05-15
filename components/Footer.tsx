@@ -36,6 +36,8 @@ export const Footer: React.FC = () => {
                 { label: 'Produtos', href: '#produto' },
                 { label: 'Como Funciona', href: '#como-funciona' },
                 { label: 'Diferenciais', href: '#diferenciais' },
+                { label: 'Depoimentos', href: '#depoimentos' },
+                { label: 'Perguntas Frequentes', href: '#faq' },
               ].map(link => (
                 <li key={link.href}>
                   <a href={link.href} className="hover:text-[#F1C40F] transition-colors">
@@ -66,8 +68,11 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="border-t border-gray-800 pt-6 text-center text-xs">
-          © {year} ImpreBrindes. Todos os direitos reservados.
+        <div className="border-t border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+          <span>© {year} ImpreBrindes. Todos os direitos reservados.</span>
+          <a href="/privacidade" className="hover:text-[#F1C40F] transition-colors">
+            Política de Privacidade
+          </a>
         </div>
       </div>
     </footer>
