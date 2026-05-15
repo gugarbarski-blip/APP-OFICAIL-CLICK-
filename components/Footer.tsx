@@ -14,12 +14,12 @@ export const Footer: React.FC = () => {
               <div className="w-10 h-10 rounded-full overflow-hidden shadow-[0_2px_8px_rgba(212,175,55,0.4)] bg-[#514F4A] flex items-center justify-center">
                 <img 
                   src="/Logo.pjg.png" 
-                  alt="ClickBrindes Logo" 
+                  alt="ImpreBrindes Logo"
                   className="w-[115%] h-[115%] max-w-none object-cover" 
                 />
               </div>
               <span className="font-poppins font-bold text-xl text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#F1C40F]">
-                ClickBrindes
+                ImpreBrindes
               </span>
             </div>
             <p className="text-sm leading-relaxed">
@@ -51,7 +51,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2">
                 <Mail size={14} className="text-[#D4AF37] flex-shrink-0" />
-                contato@clickbrindes.com.br
+                contato@imprebrindes.com.br
               </li>
               <li className="flex items-center gap-2">
                 <Phone size={14} className="text-[#D4AF37] flex-shrink-0" />
@@ -59,14 +59,14 @@ export const Footer: React.FC = () => {
               </li>
               <li className="flex items-center gap-2">
                 <Instagram size={14} className="text-[#D4AF37] flex-shrink-0" />
-                @clickbrindes
+                @imprebrindes
               </li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-gray-800 pt-6 text-center text-xs">
-          © {year} Click Brindes. Todos os direitos reservados.
+          © {year} ImpreBrindes. Todos os direitos reservados.
         </div>
       </div>
     </footer>

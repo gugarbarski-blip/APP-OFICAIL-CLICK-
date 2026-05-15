@@ -30,7 +30,7 @@ async function sendOwnerNotification(opts: {
     : `Serigrafia 1 Cor${opts.corSerigrafia ? ` — ${opts.corSerigrafia}` : ''}`;
 
   await resend.emails.send({
-    from: 'ClickBrindes <pedidos@imprebrindes.com.br>',
+    from: 'ImpreBrindes <pedidos@imprebrindes.com.br>',
     to: ['gugarbarski@gmail.com', 'gustavo@impresul.com.br'],
     subject: `🛒 Novo pedido aprovado! ${opts.nome} — ${total}`,
     html: `
@@ -79,13 +79,13 @@ async function sendConfirmationEmail(opts: {
     : `Serigrafia 1 Cor${opts.corSerigrafia ? ` — ${opts.corSerigrafia}` : ''}`;
 
   await resend.emails.send({
-    from: 'ClickBrindes <pedidos@imprebrindes.com.br>',
+    from: 'ImpreBrindes <pedidos@imprebrindes.com.br>',
     to: opts.to,
     subject: 'Pedido confirmado! Seu copo personalizado está sendo preparado',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
         <div style="background: #1a1a1a; padding: 24px; border-radius: 12px 12px 0 0; text-align: center;">
-          <h1 style="color: #D4AF37; margin: 0; font-size: 24px;">ClickBrindes</h1>
+          <h1 style="color: #D4AF37; margin: 0; font-size: 24px;">ImpreBrindes</h1>
           <p style="color: #aaa; margin: 8px 0 0; font-size: 14px;">Copos Térmicos Personalizados</p>
         </div>
 
@@ -127,7 +127,7 @@ async function sendConfirmationEmail(opts: {
           </div>
 
           <p style="font-size: 12px; color: #aaa; text-align: center; margin: 0;">
-            Pedido #${opts.mpPaymentId} · ClickBrindes
+            Pedido #${opts.mpPaymentId} · ImpreBrindes
           </p>
         </div>
       </div>

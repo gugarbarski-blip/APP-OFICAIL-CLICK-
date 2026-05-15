@@ -21,17 +21,17 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
         {/* Textos */}
         <div className="text-white space-y-6 order-2 md:order-1">
           
-          {/* Logo Grande do Hero (ClickBrindes Bronze) */}
+          {/* Logo Grande do Hero (ImpreBrindes Bronze) */}
           <div className="flex items-center gap-4 mb-8">
             <div className="w-20 h-20 rounded-full overflow-hidden shadow-[0_4px_15px_rgba(212,175,55,0.4)] bg-white flex items-center justify-center">
               <img 
                 src="/Logo.pjg.png" 
-                alt="ClickBrindes Logo" 
+                alt="ImpreBrindes Logo" 
                 className="w-[115%] h-[115%] max-w-none object-cover" 
               />
             </div>
             <span className="font-poppins font-extrabold text-4xl text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#F1C40F] drop-shadow-md tracking-tight">
-              ClickBrindes
+              ImpreBrindes
             </span>
           </div>
 
@@ -99,7 +99,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
           <div className="relative w-full max-w-sm">
             <img
               src="/Copo.jpg.png"
-              alt="Copo Térmico 475ml personalizado - Click Brindes"
+              alt="Copo Térmico 475ml personalizado - ImpreBrindes"
               className="relative w-full h-auto object-contain drop-shadow-2xl z-10"
               style={{ filter: 'drop-shadow(0 35px 35px rgba(0,0,0,0.6))' }}
             />
