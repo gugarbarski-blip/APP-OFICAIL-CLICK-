@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
 import { Package, RefreshCw, LogOut } from 'lucide-react';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -10,8 +9,6 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   entregue:  { label: 'Entregue',   color: 'bg-green-100 text-green-800' },
   cancelado: { label: 'Cancelado',  color: 'bg-red-100 text-red-800' },
 };
-
-const ADMIN_PASSWORD = 'clickbrindes2024';
 
 interface Pedido {
   id: string;
@@ -28,14 +25,20 @@ interface Pedido {
   codigo_rastreio?: string;
 }
 
-export const AdminPanel: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
+function authHeaders(token: string) {
+  return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+}
+
+export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ token, onLogout }) => {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase.from('pedidos').select('*').order('created_at', { ascending: false });
+    const res = await fetch('/api/admin/pedidos', { headers: authHeaders(token) });
+    if (res.status === 401) { onLogout(); return; }
+    const { pedidos: data } = await res.json();
     setPedidos(data || []);
     setLoading(false);
   };
@@ -44,13 +47,21 @@ export const AdminPanel: React.FC<{ onLogout: () => void }> = ({ onLogout }) => 
 
   const updateStatus = async (id: string, status: string) => {
     setUpdating(id);
-    await supabase.from('pedidos').update({ status }).eq('id', id);
+    await fetch('/api/admin/update-status', {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify({ id, status }),
+    });
     await load();
     setUpdating(null);
   };
 
   const updateRastreio = async (id: string, codigo: string) => {
-    await supabase.from('pedidos').update({ codigo_rastreio: codigo, status: 'enviado' }).eq('id', id);
+    await fetch('/api/admin/update-rastreio', {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify({ id, codigo }),
+    });
     await load();
   };
 
@@ -72,7 +83,6 @@ export const AdminPanel: React.FC<{ onLogout: () => void }> = ({ onLogout }) => 
           </div>
         </div>
 
-        {/* Summary cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           {['pago','producao','enviado','entregue'].map(s => (
             <div key={s} className="bg-white rounded-2xl border border-gray-200 p-4 text-center">
@@ -149,13 +159,32 @@ export const AdminPanel: React.FC<{ onLogout: () => void }> = ({ onLogout }) => 
   );
 };
 
-export const AdminLogin: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
+export const AdminLogin: React.FC<{ onLogin: (token: string) => void }> = ({ onLogin }) => {
   const [pw, setPw] = useState('');
-  const [err, setErr] = useState(false);
+  const [err, setErr] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const submit = () => {
-    if (pw === ADMIN_PASSWORD) { onLogin(); }
-    else { setErr(true); }
+  const submit = async () => {
+    if (!pw.trim()) return;
+    setLoading(true);
+    setErr('');
+    try {
+      const res = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw }),
+      });
+      const data = await res.json();
+      if (res.ok && data.token) {
+        onLogin(data.token);
+      } else {
+        setErr(data.error || 'Senha incorreta');
+      }
+    } catch {
+      setErr('Erro de conexão. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -166,13 +195,17 @@ export const AdminLogin: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
           type="password"
           placeholder="Senha"
           value={pw}
-          onChange={e => { setPw(e.target.value); setErr(false); }}
+          onChange={e => { setPw(e.target.value); setErr(''); }}
           onKeyDown={e => e.key === 'Enter' && submit()}
           className={`w-full border rounded-xl px-4 py-3 mb-3 focus:outline-none focus:ring-2 focus:ring-primary ${err ? 'border-red-400' : 'border-gray-300'}`}
         />
-        {err && <p className="text-red-500 text-sm mb-3">Senha incorreta</p>}
-        <button onClick={submit} className="w-full bg-primary hover:bg-primaryDark text-white font-semibold py-3 rounded-xl transition-all">
-          Entrar
+        {err && <p className="text-red-500 text-sm mb-3">{err}</p>}
+        <button
+          onClick={submit}
+          disabled={loading}
+          className="w-full bg-primary hover:bg-primaryDark text-white font-semibold py-3 rounded-xl transition-all disabled:opacity-60"
+        >
+          {loading ? 'Verificando...' : 'Entrar'}
         </button>
       </div>
     </div>

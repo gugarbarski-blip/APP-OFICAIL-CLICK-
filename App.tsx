@@ -72,10 +72,10 @@ const App: React.FC = () => {
 
   // Admin route
   const isAdmin = window.location.pathname === '/admin';
-  const [adminAuth, setAdminAuth] = useState(() => sessionStorage.getItem('admin_auth') === '1');
+  const [adminToken, setAdminToken] = useState(() => sessionStorage.getItem('admin_token') || '');
   if (isAdmin) {
-    if (!adminAuth) return <AdminLogin onLogin={() => { sessionStorage.setItem('admin_auth', '1'); setAdminAuth(true); }} />;
-    return <AdminPanel onLogout={() => { sessionStorage.removeItem('admin_auth'); setAdminAuth(false); }} />;
+    if (!adminToken) return <AdminLogin onLogin={(token) => { sessionStorage.setItem('admin_token', token); setAdminToken(token); }} />;
+    return <AdminPanel token={adminToken} onLogout={() => { sessionStorage.removeItem('admin_token'); setAdminToken(''); }} />;
   }
 
   if (step === 'customize') {

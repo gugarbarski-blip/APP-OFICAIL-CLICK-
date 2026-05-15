@@ -1,6 +1,29 @@
 import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
+import { createHmac } from 'crypto';
+
+function verifyMpSignature(req: any): boolean {
+  const secret = process.env.MP_WEBHOOK_SECRET;
+  if (!secret) return true; // se não configurado, não bloqueia (avisa no log)
+
+  const xSignature = req.headers['x-signature'] as string | undefined;
+  const xRequestId = req.headers['x-request-id'] as string | undefined;
+  const dataId = req.body?.data?.id;
+
+  if (!xSignature || !xRequestId || !dataId) return false;
+
+  const tsMatch = xSignature.match(/ts=([^,]+)/);
+  const v1Match = xSignature.match(/v1=([^,]+)/);
+  if (!tsMatch || !v1Match) return false;
+
+  const ts = tsMatch[1];
+  const v1 = v1Match[1];
+  const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts}`;
+  const expected = createHmac('sha256', secret).update(manifest).digest('hex');
+
+  return expected === v1;
+}
 
 function getDb() {
   const url = process.env.SUPABASE_URL;
@@ -137,6 +160,11 @@ async function sendConfirmationEmail(opts: {
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).end();
+
+  if (!verifyMpSignature(req)) {
+    console.warn('Webhook MP: assinatura inválida rejeitada');
+    return res.status(401).end();
+  }
 
   const { type, data } = req.body || {};
   if (type !== 'payment') return res.status(200).end();
