@@ -33,7 +33,7 @@ async function sendConfirmationEmail(opts: {
     : `Serigrafia 1 Cor${opts.corSerigrafia ? ` — ${opts.corSerigrafia}` : ''}`;
 
   await resend.emails.send({
-    from: 'ClickBrindes <pedidos@clickbrindes.com.br>',
+    from: 'ClickBrindes <onboarding@resend.dev>',
     to: opts.to,
     subject: 'Pedido confirmado! Seu copo personalizado está sendo preparado',
     html: `
