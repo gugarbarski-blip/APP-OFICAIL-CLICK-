@@ -23,6 +23,40 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
   const [shippingError, setShippingError] = useState('');
 
   const d = initialData;
+  const isFirstRender = React.useRef(true);
+
+  // Calcula frete ao entrar na tela se CEP já estiver preenchido
+  useEffect(() => {
+    const cep = d.address.cep.replace(/\D/g, '');
+    if (cep.length === 8 && shippingOptions.length === 0 && !shippingLoading) {
+      setShippingLoading(true);
+      calcularFrete(d.address.cep, d.quantity, product.id)
+        .then(opts => setShippingOptions(opts))
+        .catch(() => setShippingError('Não foi possível calcular o frete. Verifique o CEP.'))
+        .finally(() => setShippingLoading(false));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Recalcula frete quando a quantidade muda (se CEP já estiver preenchido)
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    const cep = d.address.cep.replace(/\D/g, '');
+    if (cep.length !== 8) return;
+
+    setShippingOptions([]);
+    setShippingError('');
+    onChange({ ...d, shipping: null });
+    setShippingLoading(true);
+    calcularFrete(d.address.cep, d.quantity, product.id)
+      .then(opts => setShippingOptions(opts))
+      .catch(() => setShippingError('Não foi possível calcular o frete.'))
+      .finally(() => setShippingLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [d.quantity]);
 
   // Se o CEP já está preenchido ao entrar na tela (ex: usuário voltou), calcula frete automaticamente
   useEffect(() => {
