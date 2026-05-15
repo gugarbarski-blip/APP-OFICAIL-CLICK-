@@ -55,8 +55,8 @@ export default async function handler(req: any, res: any) {
           pending: 'https://imprebrindes.com.br/?pagamento=pendente',
         },
         payment_methods: {
-          excluded_payment_types: preferPix ? [{ id: 'credit_card' }, { id: 'debit_card' }, { id: 'ticket' }] : [],
-          installments: preferPix ? 1 : 12,
+          excluded_payment_types: [],
+          installments: 12,
         },
         auto_return: 'approved',
         statement_descriptor: 'CLICK BRINDES',
