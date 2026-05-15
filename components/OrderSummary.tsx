@@ -29,7 +29,9 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
 
   const custOption = product.customizations[customization.type];
   const unitPrice = calcUnitPrice(product, customization.type);
-  const total = calcTotal(product, customization.type, formData.quantity);
+  const subtotal = calcTotal(product, customization.type, formData.quantity);
+  const shippingPrice = formData.shipping?.price ?? 0;
+  const total = subtotal + shippingPrice;
 
   const buildBody = () => ({
     productName: `${product.name} — ${custOption.label}`,
@@ -150,9 +152,8 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
                 <div className="border-t border-gray-100 pt-2 mt-2">
                   <div className="flex justify-between text-sm text-gray-500">
                     <span>R$ {unitPrice.toFixed(2).replace('.', ',')} × {formData.quantity}</span>
-                    <span className="font-semibold text-gray-900">R$ {total.toFixed(2).replace('.', ',')}</span>
+                    <span className="font-semibold text-gray-900">R$ {subtotal.toFixed(2).replace('.', ',')}</span>
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">+ frete calculado no checkout</p>
                 </div>
               </div>
             </div>
@@ -191,14 +192,21 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
           <div className="bg-gray-900 rounded-2xl p-6 text-white">
             <div className="flex justify-between items-center mb-2">
               <span className="text-gray-400">Subtotal (produtos)</span>
-              <span className="font-semibold">R$ {total.toFixed(2).replace('.', ',')}</span>
+              <span className="font-semibold">R$ {subtotal.toFixed(2).replace('.', ',')}</span>
             </div>
             <div className="flex justify-between items-center mb-4">
               <span className="text-gray-400">Frete</span>
-              <span className="text-gray-400 text-sm">Calculado no checkout</span>
+              {formData.shipping ? (
+                <div className="text-right">
+                  <span className="font-semibold text-green-400">R$ {formData.shipping.price.toFixed(2).replace('.', ',')}</span>
+                  <p className="text-xs text-gray-500">{formData.shipping.label}</p>
+                </div>
+              ) : (
+                <span className="text-gray-500 text-sm">Não informado</span>
+              )}
             </div>
             <div className="border-t border-gray-700 pt-4 flex justify-between items-baseline mb-6">
-              <span className="font-poppins font-semibold text-lg">Total estimado</span>
+              <span className="font-poppins font-semibold text-lg">Total</span>
               <span className="font-poppins text-3xl font-bold text-accent">R$ {total.toFixed(2).replace('.', ',')}</span>
             </div>
 

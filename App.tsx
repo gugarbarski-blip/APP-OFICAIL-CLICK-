@@ -19,6 +19,7 @@ const makeEmptyOrder = (product: ProductDef): OrderFormData => ({
   phone: '',
   quantity: product.minQuantity,
   address: { cep: '', street: '', neighborhood: '', city: '', state: '', number: '', complement: '' },
+  shipping: null,
 });
 
 const EMPTY_CUSTOMIZATION: Customization = {
