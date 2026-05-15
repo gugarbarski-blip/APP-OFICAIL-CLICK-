@@ -46,14 +46,14 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
     setPixLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/create-pix', {
+      const res = await fetch('/api/create-preference', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(buildBody()),
+        body: JSON.stringify({ ...buildBody(), preferPix: true }),
       });
       if (!res.ok) throw new Error('Erro ao gerar PIX');
-      const data = await res.json();
-      setPixData(data);
+      const { checkoutUrl } = await res.json();
+      window.location.href = checkoutUrl;
     } catch {
       setError('Não foi possível gerar o PIX. Tente novamente.');
     } finally {
