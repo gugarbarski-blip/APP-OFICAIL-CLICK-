@@ -21,6 +21,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
   const [shippingLoading, setShippingLoading] = useState(false);
   const [shippingError, setShippingError] = useState('');
+  const [quantityInput, setQuantityInput] = useState(String(initialData.quantity));
 
   const d = initialData;
   const isFirstRender = React.useRef(true);
@@ -57,19 +58,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
       .finally(() => setShippingLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [d.quantity]);
-
-  // Se o CEP já está preenchido ao entrar na tela (ex: usuário voltou), calcula frete automaticamente
-  useEffect(() => {
-    const cep = d.address.cep.replace(/\D/g, '');
-    if (cep.length === 8 && shippingOptions.length === 0 && !shippingLoading) {
-      setShippingLoading(true);
-      calcularFrete(d.address.cep, d.quantity, product.id)
-        .then(opts => setShippingOptions(opts))
-        .catch(() => setShippingError('Não foi possível calcular o frete. Verifique o CEP.'))
-        .finally(() => setShippingLoading(false));
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const set = (field: keyof Omit<OrderFormData, 'address'>, value: string | number) => {
     onChange({ ...d, [field]: value });
@@ -179,8 +167,21 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
                 <input
                   type="number"
                   min={MIN_QTY}
-                  value={d.quantity}
-                  onChange={e => set('quantity', Math.max(MIN_QTY, parseInt(e.target.value) || MIN_QTY))}
+                  value={quantityInput}
+                  onChange={e => {
+                    const raw = e.target.value.replace(/\D/g, '');
+                    setQuantityInput(raw);
+                    const parsed = parseInt(raw);
+                    if (parsed >= MIN_QTY) {
+                      set('quantity', parsed);
+                    }
+                  }}
+                  onBlur={() => {
+                    const parsed = parseInt(quantityInput);
+                    const safe = (!parsed || parsed < MIN_QTY) ? MIN_QTY : parsed;
+                    setQuantityInput(String(safe));
+                    set('quantity', safe);
+                  }}
                   className={`w-full border rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary ${errors.quantity ? 'border-red-400' : 'border-gray-300'}`}
                 />
                 {errors.quantity && <p className="text-red-500 text-xs mt-1">{errors.quantity}</p>}
