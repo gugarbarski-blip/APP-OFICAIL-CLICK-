@@ -248,32 +248,16 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
               </div>
             )}
 
-            {/* Payment buttons */}
-            {!pixData && (
-              <button
-                onClick={handlePix}
-                disabled={pixLoading}
-                className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-semibold text-base transition-all mb-3 ${
-                  pixLoading
-                    ? 'bg-gray-700 text-gray-400 cursor-wait'
-                    : 'bg-[#32BCAD] hover:bg-[#28a89a] text-white hover:shadow-lg hover:shadow-[#32BCAD]/30'
-                }`}
-              >
-                {pixLoading ? <Loader2 size={20} className="animate-spin" /> : <QrCode size={20} />}
-                {pixLoading ? 'Gerando QR Code...' : 'Pagar com PIX'}
-              </button>
-            )}
-
             <button
               onClick={handlePay}
-              disabled={loading || !!pixData}
+              disabled={loading}
               className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-semibold text-base transition-all ${
-                loading || pixData
-                  ? 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-50'
+                loading
+                  ? 'bg-gray-700 text-gray-400 cursor-wait'
                   : 'bg-[#009EE3] hover:bg-[#008CC7] text-white hover:shadow-lg hover:shadow-[#009EE3]/30'
               }`}
             >
-              {loading ? <>Redirecionando...</> : <><CreditCard size={20} />Pagar com Cartão ou Boleto</>}
+              {loading ? <>Redirecionando para o Mercado Pago...</> : <><CreditCard size={20} />Ir para Pagamento — Mercado Pago</>}
             </button>
 
             <p className="text-gray-500 text-xs text-center mt-3">
