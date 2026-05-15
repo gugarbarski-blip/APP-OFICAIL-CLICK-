@@ -68,7 +68,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { cepDestino, quantity } = req.body as { cepDestino: string; quantity: number };
+  const { cepDestino, quantity, productId } = req.body as { cepDestino: string; quantity: number; productId: string };
 
   const cleanCEP = String(cepDestino).replace(/\D/g, '');
   if (cleanCEP.length !== 8) {
@@ -82,8 +82,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const uf = await getUFFromCEP(cleanCEP);
     const zone = getZone(uf);
 
-    // Peso: cada copo térmico ~350g + embalagem 500g
-    const weightGrams = quantity * 350 + 500;
+    // Peso por unidade: copo-475 = 268g, cuia-320 = 173g + embalagem 300g
+    const weightPerUnit = productId === 'cuia-320' ? 173 : 268;
+    const weightGrams = quantity * weightPerUnit + 300;
 
     const pacPrice = getPrice(PAC_TABLE, weightGrams, zone);
     const sedexPrice = getPrice(SEDEX_TABLE, weightGrams, zone);

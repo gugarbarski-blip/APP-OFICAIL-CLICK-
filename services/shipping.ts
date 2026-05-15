@@ -2,12 +2,13 @@ import { ShippingOption } from '../types';
 
 export async function calcularFrete(
   cepDestino: string,
-  quantity: number
+  quantity: number,
+  productId: string
 ): Promise<ShippingOption[]> {
   const res = await fetch('/api/shipping', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cepDestino, quantity }),
+    body: JSON.stringify({ cepDestino, quantity, productId }),
   });
 
   if (!res.ok) {

@@ -63,7 +63,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
         // Calcular frete após obter o endereço
         setShippingLoading(true);
         try {
-          const options = await calcularFrete(formatted, d.quantity);
+          const options = await calcularFrete(formatted, d.quantity, product.id);
           setShippingOptions(options);
         } catch {
           setShippingError('Não foi possível calcular o frete. Verifique o CEP.');
