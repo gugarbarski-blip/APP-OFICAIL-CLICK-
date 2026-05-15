@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ArrowLeft, CreditCard, Package, MapPin, User, Palette, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, CreditCard, Package, MapPin, User, Palette, AlertCircle, QrCode, Copy, CheckCheck, Loader2 } from 'lucide-react';
 import { Customization, OrderFormData, ProductDef, SERIGRAFIA_COLORS, calcUnitPrice, calcTotal } from '../types';
 import { ArtPreviewCanvas } from './ArtPreviewCanvas';
 
@@ -11,13 +11,55 @@ interface OrderSummaryProps {
   onConfirm: () => void;
 }
 
+interface PixData {
+  paymentId: number;
+  qrCode: string;
+  qrCodeBase64: string;
+  expiresAt: string;
+}
+
 export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customization, formData, onBack, onConfirm }) => {
   const [loading, setLoading] = useState(false);
+  const [pixLoading, setPixLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pixData, setPixData] = useState<PixData | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [pixStatus, setPixStatus] = useState<'pending' | 'approved' | 'expired'>('pending');
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const custOption = product.customizations[customization.type];
   const unitPrice = calcUnitPrice(product, customization.type);
   const total = calcTotal(product, customization.type, formData.quantity);
+
+  const buildBody = () => ({
+    productName: `${product.name} — ${custOption.label}`,
+    quantity: formData.quantity,
+    unitPrice,
+    buyerName: formData.name,
+    buyerEmail: formData.email,
+    address: `${formData.address.street}, ${formData.address.number}${formData.address.complement ? `, ${formData.address.complement}` : ''} — ${formData.address.neighborhood}, ${formData.address.city}/${formData.address.state} CEP: ${formData.address.cep}`,
+    customizationType: customization.type,
+    serigrafiaColor: customization.type === 'serigrafia' ? customization.serigrafiaColor : '',
+  });
+
+  const handlePix = async () => {
+    setPixLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/create-pix', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildBody()),
+      });
+      if (!res.ok) throw new Error('Erro ao gerar PIX');
+      const data = await res.json();
+      setPixData(data);
+    } catch {
+      setError('Não foi possível gerar o PIX. Tente novamente.');
+    } finally {
+      setPixLoading(false);
+    }
+  };
 
   const handlePay = async () => {
     setLoading(true);
@@ -26,27 +68,43 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
       const res = await fetch('/api/create-preference', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          productName: `${product.name} — ${custOption.label}`,
-          quantity: formData.quantity,
-          unitPrice,
-          buyerName: formData.name,
-          buyerEmail: formData.email,
-          address: `${formData.address.street}, ${formData.address.number}${formData.address.complement ? `, ${formData.address.complement}` : ''} — ${formData.address.neighborhood}, ${formData.address.city}/${formData.address.state} CEP: ${formData.address.cep}`,
-          customizationType: customization.type,
-          serigrafiaColor: customization.type === 'serigrafia' ? customization.serigrafiaColor : '',
-        }),
+        body: JSON.stringify(buildBody()),
       });
-
       if (!res.ok) throw new Error('Erro ao criar preferência de pagamento');
-
       const { checkoutUrl } = await res.json();
       window.location.href = checkoutUrl;
-    } catch (err) {
+    } catch {
       setError('Não foi possível iniciar o pagamento. Tente novamente.');
       setLoading(false);
     }
   };
+
+  const handleCopy = () => {
+    if (!pixData?.qrCode) return;
+    navigator.clipboard.writeText(pixData.qrCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 3000);
+  };
+
+  useEffect(() => {
+    if (!pixData) return;
+    pollRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/check-pix?id=${pixData.paymentId}`);
+        const { status } = await res.json();
+        if (status === 'approved') {
+          setPixStatus('approved');
+          clearInterval(pollRef.current!);
+          setTimeout(() => { window.location.href = '/?pagamento=sucesso'; }, 2000);
+        }
+      } catch {}
+    }, 5000);
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, [pixData]);
+
+  const colorOpt = customization.type === 'serigrafia'
+    ? SERIGRAFIA_COLORS.find(c => c.key === customization.serigrafiaColor)
+    : null;
 
   return (
     <div className="min-h-screen pt-16 bg-gray-50">
@@ -80,16 +138,13 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
                 <div className="flex items-center gap-2">
                   <Palette size={14} className="text-primary" />
                   <p className="text-gray-700 text-sm">{custOption.label}</p>
-                  {customization.type === 'serigrafia' && (() => {
-                    const colorOpt = SERIGRAFIA_COLORS.find(c => c.key === customization.serigrafiaColor);
-                    return colorOpt ? (
-                      <span className="flex items-center gap-1.5 text-xs text-gray-500">
-                        — Cor:
-                        <span className="w-3.5 h-3.5 rounded-full border border-gray-300 inline-block" style={{ backgroundColor: colorOpt.hex }} />
-                        {colorOpt.label}
-                      </span>
-                    ) : null;
-                  })()}
+                  {colorOpt && (
+                    <span className="flex items-center gap-1.5 text-xs text-gray-500">
+                      — Cor:
+                      <span className="w-3.5 h-3.5 rounded-full border border-gray-300 inline-block" style={{ backgroundColor: colorOpt.hex }} />
+                      {colorOpt.label}
+                    </span>
+                  )}
                 </div>
                 <p className="text-gray-700 text-sm">Quantidade: <span className="font-semibold">{formData.quantity} unidades</span></p>
                 <div className="border-t border-gray-100 pt-2 mt-2">
@@ -142,34 +197,85 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
               <span className="text-gray-400">Frete</span>
               <span className="text-gray-400 text-sm">Calculado no checkout</span>
             </div>
-            <div className="border-t border-gray-700 pt-4 flex justify-between items-baseline">
+            <div className="border-t border-gray-700 pt-4 flex justify-between items-baseline mb-6">
               <span className="font-poppins font-semibold text-lg">Total estimado</span>
               <span className="font-poppins text-3xl font-bold text-accent">R$ {total.toFixed(2).replace('.', ',')}</span>
             </div>
+
             {error && (
-              <div className="mt-4 flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl px-4 py-3 text-sm">
+              <div className="mb-4 flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl px-4 py-3 text-sm">
                 <AlertCircle size={16} className="flex-shrink-0" />
                 {error}
               </div>
             )}
+
+            {/* PIX QR Code */}
+            {pixData && (
+              <div className="mb-6 bg-white rounded-2xl p-6 text-gray-900">
+                {pixStatus === 'approved' ? (
+                  <div className="text-center py-4">
+                    <CheckCheck size={48} className="text-green-500 mx-auto mb-2" />
+                    <p className="font-semibold text-green-600 text-lg">Pagamento aprovado!</p>
+                    <p className="text-gray-500 text-sm mt-1">Redirecionando...</p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="font-semibold text-center mb-4 flex items-center justify-center gap-2">
+                      <QrCode size={18} className="text-[#32BCAD]" />
+                      Escaneie o QR Code com seu banco
+                    </p>
+                    <div className="flex justify-center mb-4">
+                      <img
+                        src={`data:image/png;base64,${pixData.qrCodeBase64}`}
+                        alt="QR Code PIX"
+                        className="w-48 h-48 border border-gray-200 rounded-xl"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 text-center mb-3">ou copie o código abaixo</p>
+                    <button
+                      onClick={handleCopy}
+                      className="w-full flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-3 px-4 text-sm font-medium hover:bg-gray-50 transition-colors"
+                    >
+                      {copied ? <CheckCheck size={16} className="text-green-500" /> : <Copy size={16} />}
+                      {copied ? 'Copiado!' : 'Copiar código PIX'}
+                    </button>
+                    <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400">
+                      <Loader2 size={12} className="animate-spin" />
+                      Aguardando pagamento...
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Payment buttons */}
+            {!pixData && (
+              <button
+                onClick={handlePix}
+                disabled={pixLoading}
+                className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-semibold text-base transition-all mb-3 ${
+                  pixLoading
+                    ? 'bg-gray-700 text-gray-400 cursor-wait'
+                    : 'bg-[#32BCAD] hover:bg-[#28a89a] text-white hover:shadow-lg hover:shadow-[#32BCAD]/30'
+                }`}
+              >
+                {pixLoading ? <Loader2 size={20} className="animate-spin" /> : <QrCode size={20} />}
+                {pixLoading ? 'Gerando QR Code...' : 'Pagar com PIX'}
+              </button>
+            )}
+
             <button
               onClick={handlePay}
-              disabled={loading}
-              className={`mt-6 w-full flex items-center justify-center gap-3 py-4 rounded-xl font-semibold text-base transition-all ${
-                loading
-                  ? 'bg-gray-700 text-gray-400 cursor-wait'
+              disabled={loading || !!pixData}
+              className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-semibold text-base transition-all ${
+                loading || pixData
+                  ? 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-50'
                   : 'bg-[#009EE3] hover:bg-[#008CC7] text-white hover:shadow-lg hover:shadow-[#009EE3]/30'
               }`}
             >
-              {loading ? (
-                <>Redirecionando para o Mercado Pago...</>
-              ) : (
-                <>
-                  <CreditCard size={20} />
-                  Ir para Pagamento — Mercado Pago
-                </>
-              )}
+              {loading ? <>Redirecionando...</> : <><CreditCard size={20} />Pagar com Cartão ou Boleto</>}
             </button>
+
             <p className="text-gray-500 text-xs text-center mt-3">
               Pagamento seguro via Mercado Pago · PIX, Cartão ou Boleto
             </p>
