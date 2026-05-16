@@ -118,12 +118,16 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
     setErrors(e => ({ ...e, shipping: '' }));
   };
 
+  const MIN_SERIGRAFIA = 25;
+  const serigrafiaBlocked = customizationType === 'serigrafia' && d.quantity < MIN_SERIGRAFIA;
+
   const validate = (): boolean => {
     const e: Record<string, string> = {};
     if (!d.name.trim()) e.name = 'Nome é obrigatório';
     if (!d.email.trim() || !/\S+@\S+\.\S+/.test(d.email)) e.email = 'E-mail inválido';
     if (!d.phone.replace(/\D/g, '') || d.phone.replace(/\D/g, '').length < 10) e.phone = 'Telefone inválido';
     if (d.quantity < MIN_QTY) e.quantity = `Mínimo ${MIN_QTY} unidades`;
+    if (serigrafiaBlocked) e.quantity = `Serigrafia requer mínimo de ${MIN_SERIGRAFIA} unidades. Aumente a quantidade ou volte e selecione Gravação a Laser.`;
     if (d.address.cep.replace(/\D/g, '').length !== 8) e.cep = 'CEP inválido';
     if (!d.address.street.trim()) e.street = 'Rua é obrigatória';
     if (!d.address.number.trim()) e.number = 'Número é obrigatório';
@@ -157,12 +161,23 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
 
         <div className="space-y-6">
           {/* Quantity + price summary */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          <div className={`bg-white rounded-2xl border p-6 ${serigrafiaBlocked ? 'border-amber-300' : 'border-gray-200'}`}>
             <h3 className="font-poppins font-semibold text-gray-900 mb-4">Quantidade e Valor</h3>
+
+            {serigrafiaBlocked && (
+              <div className="mb-4 bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 text-sm text-amber-800">
+                <strong>⚠️ Atenção:</strong> A <strong>Serigrafia 1 Cor</strong> requer mínimo de <strong>25 unidades</strong>.
+                Aumente a quantidade abaixo ou <button onClick={onBack} className="underline font-semibold hover:text-amber-900">volte e selecione Gravação a Laser</button>.
+              </div>
+            )}
+
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
               <div className="flex-1">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Quantidade <span className="text-gray-400">(mínimo {MIN_QTY})</span>
+                  Quantidade{' '}
+                  <span className="text-gray-400">
+                    (mínimo {customizationType === 'serigrafia' ? '25 para serigrafia' : MIN_QTY})
+                  </span>
                 </label>
                 <input
                   type="number"
@@ -182,9 +197,9 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
                     setQuantityInput(String(safe));
                     set('quantity', safe);
                   }}
-                  className={`w-full border rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary ${errors.quantity ? 'border-red-400' : 'border-gray-300'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary ${errors.quantity || serigrafiaBlocked ? 'border-amber-400' : 'border-gray-300'}`}
                 />
-                {errors.quantity && <p className="text-red-500 text-xs mt-1">{errors.quantity}</p>}
+                {errors.quantity && <p className="text-amber-600 text-xs mt-1">{errors.quantity}</p>}
               </div>
               <div className="bg-gray-50 rounded-xl px-5 py-3 text-center min-w-[160px]">
                 <p className="text-xs text-gray-500">R$ {unitPrice.toFixed(2).replace('.', ',')} × {d.quantity} un.</p>

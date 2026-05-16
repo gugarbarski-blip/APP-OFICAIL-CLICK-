@@ -132,8 +132,13 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
                         selected ? 'border-primary bg-primary/5 shadow-sm' : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
-                      <div className={`w-10 h-10 rounded-lg mb-3 flex items-center justify-center ${selected ? 'bg-primary' : 'bg-gray-100'}`}>
-                        <Icon size={20} className={selected ? 'text-white' : 'text-gray-500'} />
+                      <div className="flex items-start justify-between mb-3">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${selected ? 'bg-primary' : 'bg-gray-100'}`}>
+                          <Icon size={20} className={selected ? 'text-white' : 'text-gray-500'} />
+                        </div>
+                        {key === 'serigrafia' && (
+                          <span className="text-[10px] font-semibold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Mín. 25 un.</span>
+                        )}
                       </div>
                       <p className="font-semibold text-gray-900 text-sm">{opt.label}</p>
                       <p className="text-gray-500 text-xs mt-1">{opt.description}</p>
@@ -144,6 +149,12 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
                     </button>
                   );
                 })}
+              </div>
+
+              {/* Observação sobre mínimos */}
+              <div className="mt-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-xs text-blue-800 leading-relaxed">
+                <strong>ℹ️ Pedido mínimo:</strong> Serigrafia 1 Cor requer mínimo de <strong>25 unidades</strong>.
+                Para pedidos de <strong>10 a 24 unidades</strong>, está disponível apenas a Gravação a Laser.
               </div>
             </div>
 
