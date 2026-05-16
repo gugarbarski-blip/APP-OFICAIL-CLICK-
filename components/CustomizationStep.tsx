@@ -18,7 +18,7 @@ const typeOptions: { key: CustomizationType; icon: React.ElementType }[] = [
 
 async function renderPdfToUrl(file: File): Promise<string> {
   const pdfjsLib = await import('pdfjs-dist');
-  pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
   const buffer = await file.arrayBuffer();
   const pdf    = await pdfjsLib.getDocument({ data: buffer }).promise;
