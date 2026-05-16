@@ -16,6 +16,23 @@ const typeOptions: { key: CustomizationType; icon: React.ElementType }[] = [
   { key: 'laser', icon: Zap },
 ];
 
+function removeWhiteBackground(canvas: HTMLCanvasElement): void {
+  const ctx = canvas.getContext('2d')!;
+  const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const px  = img.data;
+  for (let i = 0; i < px.length; i += 4) {
+    const r = px[i], g = px[i + 1], b = px[i + 2];
+    // Fully transparent: pure white / near-white
+    if (r > 240 && g > 240 && b > 240) {
+      px[i + 3] = 0;
+    // Semi-transparent: light grays used in anti-aliasing edges
+    } else if (r > 200 && g > 200 && b > 200) {
+      px[i + 3] = Math.round(((255 - r) + (255 - g) + (255 - b)) / 3 * 2.5);
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
 async function renderPdfToUrl(file: File): Promise<string> {
   const pdfjsLib = await import('pdfjs-dist');
   pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
@@ -29,6 +46,7 @@ async function renderPdfToUrl(file: File): Promise<string> {
   canvas.width  = vp.width;
   canvas.height = vp.height;
   await page.render({ canvas, viewport: vp }).promise;
+  removeWhiteBackground(canvas);
   return new Promise(res => canvas.toBlob(b => res(URL.createObjectURL(b!)), 'image/png'));
 }
 
