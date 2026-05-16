@@ -38,7 +38,7 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
       'Circunferência: 29,3 cm',
     ],
     basePrice: 23.00,
-    image: '/Copo.webp',
+    image: '/CopoPreview475.webp',
     cardImage: '/CopoTermicoSeuLogo.webp',
     customizations: {
       serigrafia: { label: 'Serigrafia 1 Cor', extraPrice: 0, description: 'Impressão em tinta de alta durabilidade' },
