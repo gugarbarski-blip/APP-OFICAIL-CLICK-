@@ -3,13 +3,45 @@ import React, { useRef, useEffect, useCallback } from 'react';
 interface ArtPreviewCanvasProps {
   artUrl: string | null;
   cupImageUrl: string;
+  customizationType?: 'serigrafia' | 'laser';
+  serigrafiaColorHex?: string;
 }
 
 const W = 300;
 const H = 420;
 const PRINT = { x: 78, y: 130, w: 144, h: 160 };
 
-export const ArtPreviewCanvas: React.FC<ArtPreviewCanvasProps> = ({ artUrl, cupImageUrl }) => {
+function hexToRgb(hex: string): [number, number, number] {
+  const n = parseInt(hex.replace('#', ''), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function applySerigrafiaColor(src: HTMLImageElement, hex: string): HTMLCanvasElement {
+  const [r, g, b] = hexToRgb(hex);
+  const off = document.createElement('canvas');
+  off.width  = src.naturalWidth  || src.width;
+  off.height = src.naturalHeight || src.height;
+  const ctx = off.getContext('2d')!;
+  ctx.drawImage(src, 0, 0);
+  const data = ctx.getImageData(0, 0, off.width, off.height);
+  const px = data.data;
+  for (let i = 0; i < px.length; i += 4) {
+    if (px[i + 3] > 20) {   // non-transparent pixel
+      px[i]     = r;
+      px[i + 1] = g;
+      px[i + 2] = b;
+    }
+  }
+  ctx.putImageData(data, 0, 0);
+  return off;
+}
+
+export const ArtPreviewCanvas: React.FC<ArtPreviewCanvasProps> = ({
+  artUrl,
+  cupImageUrl,
+  customizationType = 'serigrafia',
+  serigrafiaColorHex = '#1a1a1a',
+}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const render = useCallback(() => {
@@ -24,7 +56,7 @@ export const ArtPreviewCanvas: React.FC<ArtPreviewCanvasProps> = ({ artUrl, cupI
     const draw = () => {
       ctx.clearRect(0, 0, W, H);
 
-      // Dark background so the cup floats without white canvas artifact
+      // Background gradient
       const grad = ctx.createLinearGradient(0, 0, W, H);
       grad.addColorStop(0, '#6b6257');
       grad.addColorStop(0.5, '#4d473f');
@@ -33,6 +65,7 @@ export const ArtPreviewCanvas: React.FC<ArtPreviewCanvasProps> = ({ artUrl, cupI
       ctx.roundRect(0, 0, W, H, 12);
       ctx.fill();
 
+      // Cup image (cover-fit)
       const imgRatio = cupImage.naturalWidth / cupImage.naturalHeight;
       const canvasRatio = W / H;
       let sx = 0, sy = 0, sw = cupImage.naturalWidth, sh = cupImage.naturalHeight;
@@ -54,6 +87,7 @@ export const ArtPreviewCanvas: React.FC<ArtPreviewCanvasProps> = ({ artUrl, cupI
         ctx.fillStyle = 'rgba(255,255,255,0.7)';
         ctx.font = 'bold 12px Inter, sans-serif';
         ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
         ctx.fillText('Seu Logo Aqui', PRINT.x + PRINT.w / 2, PRINT.y + PRINT.h / 2 - 6);
         ctx.font = '10px Inter, sans-serif';
         ctx.fillStyle = 'rgba(255,255,255,0.5)';
@@ -68,13 +102,23 @@ export const ArtPreviewCanvas: React.FC<ArtPreviewCanvasProps> = ({ artUrl, cupI
         ctx.beginPath();
         ctx.rect(PRINT.x, PRINT.y, PRINT.w, PRINT.h);
         ctx.clip();
+
         const ratio = Math.min(PRINT.w / art.width, PRINT.h / art.height);
-        const dw = art.width * ratio;
+        const dw = art.width  * ratio;
         const dh = art.height * ratio;
         const dx = PRINT.x + (PRINT.w - dw) / 2;
         const dy = PRINT.y + (PRINT.h - dh) / 2;
-        ctx.globalAlpha = 0.88;
-        ctx.drawImage(art, dx, dy, dw, dh);
+
+        if (customizationType === 'serigrafia') {
+          // Convert all art pixels to the chosen ink color
+          const colored = applySerigrafiaColor(art, serigrafiaColorHex);
+          ctx.globalAlpha = 0.92;
+          ctx.drawImage(colored, dx, dy, dw, dh);
+        } else {
+          // Laser: draw as-is (engraved look, slightly transparent)
+          ctx.globalAlpha = 0.82;
+          ctx.drawImage(art, dx, dy, dw, dh);
+        }
         ctx.restore();
       };
       art.src = artUrl;
@@ -85,11 +129,9 @@ export const ArtPreviewCanvas: React.FC<ArtPreviewCanvasProps> = ({ artUrl, cupI
     } else {
       cupImage.onload = draw;
     }
-  }, [artUrl, cupImageUrl]);
+  }, [artUrl, cupImageUrl, customizationType, serigrafiaColorHex]);
 
-  useEffect(() => {
-    render();
-  }, [render]);
+  useEffect(() => { render(); }, [render]);
 
   return (
     <canvas
