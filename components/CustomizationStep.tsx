@@ -1,7 +1,20 @@
 import React, { useRef, useState } from 'react';
-import { Upload, X, ArrowRight, ArrowLeft, Zap, Printer, FileText, Loader } from 'lucide-react';
+import { X, ArrowRight, ArrowLeft, Zap, Printer, FileText, Loader } from 'lucide-react';
 import { Customization, CustomizationType, ProductDef, SerigrafiaColor, SERIGRAFIA_COLORS, calcUnitPrice } from '../types';
 import { ArtPreviewCanvas } from './ArtPreviewCanvas';
+
+interface CustomizationStepProps {
+  product: ProductDef;
+  value: Customization;
+  onChange: (c: Customization) => void;
+  onBack: () => void;
+  onNext: () => void;
+}
+
+const typeOptions: { key: CustomizationType; icon: React.ElementType }[] = [
+  { key: 'serigrafia', icon: Printer },
+  { key: 'laser', icon: Zap },
+];
 
 async function renderPdfToUrl(file: File): Promise<string> {
   const pdfjsLib = await import('pdfjs-dist');
@@ -16,7 +29,7 @@ async function renderPdfToUrl(file: File): Promise<string> {
   const canvas = document.createElement('canvas');
   canvas.width  = vp.width;
   canvas.height = vp.height;
-  await page.render({ canvasContext: canvas.getContext('2d')!, viewport: vp }).promise;
+  await page.render({ canvas, viewport: vp }).promise;
   return new Promise(res => canvas.toBlob(b => res(URL.createObjectURL(b!)), 'image/png'));
 }
 
