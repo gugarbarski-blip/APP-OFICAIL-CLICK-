@@ -1,8 +1,7 @@
-import React, { useRef, Suspense, lazy } from 'react';
+import React, { useRef } from 'react';
 import { Upload, X, ArrowRight, ArrowLeft, Zap, Printer } from 'lucide-react';
 import { Customization, CustomizationType, ProductDef, SerigrafiaColor, SERIGRAFIA_COLORS, calcUnitPrice } from '../types';
-
-const CupPreview3D = lazy(() => import('./CupPreview3D').then(m => ({ default: m.CupPreview3D })));
+import { ArtPreviewCanvas } from './ArtPreviewCanvas';
 
 interface CustomizationStepProps {
   product: ProductDef;
@@ -167,16 +166,12 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({ product, v
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 w-full">
-            <p className="font-semibold text-gray-900 text-sm">Preview 3D do Copo</p>
-            <Suspense fallback={
-              <div className="w-full rounded-2xl bg-[#2d2924] flex items-center justify-center" style={{ height: 420 }}>
-                <p className="text-white/40 text-sm">Carregando preview 3D…</p>
-              </div>
-            }>
-              <CupPreview3D artUrl={value.artPreviewUrl} productId={product.id} />
-            </Suspense>
-            <p className="text-xs text-gray-400 text-center">Preview ilustrativo. Arte final pode variar levemente.</p>
+          <div className="flex flex-col items-center gap-4">
+            <p className="font-semibold text-gray-900 text-sm">Preview da Arte no Copo</p>
+            <ArtPreviewCanvas artUrl={value.artPreviewUrl} cupImageUrl={product.image} />
+            {value.artPreviewUrl && (
+              <p className="text-xs text-gray-400 text-center">Preview ilustrativo. Arte final pode variar levemente.</p>
+            )}
           </div>
         </div>
       </div>
