@@ -28,7 +28,7 @@ export const Header: React.FC<HeaderProps> = ({ onCtaClick, onMeusPedidos }) => 
         {/* Logo */}
         <a href="#" className="flex items-center group">
           <img
-            src="/LogoTransparent.png"
+            src="/Logo.webp"
             alt="ImpreBrindes Logo"
             className="h-10 w-auto object-contain drop-shadow-md"
           />
