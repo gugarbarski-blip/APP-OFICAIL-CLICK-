@@ -11,9 +11,9 @@ export const Footer: React.FC = () => {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full overflow-hidden shadow-[0_2px_8px_rgba(212,175,55,0.4)] bg-[#514F4A] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full overflow-hidden shadow-[0_2px_8px_rgba(212,175,55,0.4)] bg-transparent flex items-center justify-center">
                 <img 
-                  src="/Logo.pjg.png" 
+                  src="/LogoTransparent.png" 
                   alt="ImpreBrindes Logo"
                   className="w-[115%] h-[115%] max-w-none object-cover" 
                 />

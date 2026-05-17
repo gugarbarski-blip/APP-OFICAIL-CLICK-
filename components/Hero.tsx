@@ -23,9 +23,9 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
           
           {/* Logo Grande do Hero (ImpreBrindes Bronze) */}
           <div className="flex items-center gap-4 mb-8">
-            <div className="w-20 h-20 rounded-full overflow-hidden shadow-[0_4px_15px_rgba(212,175,55,0.4)] bg-white flex items-center justify-center">
+            <div className="w-20 h-20 rounded-full overflow-hidden shadow-[0_4px_15px_rgba(212,175,55,0.4)] bg-transparent flex items-center justify-center">
               <img 
-                src="/Logo.pjg.png" 
+                src="/LogoTransparent.png" 
                 alt="ImpreBrindes Logo" 
                 className="w-[115%] h-[115%] max-w-none object-cover" 
               />
