@@ -30,7 +30,7 @@ export const Header: React.FC<HeaderProps> = ({ onCtaClick, onMeusPedidos }) => 
           <img
             src="/Logo.webp"
             alt="ImpreBrindes Logo"
-            className="h-10 w-auto object-contain drop-shadow-md"
+            className="h-10 w-auto object-contain drop-shadow-md mix-blend-multiply"
           />
         </a>
 

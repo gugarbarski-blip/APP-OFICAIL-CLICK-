@@ -14,7 +14,7 @@ export const Footer: React.FC = () => {
               <img
                 src="/Logo.webp"
                 alt="ImpreBrindes Logo"
-                className="h-10 w-auto object-contain"
+                className="h-10 w-auto object-contain mix-blend-multiply"
                 loading="lazy"
               />
             </div>

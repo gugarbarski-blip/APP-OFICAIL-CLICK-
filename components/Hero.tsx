@@ -27,7 +27,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
               <img 
                 src="/Logo.webp" 
                 alt="ImpreBrindes Logo"
-                className="w-[115%] h-[115%] max-w-none object-cover" 
+                className="w-[115%] h-[115%] max-w-none object-cover mix-blend-multiply"
               />
             </div>
             <span className="font-poppins font-extrabold text-4xl text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#F1C40F] drop-shadow-md tracking-tight">
