@@ -19,6 +19,7 @@ const ProductCard: React.FC<{ product: ProductDef; onSelect: () => void }> = ({ 
           src={product.cardImage}
           alt={product.name}
           className="h-full object-contain drop-shadow-[0_25px_25px_rgba(0,0,0,0.6)] relative z-10"
+          loading="lazy"
         />
       </div>
 

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { ArrowLeft, ArrowRight, MapPin, Loader } from 'lucide-react';
-import { OrderFormData, Address, ProductDef, CustomizationType, calcUnitPrice, calcTotal } from '../types';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, ArrowRight, MapPin, Loader, Truck } from 'lucide-react';
+import { OrderFormData, Address, ProductDef, CustomizationType, ShippingOption, calcUnitPrice, calcTotal } from '../types';
 import { lookupCEP, formatCEP, formatPhone } from '../services/cep';
+import { calcularFrete } from '../services/shipping';
 
 interface OrderFormProps {
   product: ProductDef;
@@ -17,8 +18,46 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
   const [cepLoading, setCepLoading] = useState(false);
   const [cepError, setCepError] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+  const [shippingLoading, setShippingLoading] = useState(false);
+  const [shippingError, setShippingError] = useState('');
+  const [quantityInput, setQuantityInput] = useState(String(initialData.quantity));
 
   const d = initialData;
+  const isFirstRender = React.useRef(true);
+
+  // Calcula frete ao entrar na tela se CEP já estiver preenchido
+  useEffect(() => {
+    const cep = d.address.cep.replace(/\D/g, '');
+    if (cep.length === 8 && shippingOptions.length === 0 && !shippingLoading) {
+      setShippingLoading(true);
+      calcularFrete(d.address.cep, d.quantity, product.id)
+        .then(opts => setShippingOptions(opts))
+        .catch(() => setShippingError('Não foi possível calcular o frete. Verifique o CEP.'))
+        .finally(() => setShippingLoading(false));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Recalcula frete quando a quantidade muda (se CEP já estiver preenchido)
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    const cep = d.address.cep.replace(/\D/g, '');
+    if (cep.length !== 8) return;
+
+    setShippingOptions([]);
+    setShippingError('');
+    onChange({ ...d, shipping: null });
+    setShippingLoading(true);
+    calcularFrete(d.address.cep, d.quantity, product.id)
+      .then(opts => setShippingOptions(opts))
+      .catch(() => setShippingError('Não foi possível calcular o frete.'))
+      .finally(() => setShippingLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [d.quantity]);
 
   const set = (field: keyof Omit<OrderFormData, 'address'>, value: string | number) => {
     onChange({ ...d, [field]: value });
@@ -34,11 +73,15 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
     const formatted = formatCEP(raw);
     setAddr('cep', formatted);
     setCepError('');
+    setShippingOptions([]);
+    setShippingError('');
+    onChange({ ...d, address: { ...d.address, cep: formatted }, shipping: null });
+
     if (formatted.replace(/\D/g, '').length === 8) {
       setCepLoading(true);
       try {
         const addr = await lookupCEP(formatted);
-        onChange({
+        const updatedData = {
           ...d,
           address: {
             ...d.address,
@@ -48,7 +91,20 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
             city: addr.city,
             state: addr.state,
           },
-        });
+          shipping: null,
+        };
+        onChange(updatedData);
+
+        // Calcular frete após obter o endereço
+        setShippingLoading(true);
+        try {
+          const options = await calcularFrete(formatted, d.quantity, product.id);
+          setShippingOptions(options);
+        } catch {
+          setShippingError('Não foi possível calcular o frete. Verifique o CEP.');
+        } finally {
+          setShippingLoading(false);
+        }
       } catch {
         setCepError('CEP não encontrado. Verifique e tente novamente.');
       } finally {
@@ -57,16 +113,26 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
     }
   };
 
+  const selectShipping = (option: ShippingOption) => {
+    onChange({ ...d, shipping: option });
+    setErrors(e => ({ ...e, shipping: '' }));
+  };
+
+  const MIN_SERIGRAFIA = 25;
+  const serigrafiaBlocked = customizationType === 'serigrafia' && d.quantity < MIN_SERIGRAFIA;
+
   const validate = (): boolean => {
     const e: Record<string, string> = {};
     if (!d.name.trim()) e.name = 'Nome é obrigatório';
     if (!d.email.trim() || !/\S+@\S+\.\S+/.test(d.email)) e.email = 'E-mail inválido';
     if (!d.phone.replace(/\D/g, '') || d.phone.replace(/\D/g, '').length < 10) e.phone = 'Telefone inválido';
     if (d.quantity < MIN_QTY) e.quantity = `Mínimo ${MIN_QTY} unidades`;
+    if (serigrafiaBlocked) e.quantity = `Serigrafia requer mínimo de ${MIN_SERIGRAFIA} unidades. Aumente a quantidade ou volte e selecione Gravação a Laser.`;
     if (d.address.cep.replace(/\D/g, '').length !== 8) e.cep = 'CEP inválido';
     if (!d.address.street.trim()) e.street = 'Rua é obrigatória';
     if (!d.address.number.trim()) e.number = 'Número é obrigatório';
     if (!d.address.city.trim()) e.city = 'Cidade é obrigatória';
+    if (!d.shipping) e.shipping = 'Selecione uma opção de frete';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -95,21 +161,45 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
 
         <div className="space-y-6">
           {/* Quantity + price summary */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
+          <div className={`bg-white rounded-2xl border p-6 ${serigrafiaBlocked ? 'border-amber-300' : 'border-gray-200'}`}>
             <h3 className="font-poppins font-semibold text-gray-900 mb-4">Quantidade e Valor</h3>
+
+            {serigrafiaBlocked && (
+              <div className="mb-4 bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 text-sm text-amber-800">
+                <strong>⚠️ Atenção:</strong> A <strong>Serigrafia 1 Cor</strong> requer mínimo de <strong>25 unidades</strong>.
+                Aumente a quantidade abaixo ou <button onClick={onBack} className="underline font-semibold hover:text-amber-900">volte e selecione Gravação a Laser</button>.
+              </div>
+            )}
+
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
               <div className="flex-1">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Quantidade <span className="text-gray-400">(mínimo {MIN_QTY})</span>
+                  Quantidade{' '}
+                  <span className="text-gray-400">
+                    (mínimo {customizationType === 'serigrafia' ? '25 para serigrafia' : MIN_QTY})
+                  </span>
                 </label>
                 <input
                   type="number"
                   min={MIN_QTY}
-                  value={d.quantity}
-                  onChange={e => set('quantity', Math.max(MIN_QTY, parseInt(e.target.value) || MIN_QTY))}
-                  className={`w-full border rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary ${errors.quantity ? 'border-red-400' : 'border-gray-300'}`}
+                  value={quantityInput}
+                  onChange={e => {
+                    const raw = e.target.value.replace(/\D/g, '');
+                    setQuantityInput(raw);
+                    const parsed = parseInt(raw);
+                    if (parsed >= MIN_QTY) {
+                      set('quantity', parsed);
+                    }
+                  }}
+                  onBlur={() => {
+                    const parsed = parseInt(quantityInput);
+                    const safe = (!parsed || parsed < MIN_QTY) ? MIN_QTY : parsed;
+                    setQuantityInput(String(safe));
+                    set('quantity', safe);
+                  }}
+                  className={`w-full border rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary ${errors.quantity || serigrafiaBlocked ? 'border-amber-400' : 'border-gray-300'}`}
                 />
-                {errors.quantity && <p className="text-red-500 text-xs mt-1">{errors.quantity}</p>}
+                {errors.quantity && <p className="text-amber-600 text-xs mt-1">{errors.quantity}</p>}
               </div>
               <div className="bg-gray-50 rounded-xl px-5 py-3 text-center min-w-[160px]">
                 <p className="text-xs text-gray-500">R$ {unitPrice.toFixed(2).replace('.', ',')} × {d.quantity} un.</p>
@@ -254,6 +344,62 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
               </div>
             </div>
           </div>
+
+          {/* Shipping options */}
+          {(shippingLoading || shippingOptions.length > 0 || shippingError) && (
+            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+              <h3 className="font-poppins font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Truck size={18} className="text-primary" />
+                Opções de Frete
+              </h3>
+
+              {shippingLoading && (
+                <div className="flex items-center gap-3 text-gray-500 text-sm py-2">
+                  <Loader size={16} className="animate-spin text-primary" />
+                  Calculando frete para o seu CEP...
+                </div>
+              )}
+
+              {shippingError && (
+                <p className="text-red-500 text-sm">{shippingError}</p>
+              )}
+
+              {!shippingLoading && shippingOptions.length > 0 && (
+                <div className="space-y-3">
+                  {shippingOptions.map(opt => {
+                    const selected = d.shipping?.service === opt.service;
+                    return (
+                      <button
+                        key={opt.service}
+                        type="button"
+                        onClick={() => selectShipping(opt)}
+                        className={`w-full flex items-center justify-between rounded-xl border-2 px-5 py-4 transition-all text-left ${
+                          selected
+                            ? 'border-primary bg-primary/5'
+                            : 'border-gray-200 hover:border-primary/40'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${selected ? 'border-primary bg-primary' : 'border-gray-300'}`} />
+                          <div>
+                            <p className={`font-semibold text-sm ${selected ? 'text-primary' : 'text-gray-800'}`}>
+                              {opt.service === 'PAC' ? 'PAC — Econômico' : 'SEDEX — Expresso'}
+                            </p>
+                            <p className="text-xs text-gray-500">{opt.label}</p>
+                          </div>
+                        </div>
+                        <span className={`font-bold text-base ${selected ? 'text-primary' : 'text-gray-900'}`}>
+                          R$ {opt.price.toFixed(2).replace('.', ',')}
+                        </span>
+                      </button>
+                    );
+                  })}
+                  <p className="text-xs text-gray-400 pt-1">* Prazo estimado a partir da postagem. Valores baseados na tabela Correios 2025.</p>
+                  {errors.shipping && <p className="text-red-500 text-xs">{errors.shipping}</p>}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex gap-3">

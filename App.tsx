@@ -12,6 +12,9 @@ import { OrderForm } from './components/OrderForm';
 import { OrderSummary } from './components/OrderSummary';
 import { AdminPanel, AdminLogin } from './components/AdminPanel';
 import { MeusPedidos } from './components/MeusPedidos';
+import { Testimonials } from './components/Testimonials';
+import { FAQ } from './components/FAQ';
+import { PrivacyPolicy } from './components/PrivacyPolicy';
 
 const makeEmptyOrder = (product: ProductDef): OrderFormData => ({
   name: '',
@@ -19,6 +22,7 @@ const makeEmptyOrder = (product: ProductDef): OrderFormData => ({
   phone: '',
   quantity: product.minQuantity,
   address: { cep: '', street: '', neighborhood: '', city: '', state: '', number: '', complement: '' },
+  shipping: null,
 });
 
 const EMPTY_CUSTOMIZATION: Customization = {
@@ -42,6 +46,11 @@ const App: React.FC = () => {
   // Meus Pedidos route
   if (window.location.pathname === '/meus-pedidos') {
     return <MeusPedidos onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} />;
+  }
+
+  // Privacy policy route
+  if (window.location.pathname === '/privacidade') {
+    return <PrivacyPolicy onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} />;
   }
   const [selectedProduct, setSelectedProduct] = useState<ProductDef>(PRODUCTS['copo-475']);
   const [customization, setCustomization] = useState<Customization>(EMPTY_CUSTOMIZATION);
@@ -71,10 +80,10 @@ const App: React.FC = () => {
 
   // Admin route
   const isAdmin = window.location.pathname === '/admin';
-  const [adminAuth, setAdminAuth] = useState(() => sessionStorage.getItem('admin_auth') === '1');
+  const [adminToken, setAdminToken] = useState(() => sessionStorage.getItem('admin_token') || '');
   if (isAdmin) {
-    if (!adminAuth) return <AdminLogin onLogin={() => { sessionStorage.setItem('admin_auth', '1'); setAdminAuth(true); }} />;
-    return <AdminPanel onLogout={() => { sessionStorage.removeItem('admin_auth'); setAdminAuth(false); }} />;
+    if (!adminToken) return <AdminLogin onLogin={(token) => { sessionStorage.setItem('admin_token', token); setAdminToken(token); }} />;
+    return <AdminPanel token={adminToken} onLogout={() => { sessionStorage.removeItem('admin_token'); setAdminToken(''); }} />;
   }
 
   if (step === 'customize') {
@@ -137,6 +146,8 @@ const App: React.FC = () => {
       <ProductShowcase onSelectProduct={startOrder} />
       <HowItWorks />
       <WhyChooseUs />
+      <Testimonials />
+      <FAQ />
 
       <section className="bg-gradient-to-br from-[#858079] via-[#6B6862] to-[#514F4A] py-16 relative overflow-hidden">
         {/* Subtle background glow */}
