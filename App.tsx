@@ -15,6 +15,7 @@ import { MeusPedidos } from './components/MeusPedidos';
 import { Testimonials } from './components/Testimonials';
 import { FAQ } from './components/FAQ';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
+import { AnnouncementBar } from './components/AnnouncementBar';
 
 const makeEmptyOrder = (product: ProductDef): OrderFormData => ({
   name: '',
@@ -125,6 +126,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen">
+      <AnnouncementBar />
       <Header onCtaClick={() => startOrder(PRODUCTS['copo-475'])} onMeusPedidos={() => { window.history.pushState({}, '', '/meus-pedidos'); window.location.reload(); }} />
       {paymentStatus && (() => {
         const b = PAYMENT_BANNERS[paymentStatus];
