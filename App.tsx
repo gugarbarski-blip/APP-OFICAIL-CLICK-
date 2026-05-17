@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Gift, ArrowRight, CheckCircle, Clock, XCircle } from 'lucide-react';
-import { AppStep, Customization, OrderFormData, ProductDef, PRODUCTS } from './types';
+import { AppStep, Customization, CustomizationType, OrderFormData, ProductDef, PRODUCTS } from './types';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { ProductShowcase } from './components/ProductShowcase';
@@ -72,10 +72,11 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const startOrder = (product: ProductDef) => {
+  const startOrder = (product: ProductDef, quantity?: number, custType?: CustomizationType) => {
     setSelectedProduct(product);
-    setOrderData(makeEmptyOrder(product));
-    setCustomization(EMPTY_CUSTOMIZATION);
+    const baseOrder = makeEmptyOrder(product);
+    setOrderData(quantity ? { ...baseOrder, quantity } : baseOrder);
+    setCustomization(custType ? { ...EMPTY_CUSTOMIZATION, type: custType } : EMPTY_CUSTOMIZATION);
     goTo('customize');
   };
 
@@ -127,7 +128,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-black">
       <SilkBackground fixed />
-      <Header onCtaClick={() => startOrder(PRODUCTS['copo-475'])} onMeusPedidos={() => { window.history.pushState({}, '', '/meus-pedidos'); window.location.reload(); }} />
+      <Header onCtaClick={() => startOrder(PRODUCTS['copo-475'])} onMeusPedidos={() => { window.history.pushState({}, '', '/meus-pedidos'); window.location.reload(); }}  />
       {paymentStatus && (() => {
         const b = PAYMENT_BANNERS[paymentStatus];
         const Icon = b.icon;
@@ -144,7 +145,7 @@ const App: React.FC = () => {
           </div>
         );
       })()}
-      <Hero onCtaClick={() => startOrder(PRODUCTS['copo-475'])} />
+      <Hero onCtaClick={(qty, type) => startOrder(PRODUCTS['copo-475'], qty, type)} />
       <ProductShowcase onSelectProduct={startOrder} />
       <HowItWorks />
       <WhyChooseUs />

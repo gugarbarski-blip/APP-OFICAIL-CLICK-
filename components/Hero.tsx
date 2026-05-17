@@ -1,9 +1,9 @@
-import React from 'react';
-import { ArrowRight, Star, Truck, Shield } from 'lucide-react';
-import { PRODUCT } from '../types';
+import React, { useState } from 'react';
+import { ArrowRight, Star, Truck, Shield, Minus, Plus } from 'lucide-react';
+import { PRODUCT, CustomizationType } from '../types';
 
 interface HeroProps {
-  onCtaClick: () => void;
+  onCtaClick: (quantity: number, type: CustomizationType) => void;
 }
 
 const CupSVG: React.FC = () => (
@@ -12,6 +12,18 @@ const CupSVG: React.FC = () => (
 
 
 export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
+  const [quantity, setQuantity] = useState(PRODUCT.minQuantity);
+  const [custType, setCustType] = useState<CustomizationType>('serigrafia');
+
+  const unitPrice = custType === 'laser'
+    ? PRODUCT.basePrice + PRODUCT.customizations.laser.extraPrice
+    : PRODUCT.basePrice;
+  const total = unitPrice * quantity;
+
+  const changeQty = (delta: number) => {
+    setQuantity(q => Math.max(PRODUCT.minQuantity, q + delta));
+  };
+
   return (
     <section className="min-h-screen pt-16 flex items-center relative overflow-hidden">
       {/* Luz suave dourada sobre o silk */}
@@ -52,23 +64,71 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
             Qualidade premium e entrega para todo o Brasil.
           </p>
 
-          {/* Price */}
-          <div className="flex flex-col gap-1 mt-2">
-            <div className="flex items-baseline gap-2">
-              <span className="text-gray-300 text-sm font-medium">A partir de</span>
-              <span className="font-poppins text-5xl font-extrabold text-[#eab308] drop-shadow-md">
-                R$ {PRODUCT.basePrice.toFixed(2).replace('.', ',')}
-              </span>
-              <span className="text-gray-300 text-sm font-medium">/ unidade</span>
+          {/* Calculadora de preço */}
+          <div className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-2xl p-5 space-y-4">
+
+            {/* Tipo de personalização */}
+            <div>
+              <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Tipo de personalização</p>
+              <div className="flex gap-2">
+                {(['serigrafia', 'laser'] as CustomizationType[]).map(type => (
+                  <button
+                    key={type}
+                    onClick={() => setCustType(type)}
+                    className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${
+                      custType === type
+                        ? 'bg-gradient-to-r from-[#D4AF37] to-[#d49924] text-gray-900 shadow-[0_4px_12px_rgba(212,175,55,0.4)]'
+                        : 'bg-white/5 border border-white/10 text-gray-300 hover:border-[#D4AF37]/40'
+                    }`}
+                  >
+                    {type === 'serigrafia' ? 'Serigrafia' : `Laser +R$ ${PRODUCT.customizations.laser.extraPrice.toFixed(0)}`}
+                  </button>
+                ))}
+              </div>
             </div>
-            <p className="text-gray-400 text-sm">Pedido mínimo: {PRODUCT.minQuantity} unidades</p>
+
+            {/* Quantidade */}
+            <div>
+              <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Quantas unidades?</p>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => changeQty(-10)}
+                  disabled={quantity <= PRODUCT.minQuantity}
+                  className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:border-[#D4AF37]/40 disabled:opacity-30 transition-all"
+                >
+                  <Minus size={16} />
+                </button>
+                <div className="flex-1 text-center">
+                  <span className="font-poppins text-3xl font-bold text-white">{quantity}</span>
+                  <span className="text-gray-400 text-sm ml-1">un.</span>
+                </div>
+                <button
+                  onClick={() => changeQty(10)}
+                  className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:border-[#D4AF37]/40 transition-all"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+              <p className="text-gray-500 text-xs text-center mt-1">Mínimo {PRODUCT.minQuantity} unidades · de 10 em 10</p>
+            </div>
+
+            {/* Total em tempo real */}
+            <div className="border-t border-white/10 pt-4 flex items-center justify-between">
+              <div>
+                <p className="text-gray-400 text-xs">R$ {unitPrice.toFixed(2).replace('.', ',')} × {quantity} un.</p>
+                <p className="text-gray-400 text-xs">Total estimado</p>
+              </div>
+              <span className="font-poppins text-3xl font-extrabold text-[#F1C40F] drop-shadow-md">
+                R$ {total.toFixed(2).replace('.', ',')}
+              </span>
+            </div>
           </div>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <button
-              onClick={onCtaClick}
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#D4AF37] to-[#d49924] hover:from-[#d49924] hover:to-[#c28511] text-gray-900 font-extrabold px-8 py-4 rounded-xl text-base transition-all shadow-[0_8px_20px_rgba(212,175,55,0.4)] hover:-translate-y-0.5"
+              onClick={() => onCtaClick(quantity, custType)}
+              className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-[#D4AF37] to-[#d49924] hover:from-[#d49924] hover:to-[#c28511] text-gray-900 font-extrabold px-8 py-4 rounded-xl text-base transition-all shadow-[0_8px_20px_rgba(212,175,55,0.4)] hover:-translate-y-0.5"
             >
               Compre Já!
               <ArrowRight size={18} />
