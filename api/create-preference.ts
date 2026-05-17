@@ -15,7 +15,7 @@ export default async function handler(req: any, res: any) {
   if (!accessToken) return res.status(500).json({ error: 'MP_ACCESS_TOKEN not configured' });
 
   const body = req.body || {};
-  const { productName, quantity, unitPrice, buyerName, buyerEmail, address, customizationType, serigrafiaColor, preferPix } = body;
+  const { productName, quantity, unitPrice, buyerName, buyerEmail, address, customizationType, serigrafiaColor, preferPix, artUrl } = body;
 
   if (!productName || !quantity || !unitPrice || !buyerEmail) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -33,6 +33,7 @@ export default async function handler(req: any, res: any) {
       endereco: address || '',
       tipo_personalizacao: customizationType || '',
       cor_serigrafia: serigrafiaColor || '',
+      arte_url: artUrl || null,
       created_at: new Date().toISOString(),
     }).select('id').single();
     pedidoId = pedido?.id;
@@ -47,7 +48,7 @@ export default async function handler(req: any, res: any) {
       body: {
         items: [{ id: 'copo-termico', title: productName, quantity: Number(quantity), unit_price: Number(unitPrice), currency_id: 'BRL' }],
         payer: { name: buyerName, email: buyerEmail },
-        metadata: { pedido_id: pedidoId, product_name: productName, quantity: String(quantity), buyer_name: buyerName, buyer_email: buyerEmail, address: address || '', customization_type: customizationType || '', serigrafia_color: serigrafiaColor || '' },
+        metadata: { pedido_id: pedidoId, product_name: productName, quantity: String(quantity), buyer_name: buyerName, buyer_email: buyerEmail, address: address || '', customization_type: customizationType || '', serigrafia_color: serigrafiaColor || '', art_url: artUrl || '' },
         notification_url: 'https://imprebrindes.com.br/api/webhook-mp',
         back_urls: {
           success: 'https://imprebrindes.com.br/?pagamento=sucesso',

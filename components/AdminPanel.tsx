@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Package, RefreshCw, LogOut } from 'lucide-react';
+import { Package, RefreshCw, LogOut, Download } from 'lucide-react';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   pendente:  { label: 'Pendente',   color: 'bg-yellow-100 text-yellow-800' },
@@ -23,6 +23,7 @@ interface Pedido {
   cor_serigrafia: string;
   created_at: string;
   codigo_rastreio?: string;
+  arte_url?: string;
 }
 
 function authHeaders(token: string) {
@@ -123,6 +124,20 @@ export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ 
                   <div><span className="text-gray-400">Personalização:</span> {p.tipo_personalizacao} {p.cor_serigrafia ? `— ${p.cor_serigrafia}` : ''}</div>
                   <div><span className="text-gray-400">Endereço:</span> {p.endereco}</div>
                   {p.codigo_rastreio && <div><span className="text-gray-400">Rastreio:</span> <span className="font-mono font-semibold">{p.codigo_rastreio}</span></div>}
+                  {p.arte_url && (
+                    <div className="sm:col-span-2">
+                      <span className="text-gray-400">Arte do cliente:</span>{' '}
+                      <a
+                        href={p.arte_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium underline"
+                      >
+                        <Download size={13} />
+                        Baixar arquivo
+                      </a>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap gap-2 items-center">

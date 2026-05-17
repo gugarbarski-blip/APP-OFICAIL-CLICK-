@@ -33,7 +33,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
   const shippingPrice = formData.shipping?.price ?? 0;
   const total = subtotal + shippingPrice;
 
-  const buildBody = () => ({
+  const buildBody = (artUrl?: string | null) => ({
     productName: `${product.name} — ${custOption.label}`,
     quantity: formData.quantity,
     unitPrice,
@@ -42,16 +42,41 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
     address: `${formData.address.street}, ${formData.address.number}${formData.address.complement ? `, ${formData.address.complement}` : ''} — ${formData.address.neighborhood}, ${formData.address.city}/${formData.address.state} CEP: ${formData.address.cep}`,
     customizationType: customization.type,
     serigrafiaColor: customization.type === 'serigrafia' ? customization.serigrafiaColor : '',
+    artUrl: artUrl || null,
   });
+
+  const uploadArt = async (): Promise<string | null> => {
+    const file = customization.artFile;
+    if (!file) return null;
+    const fileBase64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve((reader.result as string).split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    try {
+      const res = await fetch('/api/upload-art', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileBase64, fileName: file.name, mimeType: file.type }),
+      });
+      if (!res.ok) return null;
+      const { url } = await res.json();
+      return url as string;
+    } catch {
+      return null;
+    }
+  };
 
   const handlePix = async () => {
     setPixLoading(true);
     setError(null);
     try {
+      const artUrl = await uploadArt();
       const res = await fetch('/api/create-preference', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...buildBody(), preferPix: true }),
+        body: JSON.stringify({ ...buildBody(artUrl), preferPix: true }),
       });
       if (!res.ok) throw new Error('Erro ao gerar PIX');
       const { checkoutUrl } = await res.json();
@@ -67,10 +92,11 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
     setLoading(true);
     setError(null);
     try {
+      const artUrl = await uploadArt();
       const res = await fetch('/api/create-preference', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(buildBody()),
+        body: JSON.stringify(buildBody(artUrl)),
       });
       if (!res.ok) throw new Error('Erro ao criar preferência de pagamento');
       const { checkoutUrl } = await res.json();
