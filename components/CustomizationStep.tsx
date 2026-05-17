@@ -9,6 +9,7 @@ interface CustomizationStepProps {
   onChange: (c: Customization) => void;
   onBack: () => void;
   onNext: () => void;
+  quantity: number;
 }
 
 const typeOptions: { key: CustomizationType; icon: React.ElementType }[] = [
@@ -51,7 +52,7 @@ async function renderPdfToUrl(file: File): Promise<string> {
 }
 
 export const CustomizationStep: React.FC<CustomizationStepProps> = ({
-  product, value, onChange, onBack, onNext,
+  product, value, onChange, onBack, onNext, quantity,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -246,6 +247,27 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
 
             <div className="bg-accent/10 border border-accent/20 rounded-xl p-4 text-sm text-gray-700">
               <strong className="text-accent">📝 Dica:</strong> Nossa equipe revisará sua arte antes da produção e entrará em contato se houver ajustes necessários.
+            </div>
+
+            {/* Resumo de preço */}
+            <div className="bg-gray-900 rounded-xl p-4 flex items-center justify-between gap-4">
+              <div className="text-sm text-gray-400 space-y-0.5">
+                <p>
+                  <span className="text-white font-semibold">R$ {calcUnitPrice(product, value.type).toFixed(2).replace('.', ',')}</span>
+                  {' '}/ un. × {quantity} unidades
+                </p>
+                <p className="text-xs">
+                  {value.type === 'laser'
+                    ? `Gravação a Laser (+R$ ${product.customizations.laser.extraPrice.toFixed(0)}/un.)`
+                    : 'Serigrafia 1 Cor (sem acréscimo)'}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-gray-500 mb-0.5">Total estimado</p>
+                <p className="font-poppins text-2xl font-extrabold text-[#eab308]">
+                  R$ {(calcUnitPrice(product, value.type) * quantity).toFixed(2).replace('.', ',')}
+                </p>
+              </div>
             </div>
 
             {/* Botões */}

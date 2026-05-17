@@ -96,6 +96,7 @@ const App: React.FC = () => {
         onChange={setCustomization}
         onBack={() => goTo('landing')}
         onNext={() => goTo('order')}
+        quantity={orderData.quantity}
       />
     );
   }
