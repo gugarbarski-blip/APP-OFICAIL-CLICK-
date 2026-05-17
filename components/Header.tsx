@@ -23,7 +23,7 @@ export const Header: React.FC<HeaderProps> = ({ onCtaClick, onMeusPedidos }) => 
   ];
 
   return (
-    <header className={`fixed top-8 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#514F4A]/95 backdrop-blur-md shadow-md border-b border-white/10' : 'bg-transparent'}`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#514F4A]/95 backdrop-blur-md shadow-md border-b border-white/10' : 'bg-transparent'}`}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <a href="#" className="flex items-center group">

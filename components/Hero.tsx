@@ -13,7 +13,7 @@ const CupSVG: React.FC = () => (
 
 export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
   return (
-    <section className="min-h-screen pt-24 bg-gradient-to-br from-[#858079] via-[#6B6862] to-[#514F4A] flex items-center relative overflow-hidden">
+    <section className="min-h-screen pt-16 bg-gradient-to-br from-[#858079] via-[#6B6862] to-[#514F4A] flex items-center relative overflow-hidden">
       {/* Luzes de fundo para simular a iluminação da foto */}
       <div className="absolute top-0 left-1/4 w-full h-full bg-white/5 blur-[120px] rounded-full pointer-events-none"></div>
       
@@ -97,6 +97,25 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
         {/* Cup photo area */}
         <div className="order-1 md:order-2 flex justify-center relative">
           <div className="relative w-full max-w-sm">
+
+            {/* Balão de destaque */}
+            <div className="absolute -top-4 -right-4 z-20 animate-bounce">
+              <div className="relative bg-[#F1C40F] text-gray-900 rounded-2xl px-4 py-3 shadow-xl max-w-[160px] text-center">
+                <p className="text-xs font-black uppercase leading-tight tracking-wide">
+                  🏆 Copo mais barato do Brasil!
+                </p>
+                <p className="text-[11px] font-bold mt-1 text-gray-800">Peça já! →</p>
+                {/* Ponteiro do balão apontando para o copo */}
+                <div className="absolute bottom-[-10px] left-6 w-0 h-0"
+                  style={{
+                    borderLeft: '10px solid transparent',
+                    borderRight: '10px solid transparent',
+                    borderTop: '10px solid #F1C40F',
+                  }}
+                />
+              </div>
+            </div>
+
             <img
               src="/Copo.webp"
               alt="Copo Térmico 475ml personalizado - ImpreBrindes"
@@ -104,7 +123,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
               style={{ filter: 'drop-shadow(0 35px 35px rgba(0,0,0,0.6))' }}
               fetchPriority="high"
             />
-            {/* Sombra base do copo para simular o chão/mesa da foto */}
+            {/* Sombra base do copo */}
             <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-3/4 h-8 bg-black/60 blur-xl rounded-[100%] z-0"></div>
           </div>
         </div>
