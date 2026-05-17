@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight, Star, Truck, Shield } from 'lucide-react';
 import { PRODUCT } from '../types';
+import { SilkBackground } from './ui/silk-background-animation';
 
 interface HeroProps {
   onCtaClick: () => void;
@@ -13,11 +14,13 @@ const CupSVG: React.FC = () => (
 
 export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
   return (
-    <section className="min-h-screen pt-16 bg-gradient-to-br from-[#858079] via-[#6B6862] to-[#514F4A] flex items-center relative overflow-hidden">
-      {/* Luzes de fundo para simular a iluminação da foto */}
-      <div className="absolute top-0 left-1/4 w-full h-full bg-white/5 blur-[120px] rounded-full pointer-events-none"></div>
+    <section className="min-h-screen pt-16 flex items-center relative overflow-hidden bg-black">
+      {/* Silk animated background */}
+      <SilkBackground />
+      {/* Luz suave sobre o silk */}
+      <div className="absolute top-0 left-1/4 w-full h-full bg-[#D4AF37]/5 blur-[120px] rounded-full pointer-events-none" style={{ zIndex: 1 }}></div>
       
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 grid md:grid-cols-2 gap-12 items-center relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 grid md:grid-cols-2 gap-12 items-center relative" style={{ zIndex: 2 }}>
         {/* Textos */}
         <div className="text-white space-y-6 order-2 md:order-1">
           
