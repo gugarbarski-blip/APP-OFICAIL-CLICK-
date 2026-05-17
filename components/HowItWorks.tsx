@@ -30,14 +30,14 @@ const steps = [
 
 export const HowItWorks: React.FC = () => {
   return (
-    <section id="como-funciona" className="py-20 bg-gray-50">
+    <section id="como-funciona" className="py-20 relative">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
-          <span className="text-primary font-semibold text-sm uppercase tracking-wider">Simples e Rápido</span>
+          <span className="text-[#D4AF37] font-semibold text-sm uppercase tracking-wider">Simples e Rápido</span>
           <h2 className="font-poppins text-3xl sm:text-4xl font-bold text-gold mt-2">
             Como Funciona
           </h2>
-          <p className="text-gray-500 mt-3 max-w-lg mx-auto">
+          <p className="text-gray-300 mt-3 max-w-lg mx-auto">
             Do pedido à entrega em 4 passos simples
           </p>
         </div>
@@ -46,17 +46,17 @@ export const HowItWorks: React.FC = () => {
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
-              <div key={step.title} className="relative flex flex-col items-center text-center bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <div key={step.title} className="relative flex flex-col items-center text-center bg-black/40 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-[#D4AF37]/30 transition-all">
                 {/* Step number */}
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-gray-900 text-white rounded-full text-xs font-bold flex items-center justify-center">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-[#D4AF37] text-gray-900 rounded-full text-xs font-bold flex items-center justify-center">
                   {index + 1}
                 </div>
                 {/* Icon */}
                 <div className={`${step.color} w-14 h-14 rounded-2xl flex items-center justify-center mt-3 mb-4`}>
                   <Icon size={26} className="text-white" />
                 </div>
-                <h3 className="font-poppins font-semibold text-gray-900 mb-2">{step.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{step.description}</p>
+                <h3 className="font-poppins font-semibold text-white mb-2">{step.title}</h3>
+                <p className="text-gray-400 text-sm leading-relaxed">{step.description}</p>
               </div>
             );
           })}

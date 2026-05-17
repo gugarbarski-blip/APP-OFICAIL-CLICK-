@@ -35,20 +35,20 @@ const faqs = [
 const FAQItem: React.FC<{ q: string; a: string }> = ({ q, a }) => {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-gray-200 rounded-xl overflow-hidden">
+    <div className="border border-white/10 rounded-xl overflow-hidden backdrop-blur-sm">
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left bg-white hover:bg-gray-50 transition-colors"
+        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left bg-black/40 hover:bg-black/50 transition-colors"
       >
-        <span className="font-semibold text-gray-900 text-sm">{q}</span>
+        <span className="font-semibold text-white text-sm">{q}</span>
         <ChevronDown
           size={18}
           className={`text-primary flex-shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />
       </button>
       {open && (
-        <div className="px-5 pb-4 bg-white">
-          <p className="text-gray-500 text-sm leading-relaxed">{a}</p>
+        <div className="px-5 pb-4 bg-black/30">
+          <p className="text-gray-400 text-sm leading-relaxed">{a}</p>
         </div>
       )}
     </div>
@@ -56,14 +56,14 @@ const FAQItem: React.FC<{ q: string; a: string }> = ({ q, a }) => {
 };
 
 export const FAQ: React.FC = () => (
-  <section id="faq" className="py-20 bg-white">
+  <section id="faq" className="py-20 relative">
     <div className="max-w-3xl mx-auto px-4 sm:px-6">
       <div className="text-center mb-12">
-        <span className="text-primary font-semibold text-sm uppercase tracking-wider">Dúvidas</span>
+        <span className="text-[#D4AF37] font-semibold text-sm uppercase tracking-wider">Dúvidas</span>
         <h2 className="font-poppins text-3xl sm:text-4xl font-bold text-gold mt-2">
           Perguntas Frequentes
         </h2>
-        <p className="text-gray-500 mt-3">
+        <p className="text-gray-300 mt-3">
           Não encontrou o que precisava? Entre em contato pelo e-mail contato@imprebrindes.com.br
         </p>
       </div>

@@ -10,7 +10,7 @@ const ProductCard: React.FC<{ product: ProductDef; onSelect: () => void }> = ({ 
   const customTypes = Object.entries(product.customizations) as [CustomizationType, typeof product.customizations.serigrafia][];
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg transition-shadow flex flex-col">
+    <div className="bg-black/40 backdrop-blur-sm rounded-3xl border border-white/10 overflow-hidden shadow-sm hover:shadow-xl hover:border-[#D4AF37]/30 transition-all flex flex-col">
       {/* Image area */}
       <div className="bg-[#423d38] bg-gradient-to-br from-[#6b6257] via-[#4d473f] to-[#36322c] flex items-center justify-center p-8 h-64 relative overflow-hidden">
         {/* Luz rebatida para simular a iluminação do Hero */}
@@ -25,13 +25,13 @@ const ProductCard: React.FC<{ product: ProductDef; onSelect: () => void }> = ({ 
 
       {/* Content */}
       <div className="p-6 flex flex-col flex-1">
-        <h3 className="font-poppins text-xl font-bold text-gray-900 mb-1">{product.name}</h3>
-        <p className="text-gray-500 text-sm mb-4">{product.description}</p>
+        <h3 className="font-poppins text-xl font-bold text-white mb-1">{product.name}</h3>
+        <p className="text-gray-400 text-sm mb-4">{product.description}</p>
 
         {/* Features */}
         <ul className="space-y-1.5 mb-5">
           {product.features.slice(0, 4).map(feat => (
-            <li key={feat} className="flex items-center gap-2 text-gray-600 text-sm">
+            <li key={feat} className="flex items-center gap-2 text-gray-300 text-sm">
               <CheckCircle size={14} className="text-primary flex-shrink-0" />
               {feat}
             </li>
@@ -50,13 +50,13 @@ const ProductCard: React.FC<{ product: ProductDef; onSelect: () => void }> = ({ 
         {/* Price + CTA */}
         <div className="mt-auto">
           <div className="flex items-baseline gap-1 mb-4">
-            <span className="text-gray-400 text-sm">a partir de</span>
+            <span className="text-gray-300 text-sm">a partir de</span>
             <span className="font-poppins text-3xl font-bold text-accent">
               R$ {product.basePrice.toFixed(2).replace('.', ',')}
             </span>
             <span className="text-gray-400 text-sm">/ un.</span>
           </div>
-          <p className="text-gray-400 text-xs mb-4">Pedido mínimo: {product.minQuantity} unidades</p>
+          <p className="text-gray-500 text-xs mb-4">Pedido mínimo: {product.minQuantity} unidades</p>
           <button
             onClick={onSelect}
             className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primaryDark text-white font-semibold py-3.5 rounded-xl text-base transition-all hover:shadow-lg hover:shadow-primary/30"
@@ -74,14 +74,14 @@ export const ProductShowcase: React.FC<ProductShowcaseProps> = ({ onSelectProduc
   const products = Object.values(PRODUCTS);
 
   return (
-    <section id="produto" className="py-20 bg-gray-50">
+    <section id="produto" className="py-20 relative">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
-          <span className="text-primary font-semibold text-sm uppercase tracking-wider">Nossos Produtos</span>
+          <span className="text-[#D4AF37] font-semibold text-sm uppercase tracking-wider">Nossos Produtos</span>
           <h2 className="font-poppins text-3xl sm:text-4xl font-bold text-gold mt-2">
             Escolha seu Modelo
           </h2>
-          <p className="text-gray-500 mt-3 max-w-xl mx-auto">
+          <p className="text-gray-300 mt-3 max-w-xl mx-auto">
             Personalize com a identidade da sua empresa — serigrafia ou gravação a laser
           </p>
         </div>

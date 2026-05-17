@@ -15,6 +15,7 @@ import { MeusPedidos } from './components/MeusPedidos';
 import { Testimonials } from './components/Testimonials';
 import { FAQ } from './components/FAQ';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
+import { SilkBackground } from './components/ui/silk-background-animation';
 
 const makeEmptyOrder = (product: ProductDef): OrderFormData => ({
   name: '',
@@ -124,7 +125,8 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-black">
+      <SilkBackground fixed />
       <Header onCtaClick={() => startOrder(PRODUCTS['copo-475'])} onMeusPedidos={() => { window.history.pushState({}, '', '/meus-pedidos'); window.location.reload(); }} />
       {paymentStatus && (() => {
         const b = PAYMENT_BANNERS[paymentStatus];
@@ -149,9 +151,8 @@ const App: React.FC = () => {
       <Testimonials />
       <FAQ />
 
-      <section className="bg-gradient-to-br from-[#858079] via-[#6B6862] to-[#514F4A] py-16 relative overflow-hidden">
-        {/* Subtle background glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl h-full bg-[#D4AF37]/5 blur-[100px] rounded-full pointer-events-none"></div>
+      <section className="py-16 relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl h-full bg-[#D4AF37]/8 blur-[100px] rounded-full pointer-events-none"></div>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-10">
           <div className="flex justify-center mb-4">
             <div className="bg-[#514F4A] shadow-[0_4px_15px_rgba(212,175,55,0.3)] p-3 rounded-2xl border border-white/10">

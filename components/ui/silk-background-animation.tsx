@@ -1,6 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 
-export const SilkBackground: React.FC = () => {
+interface SilkBackgroundProps {
+  fixed?: boolean;
+}
+
+export const SilkBackground: React.FC<SilkBackgroundProps> = ({ fixed = false }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
 
@@ -17,9 +21,8 @@ export const SilkBackground: React.FC = () => {
     const noiseIntensity = 0.8;
 
     const resizeCanvas = () => {
-      const parent = canvas.parentElement;
-      canvas.width = parent ? parent.offsetWidth : window.innerWidth;
-      canvas.height = parent ? parent.offsetHeight : window.innerHeight;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     };
 
     resizeCanvas();
@@ -117,8 +120,15 @@ export const SilkBackground: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute top-0 left-0 w-full h-full"
-      style={{ zIndex: 0 }}
+      style={{
+        position: fixed ? 'fixed' : 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 0,
+        pointerEvents: 'none',
+      }}
     />
   );
 };

@@ -26,14 +26,14 @@ const differentials = [
 
 export const WhyChooseUs: React.FC = () => {
   return (
-    <section id="diferenciais" className="py-20 bg-white">
+    <section id="diferenciais" className="py-20 relative">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
-          <span className="text-primary font-semibold text-sm uppercase tracking-wider">Por que nós?</span>
+          <span className="text-[#D4AF37] font-semibold text-sm uppercase tracking-wider">Por que nós?</span>
           <h2 className="font-poppins text-3xl sm:text-4xl font-bold text-gold mt-2">
             Nossos Diferenciais
           </h2>
-          <p className="text-gray-500 mt-3 max-w-lg mx-auto">
+          <p className="text-gray-300 mt-3 max-w-lg mx-auto">
             Mais do que brindes — experiências que fortalecem sua marca
           </p>
         </div>
@@ -44,13 +44,13 @@ export const WhyChooseUs: React.FC = () => {
             return (
               <div
                 key={item.title}
-                className="group p-6 rounded-2xl border border-gray-100 hover:border-primary/30 hover:bg-primary/5 transition-all"
+                className="group p-6 rounded-2xl bg-black/40 backdrop-blur-sm border border-white/10 hover:border-[#D4AF37]/40 hover:bg-black/50 transition-all"
               >
-                <div className="w-12 h-12 bg-primary/10 group-hover:bg-primary/20 rounded-xl flex items-center justify-center mb-4 transition-colors">
-                  <Icon size={22} className="text-primary" />
+                <div className="w-12 h-12 bg-[#D4AF37]/10 group-hover:bg-[#D4AF37]/20 rounded-xl flex items-center justify-center mb-4 transition-colors">
+                  <Icon size={22} className="text-[#D4AF37]" />
                 </div>
-                <h3 className="font-poppins font-semibold text-gray-900 mb-2">{item.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{item.description}</p>
+                <h3 className="font-poppins font-semibold text-white mb-2">{item.title}</h3>
+                <p className="text-gray-400 text-sm leading-relaxed">{item.description}</p>
               </div>
             );
           })}
