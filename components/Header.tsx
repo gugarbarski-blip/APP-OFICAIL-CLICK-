@@ -27,9 +27,9 @@ export const Header: React.FC<HeaderProps> = ({ onCtaClick, onMeusPedidos }) => 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <a href="#" className="flex items-center group">
-          <div className="h-10 rounded-lg overflow-hidden" style={{ backgroundColor: '#6B6862' }}>
+          <div className="h-10 rounded-lg overflow-hidden">
             <img
-              src="/Logo.webp"
+              src="/LogoTransparent.png"
               alt="ImpreBrindes Logo"
               className="h-10 w-auto object-contain"
             />
