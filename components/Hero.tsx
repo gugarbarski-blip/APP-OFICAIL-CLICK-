@@ -98,24 +98,6 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
         <div className="order-1 md:order-2 flex justify-center relative">
           <div className="relative w-full max-w-sm">
 
-            {/* Balão de destaque */}
-            <div className="absolute -top-4 -right-4 z-20 animate-bounce">
-              <div className="relative bg-[#F1C40F] text-gray-900 rounded-2xl px-4 py-3 shadow-xl max-w-[160px] text-center">
-                <p className="text-xs font-black uppercase leading-tight tracking-wide">
-                  🏆 Copo mais barato do Brasil!
-                </p>
-                <p className="text-[11px] font-bold mt-1 text-gray-800">Peça já! →</p>
-                {/* Ponteiro do balão apontando para o copo */}
-                <div className="absolute bottom-[-10px] left-6 w-0 h-0"
-                  style={{
-                    borderLeft: '10px solid transparent',
-                    borderRight: '10px solid transparent',
-                    borderTop: '10px solid #F1C40F',
-                  }}
-                />
-              </div>
-            </div>
-
             <img
               src="/Copo.webp"
               alt="Copo Térmico 475ml personalizado - ImpreBrindes"
