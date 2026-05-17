@@ -14,7 +14,7 @@ export const Footer: React.FC = () => {
               <img
                 src="/Logo.webp"
                 alt="ImpreBrindes Logo"
-                className="h-10 w-auto object-contain mix-blend-multiply"
+                className="h-10 w-auto object-contain rounded-lg" style={{ backgroundColor: '#6B6862' }}
                 loading="lazy"
               />
             </div>

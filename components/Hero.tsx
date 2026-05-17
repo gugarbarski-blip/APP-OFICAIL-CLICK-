@@ -23,11 +23,11 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
           
           {/* Logo Grande do Hero (ImpreBrindes Bronze) */}
           <div className="flex items-center gap-4 mb-8">
-            <div className="w-20 h-20 rounded-full overflow-hidden shadow-[0_4px_15px_rgba(212,175,55,0.4)] bg-transparent flex items-center justify-center">
-              <img 
-                src="/Logo.webp" 
+            <div className="w-20 h-20 rounded-full overflow-hidden shadow-[0_4px_15px_rgba(212,175,55,0.4)] flex items-center justify-center" style={{ backgroundColor: '#6B6862' }}>
+              <img
+                src="/Logo.webp"
                 alt="ImpreBrindes Logo"
-                className="w-[115%] h-[115%] max-w-none object-cover mix-blend-multiply"
+                className="w-[115%] h-[115%] max-w-none object-cover"
               />
             </div>
             <span className="font-poppins font-extrabold text-4xl text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#F1C40F] drop-shadow-md tracking-tight">

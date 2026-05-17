@@ -27,11 +27,13 @@ export const Header: React.FC<HeaderProps> = ({ onCtaClick, onMeusPedidos }) => 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <a href="#" className="flex items-center group">
-          <img
-            src="/Logo.webp"
-            alt="ImpreBrindes Logo"
-            className="h-10 w-auto object-contain drop-shadow-md mix-blend-multiply"
-          />
+          <div className="h-10 rounded-lg overflow-hidden" style={{ backgroundColor: '#6B6862' }}>
+            <img
+              src="/Logo.webp"
+              alt="ImpreBrindes Logo"
+              className="h-10 w-auto object-contain"
+            />
+          </div>
         </a>
 
         {/* Desktop Nav */}
