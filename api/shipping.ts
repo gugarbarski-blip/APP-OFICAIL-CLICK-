@@ -42,9 +42,8 @@ async function calcMelhorEnvio(
     ? 'https://sandbox.melhorenvio.com.br'
     : 'https://www.melhorenvio.com.br';
 
-  // ME API usa package (singular), peso total de todas as caixas
-  const totalWeightKg = round2(weightPerBoxKg * numBoxes);
-  const pkg = { height: BOX_ALT, width: BOX_LARG, length: BOX_COMP, weight: totalWeightKg };
+  // Envia dimensões/peso de 1 caixa; o preço retornado é multiplicado por numBoxes
+  const pkg = { height: BOX_ALT, width: BOX_LARG, length: BOX_COMP, weight: weightPerBoxKg };
 
   const ctrl  = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 12000);
@@ -88,7 +87,7 @@ async function calcMelhorEnvio(
       return {
         service:      `ME_${s.id}`,
         company,
-        price:        round2(parseFloat(s.price)),
+        price:        round2(parseFloat(s.price) * numBoxes),
         deadlineDays: totalDays,
         label:        `${company} ${name} — até ${plural(totalDays)} (${PRODUCAO_DIAS} prod. + ${shippingDays} frete)`,
       };
