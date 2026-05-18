@@ -210,12 +210,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // ── 1. Tenta Melhor Envio ──────────────────────────────────────────────────
   if (process.env.MELHOR_ENVIO_TOKEN) {
     try {
+      console.log(`[ME] tentando cálculo: cep=${cleanCEP} boxes=${numBoxes} kg=${realWeightPerBoxKg}`);
       const options = await calcMelhorEnvio(cleanCEP, numBoxes, realWeightPerBoxKg);
       if (options.length > 0) {
+        console.log(`[ME] sucesso: ${options.length} opções`);
         return res.status(200).json({ options, numBoxes, realWeightPerBoxKg, source: 'melhor-envio' });
       }
+      console.warn('[ME] nenhuma opção válida retornada, usando fallback');
     } catch (err) {
-      console.warn('Melhor Envio falhou, usando fallback Correios:', err instanceof Error ? err.message : String(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`[ME-ERRO] ${msg}`);
     }
   }
 
