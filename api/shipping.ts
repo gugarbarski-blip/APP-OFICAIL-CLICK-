@@ -82,9 +82,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const uf = await getUFFromCEP(cleanCEP);
     const zone = getZone(uf);
 
-    // Peso por unidade: copo-475 = 268g, cuia-320 = 173g + embalagem 300g
+    // Caixa: 33×36×45 cm, cabe 20 copos, pesa 750g vazia
+    // Peso cúbico Correios = C×L×A / 6000 → 33×36×45 / 6000 = 8.910g por caixa
+    const CUPS_PER_BOX = 20;
+    const BOX_WEIGHT_G = 750;
+    const BOX_CUBIC_G = Math.round((33 * 36 * 45) / 6000 * 1000); // 8910g
+
     const weightPerUnit = productId === 'cuia-320' ? 173 : 268;
-    const weightGrams = quantity * weightPerUnit + 300;
+    const numBoxes = Math.ceil(quantity / CUPS_PER_BOX);
+    const realWeight = quantity * weightPerUnit + numBoxes * BOX_WEIGHT_G;
+    const cubicWeight = numBoxes * BOX_CUBIC_G;
+    const weightGrams = Math.max(realWeight, cubicWeight);
 
     const pacPrice = getPrice(PAC_TABLE, weightGrams, zone);
     const sedexPrice = getPrice(SEDEX_TABLE, weightGrams, zone);
