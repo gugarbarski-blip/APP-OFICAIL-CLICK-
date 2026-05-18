@@ -39,7 +39,7 @@ async function calcMelhorEnvio(
   // Support sandbox tokens (set MELHOR_ENVIO_SANDBOX=true for testing)
   const baseUrl = process.env.MELHOR_ENVIO_SANDBOX === 'true'
     ? 'https://sandbox.melhorenvio.com.br'
-    : 'https://melhorenvio.com.br';
+    : 'https://www.melhorenvio.com.br';
 
   const pkg = { height: BOX_ALT, width: BOX_LARG, length: BOX_COMP, weight: weightPerBoxKg };
   const packages = Array.from({ length: numBoxes }, () => pkg);
