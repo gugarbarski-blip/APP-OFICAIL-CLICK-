@@ -1,6 +1,6 @@
 export type CustomizationType = 'serigrafia' | 'laser';
 
-export type AppStep = 'landing' | 'customize' | 'order' | 'confirmation';
+export type AppStep = 'landing' | 'quantity' | 'customize' | 'order' | 'confirmation';
 
 export type ProductId = 'copo-475' | 'cuia-320';
 
