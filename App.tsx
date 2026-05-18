@@ -115,7 +115,7 @@ const App: React.FC = () => {
     return (
       <OrderForm
         product={selectedProduct}
-        customizationType={customization.type}
+        customization={customization}
         initialData={orderData}
         onChange={setOrderData}
         onBack={() => goTo('customize')}
