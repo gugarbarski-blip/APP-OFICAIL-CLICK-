@@ -36,6 +36,11 @@ async function calcMelhorEnvio(
   const token = process.env.MELHOR_ENVIO_TOKEN;
   if (!token) throw new Error('MELHOR_ENVIO_TOKEN não configurado');
 
+  // Support sandbox tokens (set MELHOR_ENVIO_SANDBOX=true for testing)
+  const baseUrl = process.env.MELHOR_ENVIO_SANDBOX === 'true'
+    ? 'https://sandbox.melhorenvio.com.br'
+    : 'https://melhorenvio.com.br';
+
   const pkg = { height: BOX_ALT, width: BOX_LARG, length: BOX_COMP, weight: weightPerBoxKg };
   const packages = Array.from({ length: numBoxes }, () => pkg);
 
@@ -44,7 +49,7 @@ async function calcMelhorEnvio(
 
   let data: any[];
   try {
-    const resp = await fetch('https://melhorenvio.com.br/api/v2/me/shipment/calculate', {
+    const resp = await fetch(`${baseUrl}/api/v2/me/shipment/calculate`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -62,15 +67,17 @@ async function calcMelhorEnvio(
     });
     if (!resp.ok) {
       const txt = await resp.text().catch(() => '');
-      throw new Error(`Melhor Envio HTTP ${resp.status}: ${txt.slice(0, 200)}`);
+      throw new Error(`Melhor Envio HTTP ${resp.status}: ${txt.slice(0, 500)}`);
     }
     data = await resp.json();
   } finally {
     clearTimeout(timer);
   }
 
-  return (data as any[])
-    .filter(s => !s.error && s.price != null && parseFloat(s.price) > 0)
+  const valid = (data as any[]).filter(s => !s.error && s.price != null && parseFloat(s.price) > 0);
+  console.log(`Melhor Envio: ${(data as any[]).length} serviços retornados, ${valid.length} válidos`);
+
+  return valid
     .map(s => {
       const days    = s.custom_delivery_time ?? s.delivery_time ?? 0;
       const company = s.company?.name ?? '';
@@ -208,7 +215,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(200).json({ options, numBoxes, realWeightPerBoxKg, source: 'melhor-envio' });
       }
     } catch (err) {
-      console.warn('Melhor Envio falhou, usando fallback Correios:', err);
+      console.warn('Melhor Envio falhou, usando fallback Correios:', err instanceof Error ? err.message : String(err));
     }
   }
 
