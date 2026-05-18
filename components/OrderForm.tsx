@@ -156,7 +156,25 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
           <span className="text-gray-900 font-medium">Dados do Pedido</span>
         </div>
 
-        <h2 className="font-poppins text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Dados do Pedido</h2>
+        {/* Progress indicator */}
+        <div className="flex items-center gap-2 mb-8">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-green-500 text-white text-xs font-bold flex items-center justify-center">✓</div>
+            <span className="text-sm text-gray-400">Quantidade e Frete</span>
+          </div>
+          <div className="flex-1 h-0.5 bg-green-500 mx-1" />
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-green-500 text-white text-xs font-bold flex items-center justify-center">✓</div>
+            <span className="text-sm text-gray-400">Arte e Personalização</span>
+          </div>
+          <div className="flex-1 h-0.5 bg-primary mx-1" />
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">3</div>
+            <span className="text-sm font-semibold text-primary">Seus Dados</span>
+          </div>
+        </div>
+
+        <h2 className="font-poppins text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Seus Dados</h2>
         <p className="text-gray-500 mb-8">Preencha seus dados para finalizar o pedido</p>
 
         <div className="space-y-6">

@@ -7,6 +7,7 @@ import { ProductShowcase } from './components/ProductShowcase';
 import { HowItWorks } from './components/HowItWorks';
 import { WhyChooseUs } from './components/WhyChooseUs';
 import { Footer } from './components/Footer';
+import { QuantityShippingStep } from './components/QuantityShippingStep';
 import { CustomizationStep } from './components/CustomizationStep';
 import { OrderForm } from './components/OrderForm';
 import { OrderSummary } from './components/OrderSummary';
@@ -75,7 +76,7 @@ const App: React.FC = () => {
     setSelectedProduct(product);
     setOrderData(makeEmptyOrder(product));
     setCustomization(EMPTY_CUSTOMIZATION);
-    goTo('customize');
+    goTo('quantity');
   };
 
   // Admin route
@@ -86,13 +87,25 @@ const App: React.FC = () => {
     return <AdminPanel token={adminToken} onLogout={() => { sessionStorage.removeItem('admin_token'); setAdminToken(''); }} />;
   }
 
+  if (step === 'quantity') {
+    return (
+      <QuantityShippingStep
+        product={selectedProduct}
+        initialData={orderData}
+        onChange={setOrderData}
+        onBack={() => goTo('landing')}
+        onNext={() => goTo('customize')}
+      />
+    );
+  }
+
   if (step === 'customize') {
     return (
       <CustomizationStep
         product={selectedProduct}
         value={customization}
         onChange={setCustomization}
-        onBack={() => goTo('landing')}
+        onBack={() => goTo('quantity')}
         onNext={() => goTo('order')}
       />
     );

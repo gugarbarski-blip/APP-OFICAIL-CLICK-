@@ -106,11 +106,29 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
             <ArrowLeft size={14} /> Voltar
           </button>
           <span>/</span>
-          <span className="text-gray-900 font-medium">Personalização</span>
+          <span className="text-gray-900 font-medium">Arte e Personalização</span>
+        </div>
+
+        {/* Progress indicator */}
+        <div className="flex items-center gap-2 mb-8">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-green-500 text-white text-xs font-bold flex items-center justify-center">✓</div>
+            <span className="text-sm text-gray-400">Quantidade e Frete</span>
+          </div>
+          <div className="flex-1 h-0.5 bg-primary mx-1" />
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">2</div>
+            <span className="text-sm font-semibold text-primary">Arte e Personalização</span>
+          </div>
+          <div className="flex-1 h-0.5 bg-gray-200 mx-1" />
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-500 text-xs font-bold flex items-center justify-center">3</div>
+            <span className="text-sm text-gray-400">Seus Dados</span>
+          </div>
         </div>
 
         <h2 className="font-poppins text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
-          Personalize seu {product.name}
+          Arte e Personalização
         </h2>
         <p className="text-gray-500 mb-8">Escolha o tipo de personalização e faça upload da sua arte</p>
 
@@ -265,7 +283,7 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 }`}
               >
-                Continuar para o Pedido
+                Continuar — Dados do Pedido
                 <ArrowRight size={18} />
               </button>
             </div>
