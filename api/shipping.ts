@@ -4,7 +4,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const CEP_ORIGEM   = '91430221'; // Porto Alegre/RS
 const CUPS_PER_BOX = 20;
-const BOX_WEIGHT_G = 750;
+const BOX_WEIGHT_G = 700;
 const BOX_COMP     = 45;
 const BOX_ALT      = 36;
 const BOX_LARG     = 33;
@@ -204,71 +204,73 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cleanCEP.length !== 8) return res.status(400).json({ error: 'CEP inválido' });
   if (!quantity || quantity < 1) return res.status(400).json({ error: 'Quantidade inválida' });
 
-  const weightPerUnit     = productId === 'cuia-320' ? 173 : 268;
-  const numBoxes          = Math.ceil(quantity / CUPS_PER_BOX);
+  const weightPerUnit      = productId === 'cuia-320' ? 173 : 268;
+  const numBoxes           = Math.ceil(quantity / CUPS_PER_BOX);
   const realWeightPerBoxKg = (CUPS_PER_BOX * weightPerUnit + BOX_WEIGHT_G) / 1000;
 
-  // ── 1. Tenta Melhor Envio ──────────────────────────────────────────────────
-  let _meDebug: string | undefined;
-  if (process.env.MELHOR_ENVIO_TOKEN) {
-    try {
-      console.log(`[ME] tentando cálculo: cep=${cleanCEP} boxes=${numBoxes} kg=${realWeightPerBoxKg}`);
-      const options = await calcMelhorEnvio(cleanCEP, numBoxes, realWeightPerBoxKg);
-      if (options.length > 0) {
-        console.log(`[ME] sucesso: ${options.length} opções`);
-        return res.status(200).json({ options, numBoxes, realWeightPerBoxKg, source: 'melhor-envio' });
-      }
-      _meDebug = 'nenhuma opção válida';
-      console.warn('[ME] nenhuma opção válida retornada, usando fallback');
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      _meDebug = msg;
-      console.error(`[ME-ERRO] ${msg}`);
-    }
+  // Roda ME e Correios em paralelo, mostra tudo junto
+  const [meResult, correiosResult] = await Promise.allSettled([
+    process.env.MELHOR_ENVIO_TOKEN
+      ? calcMelhorEnvio(cleanCEP, numBoxes, realWeightPerBoxKg)
+      : Promise.resolve([] as ShippingResult[]),
+    calcCorreiosBox(cleanCEP, realWeightPerBoxKg),
+  ]);
+
+  const combined: ShippingResult[] = [];
+
+  if (meResult.status === 'fulfilled') {
+    combined.push(...meResult.value);
+  } else {
+    console.error('[ME-ERRO]', meResult.reason);
   }
 
-  // ── 2. Fallback: Correios API ──────────────────────────────────────────────
-  try {
-    const box = await calcCorreiosBox(cleanCEP, realWeightPerBoxKg);
-    const options: ShippingResult[] = [
-      {
+  if (correiosResult.status === 'fulfilled') {
+    const box = correiosResult.value;
+    // Só adiciona Correios se o ME não os retornou já
+    const jaTemPAC   = combined.some(o => o.label.toLowerCase().includes('pac'));
+    const jaTemSEDEX = combined.some(o => o.label.toLowerCase().includes('sedex'));
+    if (!jaTemPAC) {
+      combined.push({
         service: 'PAC', company: 'Correios',
         price: round2(box.pac * numBoxes),
         deadlineDays: box.pacDays,
         label: `Correios PAC — até ${plural(box.pacDays)}`,
-      },
-    ];
-    if (box.sedex !== null && box.sedexDays !== null) {
-      options.push({
+      });
+    }
+    if (!jaTemSEDEX && box.sedex !== null && box.sedexDays !== null) {
+      combined.push({
         service: 'SEDEX', company: 'Correios',
         price: round2(box.sedex * numBoxes),
         deadlineDays: box.sedexDays,
         label: `Correios SEDEX — até ${plural(box.sedexDays)}`,
       });
     }
-    return res.status(200).json({ options, numBoxes, realWeightPerBoxKg, source: 'correios', _meDebug });
-  } catch {
+  } else {
     console.warn('Correios API falhou, usando tabela estática');
+    const uf      = await getUF(cleanCEP).catch(() => 'SP');
+    const zone    = getZone(uf);
+    const chargeG = Math.max(CUPS_PER_BOX * weightPerUnit + BOX_WEIGHT_G, BOX_CUBIC_G);
+    const jaTemPAC   = combined.some(o => o.label.toLowerCase().includes('pac'));
+    const jaTemSEDEX = combined.some(o => o.label.toLowerCase().includes('sedex'));
+    if (!jaTemPAC) {
+      combined.push({
+        service: 'PAC', company: 'Correios',
+        price: round2(staticPrice(PAC_TABLE, chargeG, zone) * numBoxes),
+        deadlineDays: PAC_DEADLINE[zone - 1],
+        label: `Correios PAC — até ${plural(PAC_DEADLINE[zone - 1])}`,
+      });
+    }
+    if (!jaTemSEDEX) {
+      combined.push({
+        service: 'SEDEX', company: 'Correios',
+        price: round2(staticPrice(SEDEX_TABLE, chargeG, zone) * numBoxes),
+        deadlineDays: SEDEX_DEADLINE[zone - 1],
+        label: `Correios SEDEX — até ${plural(SEDEX_DEADLINE[zone - 1])}`,
+      });
+    }
   }
 
-  // ── 3. Último fallback: tabela estática ───────────────────────────────────
-  const uf      = await getUF(cleanCEP);
-  const zone    = getZone(uf);
-  const chargeG = Math.max(CUPS_PER_BOX * weightPerUnit + BOX_WEIGHT_G, BOX_CUBIC_G);
-  const options: ShippingResult[] = [
-    {
-      service: 'PAC', company: 'Correios',
-      price: round2(staticPrice(PAC_TABLE, chargeG, zone) * numBoxes),
-      deadlineDays: PAC_DEADLINE[zone - 1],
-      label: `Correios PAC — até ${plural(PAC_DEADLINE[zone - 1])}`,
-    },
-    {
-      service: 'SEDEX', company: 'Correios',
-      price: round2(staticPrice(SEDEX_TABLE, chargeG, zone) * numBoxes),
-      deadlineDays: SEDEX_DEADLINE[zone - 1],
-      label: `Correios SEDEX — até ${plural(SEDEX_DEADLINE[zone - 1])}`,
-    },
-  ];
+  combined.sort((a, b) => a.price - b.price);
 
-  return res.status(200).json({ options, numBoxes, realWeightPerBoxKg, source: 'static' });
+  return res.status(200).json({ options: combined, numBoxes, realWeightPerBoxKg });
 }
