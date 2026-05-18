@@ -2,7 +2,8 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 // ── Configuração ─────────────────────────────────────────────────────────────
 
-const CEP_ORIGEM   = '91430221'; // Porto Alegre/RS
+const CEP_ORIGEM      = '91430221'; // Porto Alegre/RS
+const PRODUCAO_DIAS   = 2;         // dias úteis de produção somados ao prazo
 const CUPS_PER_BOX = 20;
 const BOX_WEIGHT_G = 700;
 const BOX_COMP     = 45;
@@ -80,15 +81,16 @@ async function calcMelhorEnvio(
 
   return valid
     .map(s => {
-      const days    = s.custom_delivery_time ?? s.delivery_time ?? 0;
-      const company = s.company?.name ?? '';
-      const name    = s.name ?? '';
+      const shippingDays = s.custom_delivery_time ?? s.delivery_time ?? 0;
+      const totalDays    = PRODUCAO_DIAS + shippingDays;
+      const company      = s.company?.name ?? '';
+      const name         = s.name ?? '';
       return {
-        service:     `ME_${s.id}`,
+        service:      `ME_${s.id}`,
         company,
-        price:       round2(parseFloat(s.price)),
-        deadlineDays: days,
-        label:       `${company} ${name} — até ${plural(days)}`,
+        price:        round2(parseFloat(s.price)),
+        deadlineDays: totalDays,
+        label:        `até ${plural(totalDays)} (${PRODUCAO_DIAS} prod. + ${shippingDays} frete)`,
       };
     })
     .sort((a, b) => a.price - b.price);
@@ -230,19 +232,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const jaTemPAC   = combined.some(o => o.label.toLowerCase().includes('pac'));
     const jaTemSEDEX = combined.some(o => o.label.toLowerCase().includes('sedex'));
     if (!jaTemPAC) {
+      const total = PRODUCAO_DIAS + box.pacDays;
       combined.push({
         service: 'PAC', company: 'Correios',
         price: round2(box.pac * numBoxes),
-        deadlineDays: box.pacDays,
-        label: `Correios PAC — até ${plural(box.pacDays)}`,
+        deadlineDays: total,
+        label: `até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${box.pacDays} frete)`,
       });
     }
     if (!jaTemSEDEX && box.sedex !== null && box.sedexDays !== null) {
+      const total = PRODUCAO_DIAS + box.sedexDays;
       combined.push({
         service: 'SEDEX', company: 'Correios',
         price: round2(box.sedex * numBoxes),
-        deadlineDays: box.sedexDays,
-        label: `Correios SEDEX — até ${plural(box.sedexDays)}`,
+        deadlineDays: total,
+        label: `até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${box.sedexDays} frete)`,
       });
     }
   } else {
@@ -253,19 +257,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const jaTemPAC   = combined.some(o => o.label.toLowerCase().includes('pac'));
     const jaTemSEDEX = combined.some(o => o.label.toLowerCase().includes('sedex'));
     if (!jaTemPAC) {
+      const d = PAC_DEADLINE[zone - 1];
+      const total = PRODUCAO_DIAS + d;
       combined.push({
         service: 'PAC', company: 'Correios',
         price: round2(staticPrice(PAC_TABLE, chargeG, zone) * numBoxes),
-        deadlineDays: PAC_DEADLINE[zone - 1],
-        label: `Correios PAC — até ${plural(PAC_DEADLINE[zone - 1])}`,
+        deadlineDays: total,
+        label: `até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${d} frete)`,
       });
     }
     if (!jaTemSEDEX) {
+      const d = SEDEX_DEADLINE[zone - 1];
+      const total = PRODUCAO_DIAS + d;
       combined.push({
         service: 'SEDEX', company: 'Correios',
         price: round2(staticPrice(SEDEX_TABLE, chargeG, zone) * numBoxes),
-        deadlineDays: SEDEX_DEADLINE[zone - 1],
-        label: `Correios SEDEX — até ${plural(SEDEX_DEADLINE[zone - 1])}`,
+        deadlineDays: total,
+        label: `até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${d} frete)`,
       });
     }
   }
