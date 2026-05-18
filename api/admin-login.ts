@@ -1,8 +1,8 @@
 import { createHmac, createHash } from 'crypto';
-import { getSupabaseAdmin } from '../lib/supabase-admin';
+import { createClient } from '@supabase/supabase-js';
 
 function getSecret(): string {
-  return process.env.ADMIN_SECRET ?? process.env.SUPABASE_SERVICE_KEY!;
+  return process.env.ADMIN_SECRET ?? process.env.SUPABASE_SERVICE_KEY ?? '';
 }
 
 function generateToken(): string {
@@ -12,17 +12,19 @@ function generateToken(): string {
 }
 
 async function getStoredHash(): Promise<string | null> {
-  // Allow hard-coded env var override for simplicity
   if (process.env.ADMIN_PASSWORD) {
     return createHash('sha256').update(process.env.ADMIN_PASSWORD).digest('hex');
   }
-  const sb = getSupabaseAdmin();
-  const { data } = await sb
+  const url = process.env.SUPABASE_URL!;
+  const key = process.env.SUPABASE_SERVICE_KEY!;
+  const db = createClient(url, key);
+  const { data, error } = await db
     .from('admin_config')
     .select('value')
     .eq('key', 'password_hash')
     .single();
-  return data?.value ?? null;
+  if (error || !data) return null;
+  return (data as { value: string }).value;
 }
 
 export default async function handler(req: any, res: any) {
