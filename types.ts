@@ -110,6 +110,7 @@ export interface OrderFormData {
   name: string;
   email: string;
   phone: string;
+  cpfCnpj: string;
   quantity: number;
   address: Address;
   shipping: ShippingOption | null;

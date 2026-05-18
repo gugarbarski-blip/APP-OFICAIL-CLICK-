@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { ArrowLeft, ArrowRight, MapPin, Loader, Truck, Printer, Zap, FileText, Package } from 'lucide-react';
+import { ArrowLeft, ArrowRight, MapPin, Truck, Printer, Zap, FileText, Package, Lock } from 'lucide-react';
 import { OrderFormData, Address, ProductDef, Customization, calcTotal, SERIGRAFIA_COLORS } from '../types';
-import { lookupCEP, formatCEP, formatPhone } from '../services/cep';
+import { formatPhone } from '../services/cep';
 
 interface OrderFormProps {
   product: ProductDef;
@@ -13,8 +13,6 @@ interface OrderFormProps {
 }
 
 export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, initialData, onChange, onBack, onNext }) => {
-  const [cepLoading, setCepLoading] = useState(false);
-  const [cepError, setCepError] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const d = initialData;
@@ -27,6 +25,21 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, in
     ? SERIGRAFIA_COLORS.find(c => c.key === customization.serigrafiaColor)?.label ?? ''
     : '';
 
+  const formatCpfCnpj = (raw: string): string => {
+    const digits = raw.replace(/\D/g, '').slice(0, 14);
+    if (digits.length <= 11) {
+      return digits
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    }
+    return digits
+      .replace(/(\d{2})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1/$2')
+      .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+  };
+
   const set = (field: keyof Omit<OrderFormData, 'address'>, value: string | number) => {
     onChange({ ...d, [field]: value });
     setErrors(e => ({ ...e, [field]: '' }));
@@ -37,41 +50,13 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, in
     setErrors(e => ({ ...e, [field]: '' }));
   };
 
-  const handleCEP = async (raw: string) => {
-    const formatted = formatCEP(raw);
-    setAddr('cep', formatted);
-    setCepError('');
-    onChange({ ...d, address: { ...d.address, cep: formatted } });
-
-    if (formatted.replace(/\D/g, '').length === 8) {
-      setCepLoading(true);
-      try {
-        const addr = await lookupCEP(formatted);
-        onChange({
-          ...d,
-          address: {
-            ...d.address,
-            cep: formatted,
-            street: addr.street,
-            neighborhood: addr.neighborhood,
-            city: addr.city,
-            state: addr.state,
-          },
-        });
-      } catch {
-        setCepError('CEP não encontrado. Verifique e tente novamente.');
-      } finally {
-        setCepLoading(false);
-      }
-    }
-  };
-
   const validate = (): boolean => {
     const e: Record<string, string> = {};
     if (!d.name.trim()) e.name = 'Nome é obrigatório';
     if (!d.email.trim() || !/\S+@\S+\.\S+/.test(d.email)) e.email = 'E-mail inválido';
     if (!d.phone.replace(/\D/g, '') || d.phone.replace(/\D/g, '').length < 10) e.phone = 'Telefone inválido';
-    if (d.address.cep.replace(/\D/g, '').length !== 8) e.cep = 'CEP inválido';
+    const cpfCnpjDigits = d.cpfCnpj.replace(/\D/g, '');
+    if (cpfCnpjDigits.length !== 11 && cpfCnpjDigits.length !== 14) e.cpfCnpj = 'CPF (11 dígitos) ou CNPJ (14 dígitos) inválido';
     if (!d.address.street.trim()) e.street = 'Rua é obrigatória';
     if (!d.address.number.trim()) e.number = 'Número é obrigatório';
     if (!d.address.city.trim()) e.city = 'Cidade é obrigatória';
@@ -219,6 +204,19 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, in
                 />
                 {errors.phone && <p className="text-red-400 text-xs mt-1">{errors.phone}</p>}
               </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  CPF / CNPJ <span className="text-gray-500 text-xs font-normal">(necessário para emissão de nota fiscal)</span>
+                </label>
+                <input
+                  type="text"
+                  value={d.cpfCnpj}
+                  onChange={e => set('cpfCnpj', formatCpfCnpj(e.target.value))}
+                  placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.cpfCnpj ? 'border-red-400' : 'border-white/15'}`}
+                />
+                {errors.cpfCnpj && <p className="text-red-400 text-xs mt-1">{errors.cpfCnpj}</p>}
+              </div>
             </div>
           </div>
 
@@ -235,18 +233,14 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, in
                   <input
                     type="text"
                     value={d.address.cep}
-                    onChange={e => handleCEP(e.target.value)}
-                    placeholder="00000-000"
-                    maxLength={9}
-                    className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 pr-9 ${errors.cep || cepError ? 'border-red-400' : 'border-white/15'}`}
+                    readOnly
+                    className="w-full border border-white/8 rounded-lg px-3 py-2.5 bg-[#111110] text-gray-400 cursor-not-allowed pr-9"
                   />
-                  {cepLoading && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <Loader size={16} className="text-[#D4AF37] animate-spin" />
-                    </div>
-                  )}
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <Lock size={14} className="text-gray-600" />
+                  </div>
                 </div>
-                {(errors.cep || cepError) && <p className="text-red-400 text-xs mt-1">{cepError || errors.cep}</p>}
+                <p className="text-gray-600 text-xs mt-1">Para alterar o CEP, volte à etapa 1</p>
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-300 mb-1">Rua / Logradouro</label>
