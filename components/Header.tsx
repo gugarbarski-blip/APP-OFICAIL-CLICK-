@@ -20,6 +20,7 @@ export const Header: React.FC<HeaderProps> = ({ onCtaClick, onMeusPedidos }) => 
     { label: 'Produtos', href: '#produto' },
     { label: 'Como Funciona', href: '#como-funciona' },
     { label: 'Diferenciais', href: '#diferenciais' },
+    { label: 'Quem Somos', href: '#quem-somos' },
   ];
 
   return (

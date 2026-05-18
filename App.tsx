@@ -15,6 +15,7 @@ import { AdminPanel, AdminLogin } from './components/AdminPanel';
 import { MeusPedidos } from './components/MeusPedidos';
 import { Testimonials } from './components/Testimonials';
 import { FAQ } from './components/FAQ';
+import { QuemSomos } from './components/QuemSomos';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 
 const makeEmptyOrder = (product: ProductDef): OrderFormData => ({
@@ -159,6 +160,7 @@ const App: React.FC = () => {
       <ProductShowcase onSelectProduct={startOrder} />
       <HowItWorks />
       <WhyChooseUs />
+      <QuemSomos />
       <Testimonials />
       <FAQ />
 

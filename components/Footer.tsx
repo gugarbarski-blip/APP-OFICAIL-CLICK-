@@ -31,6 +31,7 @@ export const Footer: React.FC = () => {
                 { label: 'Produtos', href: '#produto' },
                 { label: 'Como Funciona', href: '#como-funciona' },
                 { label: 'Diferenciais', href: '#diferenciais' },
+                { label: 'Quem Somos', href: '#quem-somos' },
                 { label: 'Depoimentos', href: '#depoimentos' },
                 { label: 'Perguntas Frequentes', href: '#faq' },
               ].map(link => (
