@@ -24,7 +24,7 @@ interface ShippingResult {
   label: string;
 }
 
-const plural = (n: number) => `${n} dia${n !== 1 ? 's' : ''} útil${n !== 1 ? 'eis' : ''}`;
+const plural = (n: number) => `${n} dia${n !== 1 ? 's' : ''} ${n !== 1 ? 'úteis' : 'útil'}`;
 const round2 = (v: number) => Math.round(v * 100) / 100;
 
 // ── Melhor Envio ─────────────────────────────────────────────────────────────
