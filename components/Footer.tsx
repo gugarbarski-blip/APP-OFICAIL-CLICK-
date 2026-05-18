@@ -52,10 +52,7 @@ export const Footer: React.FC = () => {
                 <Mail size={14} className="text-[#D4AF37] flex-shrink-0" />
                 contato@imprebrindes.com.br
               </li>
-              <li className="flex items-center gap-2">
-                <Phone size={14} className="text-[#D4AF37] flex-shrink-0" />
-                (11) 99999-9999
-              </li>
+
               <li className="flex items-center gap-2">
                 <Instagram size={14} className="text-[#D4AF37] flex-shrink-0" />
                 @imprebrindes
