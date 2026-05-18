@@ -100,10 +100,11 @@ export interface Address {
 }
 
 export interface ShippingOption {
-  service: 'PAC' | 'SEDEX';
+  service: string;
   price: number;
   deadlineDays: number;
   label: string;
+  company?: string;
 }
 
 export interface OrderFormData {

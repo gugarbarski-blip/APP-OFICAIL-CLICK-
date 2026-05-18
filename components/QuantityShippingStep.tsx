@@ -313,9 +313,9 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
                           <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${selected ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-gray-500'}`} />
                           <div>
                             <p className={`font-semibold text-sm ${selected ? 'text-[#F1C40F]' : 'text-white'}`}>
-                              {opt.service === 'PAC' ? 'PAC — Econômico' : 'SEDEX — Expresso'}
+                              {opt.label.split(' — ')[0]}
                             </p>
-                            <p className="text-xs text-gray-400">{opt.label}</p>
+                            <p className="text-xs text-gray-400">{opt.label.split(' — ').slice(1).join(' — ')}</p>
                           </div>
                         </div>
                         <span className={`font-bold text-base ${selected ? 'text-[#F1C40F]' : 'text-white'}`}>
