@@ -208,6 +208,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const realWeightPerBoxKg = (CUPS_PER_BOX * weightPerUnit + BOX_WEIGHT_G) / 1000;
 
   // ── 1. Tenta Melhor Envio ──────────────────────────────────────────────────
+  let _meDebug: string | undefined;
   if (process.env.MELHOR_ENVIO_TOKEN) {
     try {
       console.log(`[ME] tentando cálculo: cep=${cleanCEP} boxes=${numBoxes} kg=${realWeightPerBoxKg}`);
@@ -216,9 +217,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.log(`[ME] sucesso: ${options.length} opções`);
         return res.status(200).json({ options, numBoxes, realWeightPerBoxKg, source: 'melhor-envio' });
       }
+      _meDebug = 'nenhuma opção válida';
       console.warn('[ME] nenhuma opção válida retornada, usando fallback');
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
+      _meDebug = msg;
       console.error(`[ME-ERRO] ${msg}`);
     }
   }
@@ -242,7 +245,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         label: `Correios SEDEX — até ${plural(box.sedexDays)}`,
       });
     }
-    return res.status(200).json({ options, numBoxes, realWeightPerBoxKg, source: 'correios' });
+    return res.status(200).json({ options, numBoxes, realWeightPerBoxKg, source: 'correios', _meDebug });
   } catch {
     console.warn('Correios API falhou, usando tabela estática');
   }
