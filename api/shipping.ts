@@ -90,7 +90,7 @@ async function calcMelhorEnvio(
         company,
         price:        round2(parseFloat(s.price)),
         deadlineDays: totalDays,
-        label:        `até ${plural(totalDays)} (${PRODUCAO_DIAS} prod. + ${shippingDays} frete)`,
+        label:        `${company} ${name} — até ${plural(totalDays)} (${PRODUCAO_DIAS} prod. + ${shippingDays} frete)`,
       };
     })
     .sort((a, b) => a.price - b.price);
@@ -237,7 +237,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         service: 'PAC', company: 'Correios',
         price: round2(box.pac * numBoxes),
         deadlineDays: total,
-        label: `até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${box.pacDays} frete)`,
+        label: `Correios PAC — até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${box.pacDays} frete)`,
       });
     }
     if (!jaTemSEDEX && box.sedex !== null && box.sedexDays !== null) {
@@ -246,7 +246,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         service: 'SEDEX', company: 'Correios',
         price: round2(box.sedex * numBoxes),
         deadlineDays: total,
-        label: `até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${box.sedexDays} frete)`,
+        label: `Correios SEDEX — até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${box.sedexDays} frete)`,
       });
     }
   } else {
@@ -263,7 +263,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         service: 'PAC', company: 'Correios',
         price: round2(staticPrice(PAC_TABLE, chargeG, zone) * numBoxes),
         deadlineDays: total,
-        label: `até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${d} frete)`,
+        label: `Correios PAC — até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${d} frete)`,
       });
     }
     if (!jaTemSEDEX) {
@@ -273,7 +273,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         service: 'SEDEX', company: 'Correios',
         price: round2(staticPrice(SEDEX_TABLE, chargeG, zone) * numBoxes),
         deadlineDays: total,
-        label: `até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${d} frete)`,
+        label: `Correios SEDEX — até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${d} frete)`,
       });
     }
   }
