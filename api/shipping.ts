@@ -41,8 +41,9 @@ async function calcMelhorEnvio(
     ? 'https://sandbox.melhorenvio.com.br'
     : 'https://www.melhorenvio.com.br';
 
-  const pkg = { height: BOX_ALT, width: BOX_LARG, length: BOX_COMP, weight: weightPerBoxKg };
-  const packages = Array.from({ length: numBoxes }, () => pkg);
+  // ME API usa package (singular), peso total de todas as caixas
+  const totalWeightKg = round2(weightPerBoxKg * numBoxes);
+  const pkg = { height: BOX_ALT, width: BOX_LARG, length: BOX_COMP, weight: totalWeightKg };
 
   const ctrl  = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 12000);
@@ -60,8 +61,8 @@ async function calcMelhorEnvio(
       body: JSON.stringify({
         from: { postal_code: CEP_ORIGEM },
         to:   { postal_code: cepDestino },
-        packages,
-        options: { insurance_value: 0, receipt: false, own_hand: false },
+        package: pkg,
+        options: { receipt: false, own_hand: false },
       }),
       signal: ctrl.signal,
     });
