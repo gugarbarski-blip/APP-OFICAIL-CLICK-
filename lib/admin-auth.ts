@@ -2,8 +2,12 @@ import { createHmac } from 'crypto';
 
 const TOKEN_MAX_AGE_MS = 12 * 60 * 60 * 1000; // 12 horas
 
+function getSecret(): string | undefined {
+  return process.env.ADMIN_SECRET ?? process.env.SUPABASE_SERVICE_KEY;
+}
+
 export function validateAdminToken(token: string | undefined): boolean {
-  const secret = process.env.ADMIN_SECRET;
+  const secret = getSecret();
   if (!secret || !token) return false;
 
   const parts = token.split('.');
