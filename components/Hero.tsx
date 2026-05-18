@@ -13,7 +13,7 @@ const CupSVG: React.FC = () => (
 
 export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
   return (
-    <section className="min-h-screen pt-16 bg-gradient-to-br from-[#858079] via-[#6B6862] to-[#514F4A] flex items-center relative overflow-hidden">
+    <section className="min-h-screen pt-16 bg-gradient-to-br from-[#2a2520] via-[#1e1b17] to-[#151310] flex items-center relative overflow-hidden">
       {/* Luzes de fundo para simular a iluminação da foto */}
       <div className="absolute top-0 left-1/4 w-full h-full bg-white/5 blur-[120px] rounded-full pointer-events-none"></div>
       

@@ -139,50 +139,50 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
   const totalLaser = calcTotal(product, 'laser', d.quantity);
 
   return (
-    <div className="min-h-screen pt-16 bg-gray-50">
+    <div className="min-h-screen pt-16 bg-[#1a1917]">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-gray-500 mb-8">
-          <button onClick={onBack} className="hover:text-primary transition-colors flex items-center gap-1">
+        <div className="flex items-center gap-2 text-sm text-gray-400 mb-8">
+          <button onClick={onBack} className="hover:text-[#D4AF37] transition-colors flex items-center gap-1">
             <ArrowLeft size={14} /> Voltar
           </button>
           <span>/</span>
-          <span className="text-gray-900 font-medium">Quantidade e Frete</span>
+          <span className="text-white font-medium">Quantidade e Frete</span>
         </div>
 
         {/* Progress indicator */}
         <div className="flex items-center gap-2 mb-8">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">1</div>
-            <span className="text-sm font-semibold text-primary">Quantidade e Frete</span>
+            <div className="w-7 h-7 rounded-full bg-[#D4AF37] text-gray-900 text-xs font-bold flex items-center justify-center">1</div>
+            <span className="text-sm font-semibold text-[#D4AF37]">Quantidade e Frete</span>
           </div>
-          <div className="flex-1 h-0.5 bg-gray-200 mx-1" />
+          <div className="flex-1 h-0.5 bg-white/10 mx-1" />
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-500 text-xs font-bold flex items-center justify-center">2</div>
-            <span className="text-sm text-gray-400">Arte e Personalização</span>
+            <div className="w-7 h-7 rounded-full bg-white/10 text-gray-500 text-xs font-bold flex items-center justify-center">2</div>
+            <span className="text-sm text-gray-500">Arte e Personalização</span>
           </div>
-          <div className="flex-1 h-0.5 bg-gray-200 mx-1" />
+          <div className="flex-1 h-0.5 bg-white/10 mx-1" />
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-500 text-xs font-bold flex items-center justify-center">3</div>
-            <span className="text-sm text-gray-400">Seus Dados</span>
+            <div className="w-7 h-7 rounded-full bg-white/10 text-gray-500 text-xs font-bold flex items-center justify-center">3</div>
+            <span className="text-sm text-gray-500">Seus Dados</span>
           </div>
         </div>
 
-        <h2 className="font-poppins text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
+        <h2 className="font-poppins text-2xl sm:text-3xl font-bold text-white mb-1">
           Quantidade e Frete
         </h2>
-        <p className="text-gray-500 mb-8">Defina a quantidade e calcule o frete antes de enviar sua arte</p>
+        <p className="text-gray-400 mb-8">Defina a quantidade e calcule o frete antes de enviar sua arte</p>
 
         <div className="space-y-6">
           {/* Quantity + price */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
-            <h3 className="font-poppins font-semibold text-gray-900 mb-4">Quantidade</h3>
+          <div className="bg-[#2a2825] rounded-2xl border border-white/8 p-6">
+            <h3 className="font-poppins font-semibold text-white mb-4">Quantidade</h3>
 
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-300 mb-1">
                   Quantas unidades?{' '}
-                  <span className="text-gray-400">(mínimo {MIN_QTY} un.)</span>
+                  <span className="text-gray-500">(mínimo {MIN_QTY} un.)</span>
                 </label>
                 <input
                   type="number"
@@ -203,52 +203,52 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
                     setQuantityInput(String(safe));
                     onChange({ ...d, quantity: safe });
                   }}
-                  className={`w-full border rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary ${errors.quantity ? 'border-red-400' : 'border-gray-300'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] ${errors.quantity ? 'border-red-500' : 'border-white/15'}`}
                 />
-                {errors.quantity && <p className="text-red-500 text-xs mt-1">{errors.quantity}</p>}
+                {errors.quantity && <p className="text-red-400 text-xs mt-1">{errors.quantity}</p>}
               </div>
             </div>
 
             {/* Price comparison table */}
             <div className="mt-5 grid grid-cols-2 gap-3">
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+              <div className="bg-[#222019] rounded-xl p-4 border border-white/8">
                 <div className="flex items-center gap-2 mb-2">
-                  <Printer size={16} className="text-primary" />
-                  <span className="text-xs font-semibold text-gray-700">Serigrafia 1 Cor</span>
+                  <Printer size={16} className="text-[#D4AF37]" />
+                  <span className="text-xs font-semibold text-gray-300">Serigrafia 1 Cor</span>
                 </div>
                 <p className="text-xs text-gray-500">
                   R$ {unitPriceSerigrafia.toFixed(2).replace('.', ',')} × {d.quantity} un.
                 </p>
-                <p className="font-poppins text-xl font-bold text-primary">
+                <p className="font-poppins text-xl font-bold text-[#F1C40F]">
                   R$ {totalSerigrafia.toFixed(2).replace('.', ',')}
                 </p>
-                <p className="text-[10px] text-amber-600 mt-1">Mínimo 25 unidades</p>
+                <p className="text-[10px] text-amber-400 mt-1">Mínimo 25 unidades</p>
               </div>
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+              <div className="bg-[#222019] rounded-xl p-4 border border-white/8">
                 <div className="flex items-center gap-2 mb-2">
-                  <Zap size={16} className="text-primary" />
-                  <span className="text-xs font-semibold text-gray-700">Gravação a Laser</span>
+                  <Zap size={16} className="text-[#D4AF37]" />
+                  <span className="text-xs font-semibold text-gray-300">Gravação a Laser</span>
                 </div>
                 <p className="text-xs text-gray-500">
                   R$ {unitPriceLaser.toFixed(2).replace('.', ',')} × {d.quantity} un.
                 </p>
-                <p className="font-poppins text-xl font-bold text-primary">
+                <p className="font-poppins text-xl font-bold text-[#F1C40F]">
                   R$ {totalLaser.toFixed(2).replace('.', ',')}
                 </p>
-                <p className="text-[10px] text-green-600 mt-1">A partir de 10 unidades</p>
+                <p className="text-[10px] text-green-400 mt-1">A partir de 10 unidades</p>
               </div>
             </div>
-            <p className="text-xs text-gray-400 mt-3">*Frete não incluído no total acima. Escolha do tipo de personalização na próxima etapa.</p>
+            <p className="text-xs text-gray-500 mt-3">*Frete não incluído no total acima. Escolha do tipo de personalização na próxima etapa.</p>
           </div>
 
           {/* CEP */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
-            <h3 className="font-poppins font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <MapPin size={18} className="text-primary" />
+          <div className="bg-[#2a2825] rounded-2xl border border-white/8 p-6">
+            <h3 className="font-poppins font-semibold text-white mb-4 flex items-center gap-2">
+              <MapPin size={18} className="text-[#D4AF37]" />
               Calcular Frete
             </h3>
             <div className="max-w-xs">
-              <label className="block text-sm font-medium text-gray-700 mb-1">CEP de entrega</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">CEP de entrega</label>
               <div className="relative">
                 <input
                   type="text"
@@ -256,19 +256,19 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
                   onChange={e => handleCEP(e.target.value)}
                   placeholder="00000-000"
                   maxLength={9}
-                  className={`w-full border rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary pr-9 ${errors.cep || cepError ? 'border-red-400' : 'border-gray-300'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] pr-9 placeholder:text-gray-600 ${errors.cep || cepError ? 'border-red-500' : 'border-white/15'}`}
                 />
                 {cepLoading && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    <Loader size={16} className="text-primary animate-spin" />
+                    <Loader size={16} className="text-[#D4AF37] animate-spin" />
                   </div>
                 )}
               </div>
               {(errors.cep || cepError) && (
-                <p className="text-red-500 text-xs mt-1">{cepError || errors.cep}</p>
+                <p className="text-red-400 text-xs mt-1">{cepError || errors.cep}</p>
               )}
               {d.address.city && !cepError && (
-                <p className="text-green-600 text-xs mt-1">
+                <p className="text-green-400 text-xs mt-1">
                   {d.address.city} – {d.address.state}
                 </p>
               )}
@@ -277,21 +277,21 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
 
           {/* Shipping options */}
           {(shippingLoading || shippingOptions.length > 0 || shippingError) && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
-              <h3 className="font-poppins font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Truck size={18} className="text-primary" />
+            <div className="bg-[#2a2825] rounded-2xl border border-white/8 p-6">
+              <h3 className="font-poppins font-semibold text-white mb-4 flex items-center gap-2">
+                <Truck size={18} className="text-[#D4AF37]" />
                 Opções de Frete
               </h3>
 
               {shippingLoading && (
-                <div className="flex items-center gap-3 text-gray-500 text-sm py-2">
-                  <Loader size={16} className="animate-spin text-primary" />
+                <div className="flex items-center gap-3 text-gray-400 text-sm py-2">
+                  <Loader size={16} className="animate-spin text-[#D4AF37]" />
                   Calculando frete para o seu CEP...
                 </div>
               )}
 
               {shippingError && (
-                <p className="text-red-500 text-sm">{shippingError}</p>
+                <p className="text-red-400 text-sm">{shippingError}</p>
               )}
 
               {!shippingLoading && shippingOptions.length > 0 && (
@@ -305,27 +305,27 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
                         onClick={() => selectShipping(opt)}
                         className={`w-full flex items-center justify-between rounded-xl border-2 px-5 py-4 transition-all text-left ${
                           selected
-                            ? 'border-primary bg-primary/5'
-                            : 'border-gray-200 hover:border-primary/40'
+                            ? 'border-[#D4AF37] bg-[#D4AF37]/10'
+                            : 'border-white/10 hover:border-[#D4AF37]/40 bg-[#222019]'
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${selected ? 'border-primary bg-primary' : 'border-gray-300'}`} />
+                          <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${selected ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-gray-500'}`} />
                           <div>
-                            <p className={`font-semibold text-sm ${selected ? 'text-primary' : 'text-gray-800'}`}>
+                            <p className={`font-semibold text-sm ${selected ? 'text-[#F1C40F]' : 'text-white'}`}>
                               {opt.service === 'PAC' ? 'PAC — Econômico' : 'SEDEX — Expresso'}
                             </p>
-                            <p className="text-xs text-gray-500">{opt.label}</p>
+                            <p className="text-xs text-gray-400">{opt.label}</p>
                           </div>
                         </div>
-                        <span className={`font-bold text-base ${selected ? 'text-primary' : 'text-gray-900'}`}>
+                        <span className={`font-bold text-base ${selected ? 'text-[#F1C40F]' : 'text-white'}`}>
                           R$ {opt.price.toFixed(2).replace('.', ',')}
                         </span>
                       </button>
                     );
                   })}
-                  <p className="text-xs text-gray-400 pt-1">* Prazo estimado a partir da postagem.</p>
-                  {errors.shipping && <p className="text-red-500 text-xs">{errors.shipping}</p>}
+                  <p className="text-xs text-gray-500 pt-1">* Prazo estimado a partir da postagem.</p>
+                  {errors.shipping && <p className="text-red-400 text-xs">{errors.shipping}</p>}
                 </div>
               )}
             </div>
@@ -335,7 +335,7 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
           <div className="flex gap-3">
             <button
               onClick={onBack}
-              className="flex items-center gap-2 px-6 py-3 border border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-6 py-3 border border-white/15 rounded-xl text-gray-300 font-medium hover:bg-white/5 transition-colors"
             >
               <ArrowLeft size={16} /> Voltar
             </button>

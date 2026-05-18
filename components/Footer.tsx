@@ -5,7 +5,7 @@ export const Footer: React.FC = () => {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-900 text-gray-400">
+    <footer className="bg-[#0f0e0c] text-gray-400 border-t border-white/5">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Brand */}
@@ -64,7 +64,7 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="border-t border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+        <div className="border-t border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
           <span>© {year} ImpreBrindes. Todos os direitos reservados.</span>
           <a href="/privacidade" className="hover:text-[#F1C40F] transition-colors">
             Política de Privacidade

@@ -145,42 +145,42 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
   const total = calcTotal(product, customizationType, d.quantity);
 
   return (
-    <div className="min-h-screen pt-16 bg-gray-50">
+    <div className="min-h-screen pt-16 bg-[#1a1917]">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-        <div className="flex items-center gap-2 text-sm text-gray-500 mb-8">
-          <button onClick={onBack} className="hover:text-primary transition-colors flex items-center gap-1">
+        <div className="flex items-center gap-2 text-sm text-gray-400 mb-8">
+          <button onClick={onBack} className="hover:text-[#D4AF37] transition-colors flex items-center gap-1">
             <ArrowLeft size={14} />
             Voltar
           </button>
           <span>/</span>
-          <span className="text-gray-900 font-medium">Dados do Pedido</span>
+          <span className="text-white font-medium">Seus Dados</span>
         </div>
 
         {/* Progress indicator */}
         <div className="flex items-center gap-2 mb-8">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-full bg-green-500 text-white text-xs font-bold flex items-center justify-center">✓</div>
-            <span className="text-sm text-gray-400">Quantidade e Frete</span>
+            <span className="text-sm text-gray-500">Quantidade e Frete</span>
           </div>
           <div className="flex-1 h-0.5 bg-green-500 mx-1" />
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-full bg-green-500 text-white text-xs font-bold flex items-center justify-center">✓</div>
-            <span className="text-sm text-gray-400">Arte e Personalização</span>
+            <span className="text-sm text-gray-500">Arte e Personalização</span>
           </div>
-          <div className="flex-1 h-0.5 bg-primary mx-1" />
+          <div className="flex-1 h-0.5 bg-[#D4AF37] mx-1" />
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">3</div>
-            <span className="text-sm font-semibold text-primary">Seus Dados</span>
+            <div className="w-7 h-7 rounded-full bg-[#D4AF37] text-gray-900 text-xs font-bold flex items-center justify-center">3</div>
+            <span className="text-sm font-semibold text-[#D4AF37]">Seus Dados</span>
           </div>
         </div>
 
-        <h2 className="font-poppins text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Seus Dados</h2>
-        <p className="text-gray-500 mb-8">Preencha seus dados para finalizar o pedido</p>
+        <h2 className="font-poppins text-2xl sm:text-3xl font-bold text-white mb-2">Seus Dados</h2>
+        <p className="text-gray-400 mb-8">Preencha seus dados para finalizar o pedido</p>
 
         <div className="space-y-6">
           {/* Quantity + price summary */}
           <div className={`bg-white rounded-2xl border p-6 ${serigrafiaBlocked ? 'border-amber-300' : 'border-gray-200'}`}>
-            <h3 className="font-poppins font-semibold text-gray-900 mb-4">Quantidade e Valor</h3>
+            <h3 className="font-poppins font-semibold text-white mb-4">Quantidade e Valor</h3>
 
             {serigrafiaBlocked && (
               <div className="mb-4 bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 text-sm text-amber-800">
@@ -191,7 +191,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
 
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-300 mb-1">
                   Quantidade{' '}
                   <span className="text-gray-400">
                     (mínimo {customizationType === 'serigrafia' ? '25 para serigrafia' : MIN_QTY})
@@ -215,12 +215,12 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
                     setQuantityInput(String(safe));
                     set('quantity', safe);
                   }}
-                  className={`w-full border rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary ${errors.quantity || serigrafiaBlocked ? 'border-amber-400' : 'border-gray-300'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.quantity || serigrafiaBlocked ? 'border-amber-400' : 'border-white/15'}`}
                 />
                 {errors.quantity && <p className="text-amber-600 text-xs mt-1">{errors.quantity}</p>}
               </div>
-              <div className="bg-gray-50 rounded-xl px-5 py-3 text-center min-w-[160px]">
-                <p className="text-xs text-gray-500">R$ {unitPrice.toFixed(2).replace('.', ',')} × {d.quantity} un.</p>
+              <div className="bg-[#222019] rounded-xl px-5 py-3 text-center min-w-[160px]">
+                <p className="text-xs text-gray-400">R$ {unitPrice.toFixed(2).replace('.', ',')} × {d.quantity} un.</p>
                 <p className="font-poppins text-2xl font-bold text-primary">
                   R$ {total.toFixed(2).replace('.', ',')}
                 </p>
@@ -231,39 +231,39 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
           </div>
 
           {/* Personal data */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
-            <h3 className="font-poppins font-semibold text-gray-900 mb-4">Seus Dados</h3>
+          <div className="bg-[#2a2825] rounded-2xl border border-white/8 p-6">
+            <h3 className="font-poppins font-semibold text-white mb-4">Seus Dados</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Nome completo</label>
                 <input
                   type="text"
                   value={d.name}
                   onChange={e => set('name', e.target.value)}
                   placeholder="João Silva"
-                  className={`w-full border rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary ${errors.name ? 'border-red-400' : 'border-gray-300'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.name ? 'border-red-400' : 'border-white/15'}`}
                 />
                 {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">E-mail</label>
                 <input
                   type="email"
                   value={d.email}
                   onChange={e => set('email', e.target.value)}
                   placeholder="joao@empresa.com.br"
-                  className={`w-full border rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary ${errors.email ? 'border-red-400' : 'border-gray-300'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.email ? 'border-red-400' : 'border-white/15'}`}
                 />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp / Telefone</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">WhatsApp / Telefone</label>
                 <input
                   type="tel"
                   value={d.phone}
                   onChange={e => set('phone', formatPhone(e.target.value))}
                   placeholder="(11) 99999-9999"
-                  className={`w-full border rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary ${errors.phone ? 'border-red-400' : 'border-gray-300'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.phone ? 'border-red-400' : 'border-white/15'}`}
                 />
                 {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
               </div>
@@ -271,14 +271,14 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
           </div>
 
           {/* Address */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6">
-            <h3 className="font-poppins font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-[#2a2825] rounded-2xl border border-white/8 p-6">
+            <h3 className="font-poppins font-semibold text-white mb-4 flex items-center gap-2">
               <MapPin size={18} className="text-primary" />
               Endereço de Entrega
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">CEP</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">CEP</label>
                 <div className="relative">
                   <input
                     type="text"
@@ -286,7 +286,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
                     onChange={e => handleCEP(e.target.value)}
                     placeholder="00000-000"
                     maxLength={9}
-                    className={`w-full border rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary pr-9 ${errors.cep || cepError ? 'border-red-400' : 'border-gray-300'}`}
+                    className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 pr-9 ${errors.cep || cepError ? 'border-red-400' : 'border-white/15'}`}
                   />
                   {cepLoading && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -297,67 +297,67 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
                 {(errors.cep || cepError) && <p className="text-red-500 text-xs mt-1">{cepError || errors.cep}</p>}
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Rua / Logradouro</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Rua / Logradouro</label>
                 <input
                   type="text"
                   value={d.address.street}
                   onChange={e => setAddr('street', e.target.value)}
                   placeholder="Rua das Flores"
-                  className={`w-full border rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary ${errors.street ? 'border-red-400' : 'border-gray-300'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.street ? 'border-red-400' : 'border-white/15'}`}
                 />
                 {errors.street && <p className="text-red-500 text-xs mt-1">{errors.street}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Número</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Número</label>
                 <input
                   type="text"
                   value={d.address.number}
                   onChange={e => setAddr('number', e.target.value)}
                   placeholder="123"
-                  className={`w-full border rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary ${errors.number ? 'border-red-400' : 'border-gray-300'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.number ? 'border-red-400' : 'border-white/15'}`}
                 />
                 {errors.number && <p className="text-red-500 text-xs mt-1">{errors.number}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Complemento <span className="text-gray-400">(opcional)</span></label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Complemento <span className="text-gray-400">(opcional)</span></label>
                 <input
                   type="text"
                   value={d.address.complement}
                   onChange={e => setAddr('complement', e.target.value)}
                   placeholder="Apto 42"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full border border-white/15 rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Bairro</label>
                 <input
                   type="text"
                   value={d.address.neighborhood}
                   onChange={e => setAddr('neighborhood', e.target.value)}
                   placeholder="Centro"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full border border-white/15 rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Cidade</label>
                 <input
                   type="text"
                   value={d.address.city}
                   onChange={e => setAddr('city', e.target.value)}
                   placeholder="São Paulo"
-                  className={`w-full border rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary ${errors.city ? 'border-red-400' : 'border-gray-300'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.city ? 'border-red-400' : 'border-white/15'}`}
                 />
                 {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Estado</label>
                 <input
                   type="text"
                   value={d.address.state}
                   onChange={e => setAddr('state', e.target.value)}
                   placeholder="SP"
                   maxLength={2}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary uppercase"
+                  className="w-full border border-white/15 rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 uppercase"
                 />
               </div>
             </div>
@@ -365,8 +365,8 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
 
           {/* Shipping options */}
           {(shippingLoading || shippingOptions.length > 0 || shippingError) && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
-              <h3 className="font-poppins font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <div className="bg-[#2a2825] rounded-2xl border border-white/8 p-6">
+              <h3 className="font-poppins font-semibold text-white mb-4 flex items-center gap-2">
                 <Truck size={18} className="text-primary" />
                 Opções de Frete
               </h3>
@@ -393,20 +393,20 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
                         onClick={() => selectShipping(opt)}
                         className={`w-full flex items-center justify-between rounded-xl border-2 px-5 py-4 transition-all text-left ${
                           selected
-                            ? 'border-primary bg-primary/5'
-                            : 'border-gray-200 hover:border-primary/40'
+                            ? 'border-[#D4AF37] bg-[#D4AF37]/10'
+                            : 'border-white/10 bg-[#222019] hover:border-[#D4AF37]/40'
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${selected ? 'border-primary bg-primary' : 'border-gray-300'}`} />
+                          <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${selected ? 'border-primary bg-primary' : 'border-white/15'}`} />
                           <div>
-                            <p className={`font-semibold text-sm ${selected ? 'text-primary' : 'text-gray-800'}`}>
+                            <p className={`font-semibold text-sm ${selected ? 'text-[#F1C40F]' : 'text-white'}`}>
                               {opt.service === 'PAC' ? 'PAC — Econômico' : 'SEDEX — Expresso'}
                             </p>
-                            <p className="text-xs text-gray-500">{opt.label}</p>
+                            <p className="text-xs text-gray-400">{opt.label}</p>
                           </div>
                         </div>
-                        <span className={`font-bold text-base ${selected ? 'text-primary' : 'text-gray-900'}`}>
+                        <span className={`font-bold text-base ${selected ? 'text-[#F1C40F]' : 'text-white'}`}>
                           R$ {opt.price.toFixed(2).replace('.', ',')}
                         </span>
                       </button>
@@ -423,7 +423,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customizationType
           <div className="flex gap-3">
             <button
               onClick={onBack}
-              className="flex items-center gap-2 px-6 py-3 border border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-6 py-3 border border-white/15 rounded-xl text-gray-300 font-medium hover:bg-white/5 transition-colors"
             >
               <ArrowLeft size={16} />
               Voltar
