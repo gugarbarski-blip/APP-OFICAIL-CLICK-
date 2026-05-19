@@ -13,6 +13,7 @@ import { OrderForm } from './components/OrderForm';
 import { OrderSummary } from './components/OrderSummary';
 import { AdminPanel, AdminLogin } from './components/AdminPanel';
 import { MeusPedidos } from './components/MeusPedidos';
+import { CustomerArea } from './components/CustomerArea';
 import { Testimonials } from './components/Testimonials';
 import { FAQ } from './components/FAQ';
 import { QuemSomos } from './components/QuemSomos';
@@ -49,6 +50,11 @@ const App: React.FC = () => {
   // Meus Pedidos route
   if (window.location.pathname === '/meus-pedidos') {
     return <MeusPedidos onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} />;
+  }
+
+  // Minha Conta route
+  if (window.location.pathname === '/minha-conta') {
+    return <CustomerArea onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} />;
   }
 
   // Privacy policy route
@@ -140,7 +146,11 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen">
-      <Header onCtaClick={() => startOrder(PRODUCTS['copo-475'])} onMeusPedidos={() => { window.history.pushState({}, '', '/meus-pedidos'); window.location.reload(); }} />
+      <Header
+        onCtaClick={() => startOrder(PRODUCTS['copo-475'])}
+        onMeusPedidos={() => { window.history.pushState({}, '', '/meus-pedidos'); window.location.reload(); }}
+        onMinhaContaClick={() => { window.history.pushState({}, '', '/minha-conta'); window.location.reload(); }}
+      />
       {paymentStatus && (() => {
         const b = PAYMENT_BANNERS[paymentStatus];
         const Icon = b.icon;
