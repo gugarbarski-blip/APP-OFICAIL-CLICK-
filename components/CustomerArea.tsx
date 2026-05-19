@@ -37,22 +37,22 @@ function StatusTimeline({ status, codigoRastreio }: { status: string; codigoRast
         return (
           <div key={step.key} className="flex gap-4 mb-1">
             <div className="flex flex-col items-center">
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all ${done ? 'bg-green-500 border-green-500' : 'bg-white border-gray-200'}`}>
-                <Icon size={18} className={done ? 'text-white' : 'text-gray-300'} />
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all ${done ? 'bg-[#D4AF37] border-[#D4AF37]' : 'bg-[#2a2927] border-[#444]'}`}>
+                <Icon size={18} className={done ? 'text-gray-900' : 'text-gray-600'} />
               </div>
               {idx < STEPS.length - 1 && (
-                <div className={`w-0.5 h-8 mt-1 ${done && idx < currentIdx ? 'bg-green-500' : 'bg-gray-200'}`} />
+                <div className={`w-0.5 h-8 mt-1 ${done && idx < currentIdx ? 'bg-[#D4AF37]' : 'bg-[#333]'}`} />
               )}
             </div>
             <div className="pb-6">
-              <p className={`font-semibold text-sm ${active ? 'text-green-600' : done ? 'text-gray-900' : 'text-gray-400'}`}>
+              <p className={`font-semibold text-sm ${active ? 'text-[#D4AF37]' : done ? 'text-gray-200' : 'text-gray-600'}`}>
                 {step.label}
-                {active && <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Atual</span>}
+                {active && <span className="ml-2 text-xs bg-[#D4AF37]/20 text-[#D4AF37] px-2 py-0.5 rounded-full">Atual</span>}
               </p>
               {(done || active) && <p className="text-xs text-gray-500 mt-0.5">{step.desc}</p>}
               {step.key === 'enviado' && codigoRastreio && done && (
-                <p className="text-xs mt-1 font-mono bg-gray-100 px-2 py-1 rounded inline-block">
-                  Rastreio: <span className="font-bold">{codigoRastreio}</span>
+                <p className="text-xs mt-1 font-mono bg-[#1a1916] text-gray-300 px-2 py-1 rounded inline-block border border-[#333]">
+                  Rastreio: <span className="font-bold text-[#D4AF37]">{codigoRastreio}</span>
                 </p>
               )}
             </div>
@@ -67,15 +67,15 @@ function PasswordInput({ value, onChange, placeholder }: { value: string; onChan
   const [show, setShow] = useState(false);
   return (
     <div className="relative">
-      <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+      <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
       <input
         type={show ? 'text' : 'password'}
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder ?? 'Senha'}
-        className="w-full border border-gray-300 rounded-xl pl-9 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]"
+        className="w-full bg-[#1a1916] border border-[#3a3835] text-gray-100 placeholder-gray-600 rounded-xl pl-9 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
       />
-      <button type="button" onClick={() => setShow(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+      <button type="button" onClick={() => setShow(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
         {show ? <EyeOff size={16} /> : <Eye size={16} />}
       </button>
     </div>
@@ -114,22 +114,22 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
   return (
     <form onSubmit={submit} className="space-y-4">
       <div className="relative">
-        <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
         <input
           type="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
           placeholder="seu@email.com"
           required
-          className="w-full border border-gray-300 rounded-xl pl-9 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]"
+          className="w-full bg-[#1a1916] border border-[#3a3835] text-gray-100 placeholder-gray-600 rounded-xl pl-9 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
         />
       </div>
       <PasswordInput value={senha} onChange={setSenha} placeholder="Sua senha" />
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && <p className="text-red-400 text-sm">{error}</p>}
       <button
         type="submit"
         disabled={loading}
-        className="w-full flex items-center justify-center gap-2 bg-[#0d9488] hover:bg-[#0f766e] text-white font-semibold py-3 rounded-xl text-sm transition-all disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#D4AF37] to-[#d49924] hover:from-[#d49924] hover:to-[#c28511] text-gray-900 font-bold py-3 rounded-xl text-sm transition-all disabled:opacity-50 shadow-[0_4px_15px_rgba(212,175,55,0.3)]"
       >
         <LogIn size={16} />
         {loading ? 'Entrando...' : 'Entrar'}
@@ -169,37 +169,25 @@ function RegisterForm({ onSuccess }: { onSuccess: (msg: string) => void }) {
     onSuccess('Conta criada! Verifique seu e-mail para ativar a conta e então faça login.');
   };
 
+  const inputCls = "w-full bg-[#1a1916] border border-[#3a3835] text-gray-100 placeholder-gray-600 rounded-xl pl-9 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent";
+
   return (
     <form onSubmit={submit} className="space-y-4">
       <div className="relative">
-        <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input
-          type="text"
-          value={nome}
-          onChange={e => setNome(e.target.value)}
-          placeholder="Seu nome completo"
-          required
-          className="w-full border border-gray-300 rounded-xl pl-9 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]"
-        />
+        <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+        <input type="text" value={nome} onChange={e => setNome(e.target.value)} placeholder="Seu nome completo" required className={inputCls} />
       </div>
       <div className="relative">
-        <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          placeholder="seu@email.com (mesmo usado no pedido)"
-          required
-          className="w-full border border-gray-300 rounded-xl pl-9 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0d9488]"
-        />
+        <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+        <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com (mesmo usado no pedido)" required className={inputCls} />
       </div>
       <PasswordInput value={senha} onChange={setSenha} placeholder="Crie uma senha (mín. 6 caracteres)" />
       <PasswordInput value={confirmar} onChange={setConfirmar} placeholder="Confirme a senha" />
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && <p className="text-red-400 text-sm">{error}</p>}
       <button
         type="submit"
         disabled={loading}
-        className="w-full flex items-center justify-center gap-2 bg-[#0d9488] hover:bg-[#0f766e] text-white font-semibold py-3 rounded-xl text-sm transition-all disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#D4AF37] to-[#d49924] hover:from-[#d49924] hover:to-[#c28511] text-gray-900 font-bold py-3 rounded-xl text-sm transition-all disabled:opacity-50 shadow-[0_4px_15px_rgba(212,175,55,0.3)]"
       >
         <UserPlus size={16} />
         {loading ? 'Criando conta...' : 'Criar Conta'}
@@ -239,12 +227,12 @@ function Dashboard({ session, onLogout }: { session: Session; onLogout: () => vo
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="font-poppins text-2xl font-bold text-gray-900">Olá, {nome}!</h1>
+          <h1 className="font-poppins text-2xl font-bold text-gray-100">Olá, {nome}!</h1>
           <p className="text-sm text-gray-500 mt-0.5">{session.user.email}</p>
         </div>
         <button
           onClick={onLogout}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-500 transition-colors border border-gray-200 hover:border-red-200 px-3 py-2 rounded-lg"
+          className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-red-400 transition-colors border border-[#3a3835] hover:border-red-500/40 px-3 py-2 rounded-lg"
         >
           <LogOut size={14} />
           Sair
@@ -252,44 +240,42 @@ function Dashboard({ session, onLogout }: { session: Session; onLogout: () => vo
       </div>
 
       <div className="flex items-center gap-3 mb-6">
-        <Package size={22} className="text-[#0d9488]" />
-        <h2 className="font-poppins text-lg font-bold text-gray-900">Meus Pedidos</h2>
+        <Package size={22} className="text-[#D4AF37]" />
+        <h2 className="font-poppins text-lg font-bold text-gray-100">Meus Pedidos</h2>
       </div>
 
       {loading && (
-        <div className="text-center py-16 text-gray-400">
-          <div className="w-8 h-8 border-2 border-[#0d9488] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <div className="text-center py-16 text-gray-500">
+          <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <p className="text-sm">Carregando pedidos...</p>
         </div>
       )}
 
-      {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+      {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
 
       {!loading && pedidos !== null && pedidos.length === 0 && (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-600">
           <Package size={40} className="mx-auto mb-3 opacity-30" />
-          <p className="font-medium">Nenhum pedido encontrado.</p>
-          <p className="text-sm mt-1">
-            Certifique-se de usar o mesmo e-mail informado no pedido.
-          </p>
+          <p className="font-medium text-gray-400">Nenhum pedido encontrado.</p>
+          <p className="text-sm mt-1">Certifique-se de usar o mesmo e-mail informado no pedido.</p>
         </div>
       )}
 
       {!loading && pedidos && pedidos.length > 0 && (
         <div className="space-y-6">
           {pedidos.map(p => (
-            <div key={p.id} className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+            <div key={p.id} className="bg-[#1e1d1b] rounded-2xl border border-[#3a3835] p-6 shadow-lg">
               <div className="flex justify-between items-start mb-1">
                 <div>
-                  <p className="text-xs text-gray-400 font-mono mb-1">#{p.id.slice(0, 8).toUpperCase()}</p>
-                  <p className="font-semibold text-gray-900">{p.produto}</p>
+                  <p className="text-xs text-gray-600 font-mono mb-1">#{p.id.slice(0, 8).toUpperCase()}</p>
+                  <p className="font-semibold text-gray-100">{p.produto}</p>
                   <p className="text-sm text-gray-500">{p.quantidade} unidades · {p.tipo_personalizacao}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-poppins font-bold text-lg text-[#0d9488]">
+                  <p className="font-poppins font-bold text-lg text-[#D4AF37]">
                     R$ {p.valor_total?.toFixed(2).replace('.', ',')}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-600">
                     {new Date(p.created_at).toLocaleDateString('pt-BR')}
                   </p>
                 </div>
@@ -334,16 +320,16 @@ export const CustomerArea: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-16 bg-gray-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#0d9488] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#14130f] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-16 bg-gray-50">
+    <div className="min-h-screen pt-16 bg-[#14130f]">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
-        <button onClick={onBack} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 mb-8 transition-colors">
+        <button onClick={onBack} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-300 mb-8 transition-colors">
           <ArrowLeft size={14} /> Voltar
         </button>
 
@@ -352,30 +338,30 @@ export const CustomerArea: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         ) : (
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <User size={28} className="text-[#0d9488]" />
-              <h1 className="font-poppins text-2xl font-bold text-gray-900">Minha Conta</h1>
+              <User size={28} className="text-[#D4AF37]" />
+              <h1 className="font-poppins text-2xl font-bold text-gray-100">Minha Conta</h1>
             </div>
             <p className="text-gray-500 mb-8">
               Acesse sua conta para acompanhar seus pedidos com segurança.
             </p>
 
             {successMsg && (
-              <div className="bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-3 text-sm mb-6">
+              <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] rounded-xl px-4 py-3 text-sm mb-6">
                 {successMsg}
               </div>
             )}
 
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-              <div className="flex border-b border-gray-100 mb-6">
+            <div className="bg-[#1a1916] rounded-2xl border border-[#3a3835] shadow-xl p-6">
+              <div className="flex border-b border-[#2a2927] mb-6">
                 <button
                   onClick={() => { setTab('login'); setSuccessMsg(''); }}
-                  className={`flex-1 pb-3 text-sm font-semibold transition-colors ${tab === 'login' ? 'text-[#0d9488] border-b-2 border-[#0d9488]' : 'text-gray-400 hover:text-gray-600'}`}
+                  className={`flex-1 pb-3 text-sm font-semibold transition-colors ${tab === 'login' ? 'text-[#D4AF37] border-b-2 border-[#D4AF37]' : 'text-gray-600 hover:text-gray-400'}`}
                 >
                   Entrar
                 </button>
                 <button
                   onClick={() => { setTab('register'); setSuccessMsg(''); }}
-                  className={`flex-1 pb-3 text-sm font-semibold transition-colors ${tab === 'register' ? 'text-[#0d9488] border-b-2 border-[#0d9488]' : 'text-gray-400 hover:text-gray-600'}`}
+                  className={`flex-1 pb-3 text-sm font-semibold transition-colors ${tab === 'register' ? 'text-[#D4AF37] border-b-2 border-[#D4AF37]' : 'text-gray-600 hover:text-gray-400'}`}
                 >
                   Criar Conta
                 </button>
@@ -389,17 +375,17 @@ export const CustomerArea: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             </div>
 
             {tab === 'login' && (
-              <p className="text-center text-sm text-gray-500 mt-4">
+              <p className="text-center text-sm text-gray-600 mt-4">
                 Não tem conta?{' '}
-                <button onClick={() => setTab('register')} className="text-[#0d9488] font-semibold hover:underline">
+                <button onClick={() => setTab('register')} className="text-[#D4AF37] font-semibold hover:underline">
                   Cadastre-se gratuitamente
                 </button>
               </p>
             )}
             {tab === 'register' && (
-              <p className="text-center text-sm text-gray-500 mt-4">
+              <p className="text-center text-sm text-gray-600 mt-4">
                 Já tem conta?{' '}
-                <button onClick={() => setTab('login')} className="text-[#0d9488] font-semibold hover:underline">
+                <button onClick={() => setTab('login')} className="text-[#D4AF37] font-semibold hover:underline">
                   Faça login
                 </button>
               </p>
