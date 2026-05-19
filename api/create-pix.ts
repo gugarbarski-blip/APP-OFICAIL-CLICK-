@@ -1,6 +1,17 @@
 import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { createClient } from '@supabase/supabase-js';
 
+const PRICES: Record<string, Record<string, number>> = {
+  'copo-475': { serigrafia: 23.00, laser: 28.00 },
+  'cuia-320': { serigrafia: 23.00, laser: 28.00 },
+};
+
+function getServerPrice(productId: string, customizationType: string): number | null {
+  const product = PRICES[productId];
+  if (!product) return null;
+  return product[customizationType] ?? product['serigrafia'] ?? null;
+}
+
 function getDb() {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
@@ -14,13 +25,17 @@ export default async function handler(req: any, res: any) {
   const accessToken = process.env.MP_ACCESS_TOKEN;
   if (!accessToken) return res.status(500).json({ error: 'MP_ACCESS_TOKEN not configured' });
 
-  const { productName, quantity, unitPrice, buyerName, buyerEmail, address, customizationType, serigrafiaColor } = req.body || {};
+  const { productId, productName, quantity, buyerName, buyerEmail, address, customizationType, serigrafiaColor } = req.body || {};
 
-  if (!productName || !quantity || !unitPrice || !buyerEmail) {
+  if (!productId || !productName || !quantity || !buyerEmail) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  const total = Number(unitPrice) * Number(quantity);
+  const unitPrice = getServerPrice(productId, customizationType || 'serigrafia');
+  if (!unitPrice) return res.status(400).json({ error: 'Produto inválido' });
+
+  const qty = Math.max(1, Math.floor(Number(quantity)));
+  const total = unitPrice * qty;
 
   let pedidoId: string | undefined;
   try {
@@ -29,7 +44,7 @@ export default async function handler(req: any, res: any) {
       nome: buyerName || '',
       email: buyerEmail,
       produto: productName,
-      quantidade: Number(quantity),
+      quantidade: qty,
       valor_total: total,
       endereco: address || '',
       tipo_personalizacao: customizationType || '',
@@ -54,15 +69,11 @@ export default async function handler(req: any, res: any) {
         payment_method_id: 'pix',
         transaction_amount: total,
         description: productName,
-        payer: {
-          email: buyerEmail,
-          first_name: firstName,
-          last_name: lastName,
-        },
+        payer: { email: buyerEmail, first_name: firstName, last_name: lastName },
         metadata: {
           pedido_id: pedidoId,
           product_name: productName,
-          quantity: String(quantity),
+          quantity: String(qty),
           buyer_name: buyerName,
           buyer_email: buyerEmail,
           address: address || '',
@@ -74,7 +85,6 @@ export default async function handler(req: any, res: any) {
     });
 
     const txData = (result as any).point_of_interaction?.transaction_data;
-
     return res.status(200).json({
       paymentId: result.id,
       qrCode: txData?.qr_code,
@@ -83,6 +93,6 @@ export default async function handler(req: any, res: any) {
     });
   } catch (err: any) {
     console.error('MP PIX error:', err);
-    return res.status(500).json({ error: 'Falha ao criar PIX', detail: err?.message });
+    return res.status(500).json({ error: 'Falha ao criar PIX' });
   }
 }

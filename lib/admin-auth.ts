@@ -1,14 +1,22 @@
-import { createHmac } from 'crypto';
+import { createHmac, timingSafeEqual } from 'crypto';
 
-const TOKEN_MAX_AGE_MS = 12 * 60 * 60 * 1000; // 12 horas
+const TOKEN_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 
-function getSecret(): string | undefined {
-  return process.env.ADMIN_SECRET ?? process.env.SUPABASE_SERVICE_KEY;
+function getSecret(): string {
+  const secret = process.env.ADMIN_SECRET;
+  if (!secret) throw new Error('ADMIN_SECRET não configurado');
+  return secret;
 }
 
 export function validateAdminToken(token: string | undefined): boolean {
-  const secret = getSecret();
-  if (!secret || !token) return false;
+  let secret: string;
+  try {
+    secret = getSecret();
+  } catch {
+    console.error('CRITICAL: ADMIN_SECRET não configurado — acesso admin bloqueado');
+    return false;
+  }
+  if (!token) return false;
 
   const parts = token.split('.');
   if (parts.length !== 2) return false;
@@ -18,7 +26,11 @@ export function validateAdminToken(token: string | undefined): boolean {
   if (isNaN(age) || age < 0 || age > TOKEN_MAX_AGE_MS) return false;
 
   const expected = createHmac('sha256', secret).update(ts).digest('hex');
-  return hmac === expected;
+  try {
+    return timingSafeEqual(Buffer.from(hmac), Buffer.from(expected));
+  } catch {
+    return false;
+  }
 }
 
 export function getTokenFromRequest(req: any): string | undefined {

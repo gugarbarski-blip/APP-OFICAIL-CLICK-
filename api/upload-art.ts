@@ -1,5 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
+const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf']);
+const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+
 function getDb() {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
@@ -7,29 +10,47 @@ function getDb() {
   return createClient(url, key);
 }
 
+function detectMimeFromBuffer(buf: Buffer): string | null {
+  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'image/jpeg';
+  if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) return 'image/png';
+  if (buf[0] === 0x47 && buf[1] === 0x49 && buf[2] === 0x46) return 'image/gif';
+  if (buf[0] === 0x52 && buf[1] === 0x49 && buf[2] === 0x46 && buf[3] === 0x46) return 'image/webp';
+  if (buf[0] === 0x25 && buf[1] === 0x50 && buf[2] === 0x44 && buf[3] === 0x46) return 'application/pdf';
+  return null;
+}
+
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { fileBase64, fileName, mimeType } = req.body || {};
+  const { fileBase64, fileName } = req.body || {};
   if (!fileBase64 || !fileName) return res.status(400).json({ error: 'Missing file data' });
 
   try {
-    const db = getDb();
     const buffer = Buffer.from(fileBase64, 'base64');
-    const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const uniqueName = `${Date.now()}-${safeName}`;
+
+    if (buffer.length > MAX_SIZE_BYTES) {
+      return res.status(400).json({ error: 'Arquivo muito grande. Máximo 10MB.' });
+    }
+
+    const detectedMime = detectMimeFromBuffer(buffer);
+    if (!detectedMime || !ALLOWED_MIME_TYPES.has(detectedMime)) {
+      return res.status(400).json({ error: 'Tipo de arquivo não permitido. Use JPG, PNG, PDF ou WebP.' });
+    }
+
+    const db = getDb();
+    const ext = detectedMime.split('/')[1].replace('jpeg', 'jpg');
+    const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
     const { error } = await db.storage
       .from('artes')
-      .upload(uniqueName, buffer, { contentType: mimeType || 'application/octet-stream' });
+      .upload(uniqueName, buffer, { contentType: detectedMime });
 
     if (error) throw error;
 
     const { data: { publicUrl } } = db.storage.from('artes').getPublicUrl(uniqueName);
-
     return res.status(200).json({ url: publicUrl });
   } catch (err: any) {
     console.error('Upload error:', err);
-    return res.status(500).json({ error: 'Falha ao fazer upload', detail: err?.message });
+    return res.status(500).json({ error: 'Falha ao fazer upload' });
   }
 }

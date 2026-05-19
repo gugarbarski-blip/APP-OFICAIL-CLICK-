@@ -34,9 +34,9 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
   const total = subtotal + shippingPrice;
 
   const buildBody = (artUrl?: string | null) => ({
+    productId: product.id,
     productName: `${product.name} — ${custOption.label}`,
     quantity: formData.quantity,
-    unitPrice,
     buyerName: formData.name,
     buyerEmail: formData.email,
     address: `${formData.address.street}, ${formData.address.number}${formData.address.complement ? `, ${formData.address.complement}` : ''} — ${formData.address.neighborhood}, ${formData.address.city}/${formData.address.state} CEP: ${formData.address.cep}`,

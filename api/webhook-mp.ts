@@ -5,7 +5,10 @@ import { createHmac } from 'crypto';
 
 function verifyMpSignature(req: any): boolean {
   const secret = process.env.MP_WEBHOOK_SECRET;
-  if (!secret) return true; // se não configurado, não bloqueia (avisa no log)
+  if (!secret) {
+    console.error('CRITICAL: MP_WEBHOOK_SECRET não configurado — webhook rejeitado');
+    return false;
+  }
 
   const xSignature = req.headers['x-signature'] as string | undefined;
   const xRequestId = req.headers['x-request-id'] as string | undefined;
