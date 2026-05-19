@@ -9,8 +9,15 @@ interface ArtPreviewCanvasProps {
 
 const W = 300;
 const H = 420;
-// Print area derived from physical measurements: 12cm×6cm on a 17.1cm×9.1cm cup
-const PRINT = { x: 59, y: 71, w: 136, h: 272 };
+
+// Print areas derived from physical measurements per product
+// Copo 475ml: 12cm×6cm gravação / 17.1cm×9.1cm copo
+// Cuia 320ml:  4cm×5cm gravação / 11.7cm×8.7cm copo
+const PRINT_AREAS: Record<string, { x: number; y: number; w: number; h: number }> = {
+  '/CopoPreview475.webp': { x: 59,  y: 71,  w: 136, h: 272 },
+  '/CopoCuia.webp':       { x: 63,  y: 144, w: 153, h: 127 },
+};
+const PRINT_DEFAULT = { x: 59, y: 71, w: 136, h: 272 };
 
 function hexToRgb(hex: string): [number, number, number] {
   const n = parseInt(hex.replace('#', ''), 16);
@@ -53,6 +60,8 @@ export const ArtPreviewCanvas: React.FC<ArtPreviewCanvasProps> = ({
 
     const cupImage = new Image();
     cupImage.src = cupImageUrl;
+
+    const PRINT = PRINT_AREAS[cupImageUrl] ?? PRINT_DEFAULT;
 
     const draw = () => {
       ctx.clearRect(0, 0, W, H);
