@@ -64,8 +64,11 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.type !== 'application/pdf') {
-      setPdfError('Apenas arquivos PDF são aceitos.');
+    const isImage = file.type.startsWith('image/');
+    const isPdf = file.type === 'application/pdf';
+
+    if (!isImage && !isPdf) {
+      setPdfError('Formato não aceito. Use PDF, JPG, PNG ou WebP.');
       return;
     }
     if (file.size > 20 * 1024 * 1024) {
@@ -78,10 +81,15 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
 
     try {
       if (value.artPreviewUrl) URL.revokeObjectURL(value.artPreviewUrl);
-      const previewUrl = await renderPdfToUrl(file);
+      let previewUrl: string;
+      if (isPdf) {
+        previewUrl = await renderPdfToUrl(file);
+      } else {
+        previewUrl = URL.createObjectURL(file);
+      }
       onChange({ ...value, artFile: file, artPreviewUrl: previewUrl });
     } catch {
-      setPdfError('Não foi possível ler o PDF. Verifique se o arquivo não está corrompido.');
+      setPdfError('Não foi possível processar o arquivo. Tente novamente.');
     } finally {
       setPdfLoading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -209,7 +217,7 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
             <div>
               <label className="block font-semibold text-white mb-1">Sua Arte / Logo</label>
               <p className="text-gray-400 text-sm mb-3">
-                Formato aceito: <strong className="text-gray-200">PDF</strong> (máx. 20 MB) — envie o arquivo com fundo transparente ou branco
+                Formatos aceitos: <strong className="text-gray-200">PDF, JPG, PNG, WebP</strong> (máx. 20 MB) — fundo transparente ou branco
               </p>
 
               {!value.artFile ? (
@@ -226,9 +234,9 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
                   </div>
                   <div className="text-center">
                     <p className="font-medium text-gray-300">
-                      {pdfLoading ? 'Processando PDF…' : 'Clique para fazer upload do PDF'}
+                      {pdfLoading ? 'Processando arquivo…' : 'Clique para fazer upload'}
                     </p>
-                    <p className="text-gray-500 text-sm mt-1">ou arraste o arquivo aqui</p>
+                    <p className="text-gray-500 text-sm mt-1">PDF, JPG, PNG ou WebP</p>
                   </div>
                 </button>
               ) : (
@@ -238,7 +246,7 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-white text-sm truncate">{value.artFile.name}</p>
-                    <p className="text-gray-400 text-xs">{(value.artFile.size / 1024).toFixed(0)} KB · PDF</p>
+                    <p className="text-gray-400 text-xs">{(value.artFile.size / 1024).toFixed(0)} KB · {value.artFile.type === 'application/pdf' ? 'PDF' : value.artFile.type.split('/')[1].toUpperCase()}</p>
                   </div>
                   <button onClick={handleRemoveArt} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors">
                     <X size={18} />
@@ -255,7 +263,7 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="application/pdf,.pdf"
+                accept="application/pdf,.pdf,image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
                 className="hidden"
                 onChange={handleFileChange}
               />

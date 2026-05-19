@@ -110,10 +110,8 @@ export const ArtPreviewCanvas: React.FC<ArtPreviewCanvasProps> = ({
         const dy = PRINT.y + (PRINT.h - dh) / 2;
 
         if (customizationType === 'serigrafia') {
-          // Convert all art pixels to the chosen ink color
-          const colored = applySerigrafiaColor(art, serigrafiaColorHex);
           ctx.globalAlpha = 0.92;
-          ctx.drawImage(colored, dx, dy, dw, dh);
+          ctx.drawImage(art, dx, dy, dw, dh);
         } else {
           // Laser: draw as-is (engraved look, slightly transparent)
           ctx.globalAlpha = 0.82;
