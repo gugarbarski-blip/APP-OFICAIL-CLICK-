@@ -9,7 +9,8 @@ interface ArtPreviewCanvasProps {
 
 const W = 300;
 const H = 420;
-const PRINT = { x: 78, y: 130, w: 144, h: 160 };
+// Print area derived from physical measurements: 12cm×6cm on a 17.1cm×9.1cm cup
+const PRINT = { x: 59, y: 71, w: 136, h: 272 };
 
 function hexToRgb(hex: string): [number, number, number] {
   const n = parseInt(hex.replace('#', ''), 16);
