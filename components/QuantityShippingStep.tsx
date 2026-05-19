@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, MapPin, Loader, Truck, Zap, Printer } from 'lucide-react';
+import { ArrowLeft, ArrowRight, MapPin, Loader, Truck, Zap, Printer, ChevronDown } from 'lucide-react';
 import {
   OrderFormData,
   Address,
@@ -35,6 +35,7 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
   const [shippingLoading, setShippingLoading] = useState(false);
   const [shippingError, setShippingError] = useState('');
+  const [showAllShipping, setShowAllShipping] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const isFirstRender = React.useRef(true);
@@ -294,40 +295,71 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
                 <p className="text-red-400 text-sm">{shippingError}</p>
               )}
 
-              {!shippingLoading && shippingOptions.length > 0 && (
-                <div className="space-y-3">
-                  {shippingOptions.map(opt => {
-                    const selected = d.shipping?.service === opt.service;
-                    return (
-                      <button
-                        key={opt.service}
-                        type="button"
-                        onClick={() => selectShipping(opt)}
-                        className={`w-full flex items-center justify-between rounded-xl border-2 px-5 py-4 transition-all text-left ${
-                          selected
-                            ? 'border-[#D4AF37] bg-[#D4AF37]/10'
-                            : 'border-white/10 hover:border-[#D4AF37]/40 bg-[#222019]'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${selected ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-gray-500'}`} />
-                          <div>
-                            <p className={`font-semibold text-sm ${selected ? 'text-[#F1C40F]' : 'text-white'}`}>
-                              {opt.label.split(' — ')[0]}
-                            </p>
-                            <p className="text-xs text-gray-400">{opt.label.split(' — ').slice(1).join(' — ')}</p>
+              {!shippingLoading && shippingOptions.length > 0 && (() => {
+                const fastest = shippingOptions.reduce((a, b) => a.deadlineDays < b.deadlineDays ? a : b);
+                const top3 = shippingOptions.slice(0, 3);
+                const fastestInTop3 = top3.some(o => o.service === fastest.service);
+                const initialVisible = fastestInTop3
+                  ? top3
+                  : [...top3, fastest];
+                const remaining = shippingOptions.filter(o => !initialVisible.some(v => v.service === o.service));
+                const toShow = showAllShipping ? shippingOptions : initialVisible;
+
+                return (
+                  <div className="space-y-3">
+                    {toShow.map(opt => {
+                      const selected = d.shipping?.service === opt.service;
+                      const isFastest = opt.service === fastest.service;
+                      return (
+                        <button
+                          key={opt.service}
+                          type="button"
+                          onClick={() => selectShipping(opt)}
+                          className={`w-full flex items-center justify-between rounded-xl border-2 px-5 py-4 transition-all text-left ${
+                            selected
+                              ? 'border-[#D4AF37] bg-[#D4AF37]/10'
+                              : 'border-white/10 hover:border-[#D4AF37]/40 bg-[#222019]'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${selected ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-gray-500'}`} />
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className={`font-semibold text-sm ${selected ? 'text-[#F1C40F]' : 'text-white'}`}>
+                                  {opt.label.split(' — ')[0]}
+                                </p>
+                                {isFastest && (
+                                  <span className="text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded px-1.5 py-0.5">
+                                    Mais rápida
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-400">{opt.label.split(' — ').slice(1).join(' — ')}</p>
+                            </div>
                           </div>
-                        </div>
-                        <span className={`font-bold text-base ${selected ? 'text-[#F1C40F]' : 'text-white'}`}>
-                          R$ {opt.price.toFixed(2).replace('.', ',')}
-                        </span>
+                          <span className={`font-bold text-base ${selected ? 'text-[#F1C40F]' : 'text-white'}`}>
+                            R$ {opt.price.toFixed(2).replace('.', ',')}
+                          </span>
+                        </button>
+                      );
+                    })}
+
+                    {!showAllShipping && remaining.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setShowAllShipping(true)}
+                        className="w-full flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-[#D4AF37] border border-white/10 hover:border-[#D4AF37]/30 rounded-xl py-3 transition-all"
+                      >
+                        <ChevronDown size={15} />
+                        Ver mais {remaining.length} {remaining.length === 1 ? 'opção' : 'opções'} de frete
                       </button>
-                    );
-                  })}
-                  <p className="text-xs text-gray-500 pt-1">* Prazo estimado a partir da postagem.</p>
-                  {errors.shipping && <p className="text-red-400 text-xs">{errors.shipping}</p>}
-                </div>
-              )}
+                    )}
+
+                    <p className="text-xs text-gray-500 pt-1">* Prazo estimado a partir da postagem.</p>
+                    {errors.shipping && <p className="text-red-400 text-xs">{errors.shipping}</p>}
+                  </div>
+                );
+              })()}
             </div>
           )}
 
