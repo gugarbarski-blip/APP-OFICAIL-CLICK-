@@ -1,19 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface HeaderProps {
   onCtaClick: () => void;
   onMeusPedidos: () => void;
+  onMinhaContaClick: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onCtaClick, onMeusPedidos }) => {
+export const Header: React.FC<HeaderProps> = ({ onCtaClick, onMeusPedidos, onMinhaContaClick }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setLoggedIn(!!session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => setLoggedIn(!!session));
+    return () => subscription.unsubscribe();
   }, []);
 
   const navLinks = [
@@ -49,10 +58,11 @@ export const Header: React.FC<HeaderProps> = ({ onCtaClick, onMeusPedidos }) => 
             </a>
           ))}
           <button
-            onClick={onMeusPedidos}
-            className="text-sm font-semibold text-[#D4AF37] hover:text-[#F1C40F] transition-colors"
+            onClick={onMinhaContaClick}
+            className="flex items-center gap-1.5 text-sm font-semibold text-[#D4AF37] hover:text-[#F1C40F] transition-colors"
           >
-            Meus Pedidos
+            <User size={15} />
+            {loggedIn ? 'Minha Conta' : 'Entrar'}
           </button>
         </nav>
 
@@ -90,10 +100,11 @@ export const Header: React.FC<HeaderProps> = ({ onCtaClick, onMeusPedidos }) => 
               </a>
             ))}
             <button
-              onClick={() => { setMenuOpen(false); onMeusPedidos(); }}
-              className="text-sm font-semibold text-[#D4AF37] py-2 hover:text-[#F1C40F] transition-colors text-left"
+              onClick={() => { setMenuOpen(false); onMinhaContaClick(); }}
+              className="flex items-center gap-1.5 text-sm font-semibold text-[#D4AF37] py-2 hover:text-[#F1C40F] transition-colors text-left"
             >
-              Meus Pedidos
+              <User size={15} />
+              {loggedIn ? 'Minha Conta' : 'Entrar'}
             </button>
             <button
               onClick={() => { setMenuOpen(false); onCtaClick(); }}
