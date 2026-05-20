@@ -167,10 +167,10 @@ export default async function handler(req: any, res: any) {
     const meta = mp.metadata || {};
     const db = getDb();
 
-    const emailTo = mp.payer?.email || meta.buyer_email || '';
-    const nome = mp.payer?.first_name
+    const emailTo = meta.buyer_email || mp.payer?.email || '';
+    const nome = meta.buyer_name || (mp.payer?.first_name
       ? `${mp.payer.first_name} ${mp.payer.last_name || ''}`.trim()
-      : meta.buyer_name || '';
+      : '');
 
     if (meta.pedido_id) {
       await db.from('pedidos').update({
@@ -189,6 +189,7 @@ export default async function handler(req: any, res: any) {
         endereco: meta.address || '',
         tipo_personalizacao: meta.customization_type || '',
         cor_serigrafia: meta.serigrafia_color || '',
+        arte_url: meta.art_url || null,
         created_at: new Date().toISOString(),
       });
     }
