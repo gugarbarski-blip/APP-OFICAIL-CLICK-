@@ -18,6 +18,7 @@ import { Testimonials } from './components/Testimonials';
 import { FAQ } from './components/FAQ';
 import { QuemSomos } from './components/QuemSomos';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
+import { PosCompra } from './components/PosCompra';
 
 const makeEmptyOrder = (product: ProductDef): OrderFormData => ({
   name: '',
@@ -55,6 +56,22 @@ const App: React.FC = () => {
   // Minha Conta route
   if (window.location.pathname === '/minha-conta') {
     return <CustomerArea onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} />;
+  }
+
+  // Pos-compra route
+  if (window.location.pathname === '/pedido-confirmado') {
+    const p = new URLSearchParams(window.location.search);
+    return (
+      <PosCompra
+        nome={p.get('nome') || ''}
+        email={p.get('email') || ''}
+        produto={p.get('produto') || ''}
+        personalizacao={p.get('personalizacao') || ''}
+        quantidade={p.get('quantidade') || ''}
+        valor={p.get('valor') || ''}
+        frete={p.get('frete') || ''}
+      />
+    );
   }
 
   // Privacy policy route

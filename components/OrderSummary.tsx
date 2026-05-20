@@ -123,7 +123,16 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
         if (status === 'approved') {
           setPixStatus('approved');
           clearInterval(pollRef.current!);
-          setTimeout(() => { window.location.href = '/?pagamento=sucesso'; }, 2000);
+          const params = new URLSearchParams({
+            nome: formData.name,
+            email: formData.email,
+            produto: `${product.name} — ${custOption.label}`,
+            personalizacao: custOption.label,
+            quantidade: String(formData.quantity),
+            valor: String(total.toFixed(2)),
+            frete: formData.shipping?.label || '',
+          });
+          setTimeout(() => { window.location.href = `/pedido-confirmado?${params}`; }, 2000);
         }
       } catch {}
     }, 5000);
