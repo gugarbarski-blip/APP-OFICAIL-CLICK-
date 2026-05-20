@@ -15,6 +15,8 @@ interface Pedido {
   status: string;
   nome: string;
   email: string;
+  telefone?: string;
+  cpf_cnpj?: string;
   produto: string;
   quantidade: number;
   valor_total: number;
@@ -160,6 +162,8 @@ export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ 
                     </div>
                     <p className="font-semibold text-gray-900">{p.nome}</p>
                     <p className="text-sm text-gray-500">{p.email}</p>
+                    {p.telefone && <p className="text-sm text-gray-500">{p.telefone}</p>}
+                    {p.cpf_cnpj && <p className="text-xs text-gray-400">CPF/CNPJ: {p.cpf_cnpj}</p>}
                   </div>
                   <div className="text-right">
                     <p className="font-poppins text-xl font-bold text-primary">R$ {p.valor_total?.toFixed(2).replace('.', ',')}</p>
@@ -171,7 +175,7 @@ export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ 
                   <div><span className="text-gray-400">Produto:</span> {p.produto}</div>
                   <div><span className="text-gray-400">Quantidade:</span> {p.quantidade} unid.</div>
                   <div><span className="text-gray-400">Personalização:</span> {p.tipo_personalizacao} {p.cor_serigrafia ? `— ${p.cor_serigrafia}` : ''}</div>
-                  <div><span className="text-gray-400">Endereço:</span> {p.endereco}</div>
+                  <div className="sm:col-span-2"><span className="text-gray-400">Endereço:</span> {p.endereco}</div>
                   {p.codigo_rastreio && <div><span className="text-gray-400">Rastreio:</span> <span className="font-mono font-semibold">{p.codigo_rastreio}</span></div>}
                   {p.arte_url && (
                     <div className="sm:col-span-2">

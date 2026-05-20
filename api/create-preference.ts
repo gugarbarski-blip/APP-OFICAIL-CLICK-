@@ -20,7 +20,7 @@ export default async function handler(req: any, res: any) {
   if (!accessToken) return res.status(500).json({ error: 'MP_ACCESS_TOKEN not configured' });
 
   const body = req.body || {};
-  const { productId, productName, quantity, buyerName, buyerEmail, address, customizationType, serigrafiaColor, artUrl } = body;
+  const { productId, productName, quantity, buyerName, buyerEmail, buyerPhone, buyerCpfCnpj, address, customizationType, serigrafiaColor, artUrl } = body;
 
   if (!productId || !productName || !quantity || !buyerEmail) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -42,7 +42,7 @@ export default async function handler(req: any, res: any) {
       body: {
         items: [{ id: productId, title: productName, quantity: qty, unit_price: unitPrice, currency_id: 'BRL' }],
         payer: { name: buyerName, email: buyerEmail },
-        metadata: { product_name: productName, quantity: String(qty), buyer_name: buyerName, buyer_email: buyerEmail, address: address || '', customization_type: customizationType || '', serigrafia_color: serigrafiaColor || '', art_url: artUrl || '' },
+        metadata: { product_name: productName, quantity: String(qty), buyer_name: buyerName, buyer_email: buyerEmail, buyer_phone: buyerPhone || '', buyer_cpf_cnpj: buyerCpfCnpj || '', address: address || '', customization_type: customizationType || '', serigrafia_color: serigrafiaColor || '', art_url: artUrl || '' },
         notification_url: 'https://imprebrindes.clickimpresso.com.br/api/webhook-mp',
         back_urls: {
           success: 'https://imprebrindes.clickimpresso.com.br/pedido-confirmado',

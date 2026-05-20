@@ -183,6 +183,8 @@ export default async function handler(req: any, res: any) {
         status: 'pago',
         nome,
         email: emailTo,
+        telefone: meta.buyer_phone || '',
+        cpf_cnpj: meta.buyer_cpf_cnpj || '',
         produto: meta.product_name || '',
         quantidade: Number(meta.quantity) || 0,
         valor_total: mp.transaction_amount,

@@ -39,6 +39,8 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
     quantity: formData.quantity,
     buyerName: formData.name,
     buyerEmail: formData.email,
+    buyerPhone: formData.phone,
+    buyerCpfCnpj: formData.cpfCnpj,
     address: `${formData.address.street}, ${formData.address.number}${formData.address.complement ? `, ${formData.address.complement}` : ''} — ${formData.address.neighborhood}, ${formData.address.city}/${formData.address.state} CEP: ${formData.address.cep}`,
     customizationType: customization.type,
     serigrafiaColor: customization.type === 'serigrafia' ? customization.serigrafiaColor : '',
