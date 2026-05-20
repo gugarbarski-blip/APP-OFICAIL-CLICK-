@@ -30,10 +30,21 @@ function authHeaders(token: string) {
   return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 }
 
+const FILTER_TABS = [
+  { key: 'todos', label: 'Todos' },
+  { key: 'pago', label: 'Pago' },
+  { key: 'producao', label: 'Produção' },
+  { key: 'enviado', label: 'Enviado' },
+  { key: 'entregue', label: 'Entregue' },
+  { key: 'pendente', label: 'Pendente' },
+  { key: 'cancelado', label: 'Cancelado' },
+];
+
 export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ token, onLogout }) => {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('pago');
 
   const load = async () => {
     setLoading(true);
@@ -93,13 +104,37 @@ export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ 
           ))}
         </div>
 
+        {/* Filter tabs */}
+        <div className="flex flex-wrap gap-2 mb-5">
+          {FILTER_TABS.map(tab => {
+            const count = tab.key === 'todos' ? pedidos.length : pedidos.filter(p => p.status === tab.key).length;
+            const isActive = statusFilter === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setStatusFilter(tab.key)}
+                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${
+                  isActive
+                    ? 'bg-gray-900 text-white border-gray-900'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
+                }`}
+              >
+                {tab.label}
+                <span className={`text-xs px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
         {loading ? (
           <div className="text-center py-20 text-gray-400">Carregando pedidos...</div>
-        ) : pedidos.length === 0 ? (
-          <div className="text-center py-20 text-gray-400">Nenhum pedido ainda.</div>
+        ) : pedidos.filter(p => statusFilter === 'todos' || p.status === statusFilter).length === 0 ? (
+          <div className="text-center py-20 text-gray-400">Nenhum pedido com status "{FILTER_TABS.find(t => t.key === statusFilter)?.label}".</div>
         ) : (
           <div className="space-y-4">
-            {pedidos.map(p => (
+            {pedidos.filter(p => statusFilter === 'todos' || p.status === statusFilter).map(p => (
               <div key={p.id} className="bg-white rounded-2xl border border-gray-200 p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
                   <div>
