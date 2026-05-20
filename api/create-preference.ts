@@ -71,11 +71,11 @@ export default async function handler(req: any, res: any) {
         items: [{ id: productId, title: productName, quantity: qty, unit_price: unitPrice, currency_id: 'BRL' }],
         payer: { name: buyerName, email: buyerEmail },
         metadata: { pedido_id: pedidoId, product_name: productName, quantity: String(qty), buyer_name: buyerName, buyer_email: buyerEmail, address: address || '', customization_type: customizationType || '', serigrafia_color: serigrafiaColor || '', art_url: artUrl || '' },
-        notification_url: 'https://imprebrindes.com.br/api/webhook-mp',
+        notification_url: 'https://imprebrindes.clickimpresso.com.br/api/webhook-mp',
         back_urls: {
-          success: 'https://imprebrindes.com.br/?pagamento=sucesso',
-          failure: 'https://imprebrindes.com.br/?pagamento=erro',
-          pending: 'https://imprebrindes.com.br/?pagamento=pendente',
+          success: 'https://imprebrindes.clickimpresso.com.br/?pagamento=sucesso',
+          failure: 'https://imprebrindes.clickimpresso.com.br/?pagamento=erro',
+          pending: 'https://imprebrindes.clickimpresso.com.br/?pagamento=pendente',
         },
         payment_methods: {
           excluded_payment_types: [{ id: 'ticket' }],

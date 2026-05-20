@@ -80,7 +80,7 @@ export default async function handler(req: any, res: any) {
           customization_type: customizationType || '',
           serigrafia_color: serigrafiaColor || '',
         },
-        notification_url: 'https://imprebrindes.com.br/api/webhook-mp',
+        notification_url: 'https://imprebrindes.clickimpresso.com.br/api/webhook-mp',
       },
     });
 
