@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, CreditCard, Package, MapPin, User, Palette, AlertCircle, QrCode, Copy, CheckCheck, Loader2 } from 'lucide-react';
+import { ArrowLeft, Package, MapPin, User, Palette, AlertCircle, QrCode, Copy, CheckCheck, Loader2 } from 'lucide-react';
 import { Customization, OrderFormData, ProductDef, SERIGRAFIA_COLORS, calcUnitPrice, calcTotal } from '../types';
 import { ArtPreviewCanvas } from './ArtPreviewCanvas';
 
@@ -20,7 +20,6 @@ interface PixData {
 
 export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customization, formData, onBack, onConfirm }) => {
   const [loading, setLoading] = useState(false);
-  const [pixLoading, setPixLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pixData, setPixData] = useState<PixData | null>(null);
   const [copied, setCopied] = useState(false);
@@ -70,41 +69,23 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
     }
   };
 
-  const handlePix = async () => {
-    setPixLoading(true);
-    setError(null);
-    try {
-      const artUrl = await uploadArt();
-      const res = await fetch('/api/create-preference', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...buildBody(artUrl), preferPix: true }),
-      });
-      if (!res.ok) throw new Error('Erro ao gerar PIX');
-      const { checkoutUrl } = await res.json();
-      window.location.href = checkoutUrl;
-    } catch {
-      setError('Não foi possível gerar o PIX. Tente novamente.');
-    } finally {
-      setPixLoading(false);
-    }
-  };
-
   const handlePay = async () => {
     setLoading(true);
     setError(null);
     try {
       const artUrl = await uploadArt();
-      const res = await fetch('/api/create-preference', {
+      const res = await fetch('/api/create-pix', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(buildBody(artUrl)),
       });
-      if (!res.ok) throw new Error('Erro ao criar preferência de pagamento');
-      const { checkoutUrl } = await res.json();
-      window.location.href = checkoutUrl;
+      if (!res.ok) throw new Error('Erro ao gerar PIX');
+      const data = await res.json();
+      if (!data.qrCode) throw new Error('PIX não gerado');
+      setPixData(data);
     } catch {
-      setError('Não foi possível iniciar o pagamento. Tente novamente.');
+      setError('Não foi possível gerar o PIX. Tente novamente.');
+    } finally {
       setLoading(false);
     }
   };
@@ -293,20 +274,22 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
               </div>
             )}
 
-            <button
-              onClick={handlePay}
-              disabled={loading}
-              className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-semibold text-base transition-all ${
-                loading
-                  ? 'bg-gray-700 text-gray-400 cursor-wait'
-                  : 'bg-[#009EE3] hover:bg-[#008CC7] text-white hover:shadow-lg hover:shadow-[#009EE3]/30'
-              }`}
-            >
-              {loading ? <>Redirecionando para o Mercado Pago...</> : <><CreditCard size={20} />Ir para Pagamento — Mercado Pago</>}
-            </button>
+            {!pixData && (
+              <button
+                onClick={handlePay}
+                disabled={loading}
+                className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-semibold text-base transition-all ${
+                  loading
+                    ? 'bg-gray-700 text-gray-400 cursor-wait'
+                    : 'bg-[#32BCAD] hover:bg-[#29a99b] text-white hover:shadow-lg hover:shadow-[#32BCAD]/30'
+                }`}
+              >
+                {loading ? <><Loader2 size={20} className="animate-spin" />Gerando PIX...</> : <><QrCode size={20} />Gerar QR Code PIX</>}
+              </button>
+            )}
 
             <p className="text-gray-500 text-xs text-center mt-3">
-              Pagamento seguro via Mercado Pago · PIX, Cartão ou Boleto
+              Pagamento seguro via Mercado Pago · PIX
             </p>
           </div>
         </div>

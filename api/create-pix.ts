@@ -1,5 +1,4 @@
 import { MercadoPagoConfig, Payment } from 'mercadopago';
-import { createClient } from '@supabase/supabase-js';
 
 const PRICES: Record<string, Record<string, number>> = {
   'copo-475': { serigrafia: 23.00, laser: 28.00 },
@@ -12,20 +11,13 @@ function getServerPrice(productId: string, customizationType: string): number | 
   return product[customizationType] ?? product['serigrafia'] ?? null;
 }
 
-function getDb() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_KEY;
-  if (!url || !key) throw new Error('Supabase env vars missing');
-  return createClient(url, key);
-}
-
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const accessToken = process.env.MP_ACCESS_TOKEN;
   if (!accessToken) return res.status(500).json({ error: 'MP_ACCESS_TOKEN not configured' });
 
-  const { productId, productName, quantity, buyerName, buyerEmail, address, customizationType, serigrafiaColor } = req.body || {};
+  const { productId, productName, quantity, buyerName, buyerEmail, buyerPhone, buyerCpfCnpj, address, customizationType, serigrafiaColor, artUrl } = req.body || {};
 
   if (!productId || !productName || !quantity || !buyerEmail) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -36,25 +28,6 @@ export default async function handler(req: any, res: any) {
 
   const qty = Math.max(1, Math.floor(Number(quantity)));
   const total = unitPrice * qty;
-
-  let pedidoId: string | undefined;
-  try {
-    const { data: pedido } = await getDb().from('pedidos').insert({
-      status: 'pendente',
-      nome: buyerName || '',
-      email: buyerEmail,
-      produto: productName,
-      quantidade: qty,
-      valor_total: total,
-      endereco: address || '',
-      tipo_personalizacao: customizationType || '',
-      cor_serigrafia: serigrafiaColor || '',
-      created_at: new Date().toISOString(),
-    }).select('id').single();
-    pedidoId = pedido?.id;
-  } catch (dbErr) {
-    console.error('Supabase error (non-fatal):', dbErr);
-  }
 
   try {
     const client = new MercadoPagoConfig({ accessToken });
@@ -71,14 +44,16 @@ export default async function handler(req: any, res: any) {
         description: productName,
         payer: { email: buyerEmail, first_name: firstName, last_name: lastName },
         metadata: {
-          pedido_id: pedidoId,
           product_name: productName,
           quantity: String(qty),
-          buyer_name: buyerName,
+          buyer_name: buyerName || '',
           buyer_email: buyerEmail,
+          buyer_phone: buyerPhone || '',
+          buyer_cpf_cnpj: buyerCpfCnpj || '',
           address: address || '',
           customization_type: customizationType || '',
           serigrafia_color: serigrafiaColor || '',
+          art_url: artUrl || '',
         },
         notification_url: 'https://imprebrindes.clickimpresso.com.br/api/webhook-mp',
       },
