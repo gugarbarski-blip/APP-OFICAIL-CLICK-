@@ -10,19 +10,12 @@ function getDb() {
 }
 
 async function sendOwnerNotification(opts: {
-  nome: string;
-  email: string;
-  produto: string;
-  quantidade: number;
-  valorTotal: number;
-  endereco: string;
-  tipoPersonalizacao: string;
-  corSerigrafia: string;
-  mpPaymentId: string;
+  nome: string; email: string; produto: string; quantidade: number;
+  valorTotal: number; endereco: string; tipoPersonalizacao: string;
+  corSerigrafia: string; mpPaymentId: string;
 }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;
-
   const resend = new Resend(apiKey);
   const total = `R$ ${opts.valorTotal.toFixed(2).replace('.', ',')}`;
   const personalizacao = opts.tipoPersonalizacao === 'laser'
@@ -56,22 +49,12 @@ async function sendOwnerNotification(opts: {
 }
 
 async function sendConfirmationEmail(opts: {
-  to: string;
-  nome: string;
-  produto: string;
-  quantidade: number;
-  valorTotal: number;
-  endereco: string;
-  tipoPersonalizacao: string;
-  corSerigrafia: string;
-  mpPaymentId: string;
+  to: string; nome: string; produto: string; quantidade: number;
+  valorTotal: number; endereco: string; tipoPersonalizacao: string;
+  corSerigrafia: string; mpPaymentId: string;
 }) {
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.warn('RESEND_API_KEY not set, skipping email');
-    return;
-  }
-
+  if (!apiKey) return;
   const resend = new Resend(apiKey);
   const total = `R$ ${opts.valorTotal.toFixed(2).replace('.', ',')}`;
   const personalizacao = opts.tipoPersonalizacao === 'laser'
@@ -88,61 +71,65 @@ async function sendConfirmationEmail(opts: {
           <h1 style="color: #D4AF37; margin: 0; font-size: 24px;">ImpreBrindes</h1>
           <p style="color: #aaa; margin: 8px 0 0; font-size: 14px;">Copos Térmicos Personalizados</p>
         </div>
-
         <div style="background: #f9f9f9; padding: 32px; border-radius: 0 0 12px 12px;">
           <h2 style="color: #1a1a1a; margin: 0 0 8px;">Pagamento aprovado! ✅</h2>
           <p style="color: #555; margin: 0 0 24px;">Olá, <strong>${opts.nome}</strong>! Recebemos seu pagamento e seu pedido já está em produção.</p>
-
           <div style="background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
             <h3 style="margin: 0 0 16px; font-size: 15px; color: #1a1a1a; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px;">Detalhes do Pedido</h3>
             <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-              <tr>
-                <td style="padding: 6px 0; color: #888;">Produto</td>
-                <td style="padding: 6px 0; text-align: right; font-weight: 600;">${opts.produto}</td>
-              </tr>
-              <tr>
-                <td style="padding: 6px 0; color: #888;">Personalização</td>
-                <td style="padding: 6px 0; text-align: right; font-weight: 600;">${personalizacao}</td>
-              </tr>
-              <tr>
-                <td style="padding: 6px 0; color: #888;">Quantidade</td>
-                <td style="padding: 6px 0; text-align: right; font-weight: 600;">${opts.quantidade} unidades</td>
-              </tr>
-              <tr style="border-top: 1px solid #f0f0f0;">
-                <td style="padding: 10px 0 0; color: #1a1a1a; font-weight: 700; font-size: 15px;">Total pago</td>
-                <td style="padding: 10px 0 0; text-align: right; color: #D4AF37; font-weight: 700; font-size: 18px;">${total}</td>
-              </tr>
+              <tr><td style="padding: 6px 0; color: #888;">Produto</td><td style="padding: 6px 0; text-align: right; font-weight: 600;">${opts.produto}</td></tr>
+              <tr><td style="padding: 6px 0; color: #888;">Personalização</td><td style="padding: 6px 0; text-align: right; font-weight: 600;">${personalizacao}</td></tr>
+              <tr><td style="padding: 6px 0; color: #888;">Quantidade</td><td style="padding: 6px 0; text-align: right; font-weight: 600;">${opts.quantidade} unidades</td></tr>
+              <tr style="border-top: 1px solid #f0f0f0;"><td style="padding: 10px 0 0; color: #1a1a1a; font-weight: 700; font-size: 15px;">Total pago</td><td style="padding: 10px 0 0; text-align: right; color: #D4AF37; font-weight: 700; font-size: 18px;">${total}</td></tr>
             </table>
           </div>
-
           <div style="background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
             <h3 style="margin: 0 0 10px; font-size: 15px; color: #1a1a1a;">Endereço de Entrega</h3>
             <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.6;">${opts.endereco}</p>
           </div>
-
           <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
             <p style="margin: 0; font-size: 13px; color: #92400e;">
-              📦 <strong>Próximos passos:</strong> Entraremos em contato para confirmar os detalhes da personalização e informar o prazo de entrega. Em caso de dúvidas, responda este e-mail.
+              📦 <strong>Próximos passos:</strong> Entraremos em contato para confirmar os detalhes da personalização e informar o prazo de entrega.
             </p>
           </div>
-
-          <p style="font-size: 12px; color: #aaa; text-align: center; margin: 0;">
-            Pedido #${opts.mpPaymentId} · ImpreBrindes
-          </p>
+          <p style="font-size: 12px; color: #aaa; text-align: center; margin: 0;">Pedido #${opts.mpPaymentId} · ImpreBrindes</p>
         </div>
       </div>
     `,
   });
 }
 
+async function sendEmails(p: {
+  nome: string; email: string; produto: string; quantidade: number;
+  endereco: string; tipo_personalizacao: string; cor_serigrafia: string;
+}, valorTotal: number, mpPaymentId: string) {
+  const emailOpts = {
+    nome: p.nome, email: p.email, produto: p.produto,
+    quantidade: p.quantidade, valorTotal, endereco: p.endereco,
+    tipoPersonalizacao: p.tipo_personalizacao, corSerigrafia: p.cor_serigrafia,
+    mpPaymentId,
+  };
+  // Envia os dois emails em PARALELO — não bloqueia um pelo outro
+  const results = await Promise.allSettled([
+    sendOwnerNotification(emailOpts),
+    sendConfirmationEmail({ to: p.email, ...emailOpts }),
+  ]);
+  results.forEach((r, i) => {
+    if (r.status === 'rejected') {
+      console.error(`Email ${i === 0 ? 'owner' : 'customer'} falhou:`, r.reason?.message);
+    }
+  });
+}
+
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  console.log('Webhook MP recebido:', JSON.stringify({ type: req.body?.type, action: req.body?.action, dataId: req.body?.data?.id }));
+  console.log('Webhook MP recebido:', JSON.stringify({
+    type: req.body?.type, action: req.body?.action, dataId: req.body?.data?.id,
+  }));
 
   const { type, action, data } = req.body || {};
 
-  // Suporta formato IPN antigo (type:"payment") e Webhooks/Events novo (action:"payment.*")
   const isPaymentEvent =
     type === 'payment' ||
     action === 'payment.created' ||
@@ -150,59 +137,76 @@ export default async function handler(req: any, res: any) {
 
   if (!isPaymentEvent) return res.status(200).end();
 
+  // Wrapper: SEMPRE retorna 200 ao MP — nunca deixa o MP retentar por erro nosso
   try {
     const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN! });
     const payment = new Payment(client);
+
     let mp: any;
     try {
       mp = await payment.get({ id: data.id });
     } catch (fetchErr: any) {
-      // Pagamento não encontrado (ex: IDs de teste) — ignorar silenciosamente
       console.warn('Webhook: pagamento não encontrado, ignorando', { id: data.id, err: fetchErr?.message });
       return res.status(200).end();
     }
 
-    if (mp.status !== 'approved') return res.status(200).end();
+    if (mp.status !== 'approved') {
+      console.log(`Webhook: status=${mp.status}, ignorando`);
+      return res.status(200).end();
+    }
 
-    const meta = mp.metadata || {};
-    console.log('MP metadata raw:', JSON.stringify(meta));
     const db = getDb();
-
     const mpPaymentId = String(mp.id);
+    const valorTotal = mp.transaction_amount ?? 0;
 
-    // Estratégia 1: pedido já existe no banco (criado por create-pix.ts com mp_payment_id)
-    const { data: existingByPaymentId } = await db
+    // ── Estratégia 1: pedido criado por create-pix.ts (caminho normal) ──
+    const { data: existing } = await db
       .from('pedidos')
-      .select('id, nome, email, produto, quantidade, endereco, tipo_personalizacao, cor_serigrafia')
+      .select('id, status, nome, email, produto, quantidade, endereco, tipo_personalizacao, cor_serigrafia')
       .eq('mp_payment_id', mpPaymentId)
       .maybeSingle();
 
-    if (existingByPaymentId) {
+    if (existing) {
+      // Idempotência: se já está pago, não processa novamente
+      if (existing.status === 'pago') {
+        console.log(`Webhook: pagamento ${mpPaymentId} já processado, ignorando`);
+        return res.status(200).json({ ok: true, skipped: 'already_paid' });
+      }
       await db.from('pedidos').update({ status: 'pago' }).eq('mp_payment_id', mpPaymentId);
-      const p = existingByPaymentId;
-      await sendOwnerNotification({ nome: p.nome, email: p.email, produto: p.produto, quantidade: p.quantidade, valorTotal: mp.transaction_amount ?? 0, endereco: p.endereco, tipoPersonalizacao: p.tipo_personalizacao, corSerigrafia: p.cor_serigrafia, mpPaymentId });
-      await sendConfirmationEmail({ to: p.email, nome: p.nome, produto: p.produto, quantidade: p.quantidade, valorTotal: mp.transaction_amount ?? 0, endereco: p.endereco, tipoPersonalizacao: p.tipo_personalizacao, corSerigrafia: p.cor_serigrafia, mpPaymentId });
+      console.log(`Webhook: pedido ${existing.id} → pago`);
+      // Emails em paralelo, falha não compromete a resposta
+      await sendEmails(existing, valorTotal, mpPaymentId);
       return res.status(200).json({ ok: true });
     }
 
-    // Estratégia 2: busca por pedido_id na metadata (fallback)
+    // ── Estratégia 2: pedido_id na metadata (fallback) ──
+    const meta = mp.metadata || {};
     const g = (snake: string, camel: string) => meta[snake] || meta[camel] || '';
     const pedidoId = g('pedido_id', 'pedidoId');
+
     if (pedidoId) {
-      const { data: existingByPedidoId } = await db.from('pedidos').select('id, nome, email, produto, quantidade, endereco, tipo_personalizacao, cor_serigrafia').eq('id', pedidoId).maybeSingle();
-      if (existingByPedidoId) {
+      const { data: byId } = await db
+        .from('pedidos')
+        .select('id, status, nome, email, produto, quantidade, endereco, tipo_personalizacao, cor_serigrafia')
+        .eq('id', pedidoId)
+        .maybeSingle();
+
+      if (byId) {
+        if (byId.status === 'pago') {
+          return res.status(200).json({ ok: true, skipped: 'already_paid' });
+        }
         await db.from('pedidos').update({ status: 'pago', mp_payment_id: mpPaymentId }).eq('id', pedidoId);
-        const p = existingByPedidoId;
-        await sendOwnerNotification({ nome: p.nome, email: p.email, produto: p.produto, quantidade: p.quantidade, valorTotal: mp.transaction_amount ?? 0, endereco: p.endereco, tipoPersonalizacao: p.tipo_personalizacao, corSerigrafia: p.cor_serigrafia, mpPaymentId });
-        await sendConfirmationEmail({ to: p.email, nome: p.nome, produto: p.produto, quantidade: p.quantidade, valorTotal: mp.transaction_amount ?? 0, endereco: p.endereco, tipoPersonalizacao: p.tipo_personalizacao, corSerigrafia: p.cor_serigrafia, mpPaymentId });
+        console.log(`Webhook: pedido ${pedidoId} → pago (via metadata)`);
+        await sendEmails(byId, valorTotal, mpPaymentId);
         return res.status(200).json({ ok: true });
       }
     }
 
-    // Estratégia 3: INSERT com dados da metadata (último recurso para pagamentos externos)
+    // ── Estratégia 3: INSERT a partir da metadata (pagamentos externos) ──
     const emailTo = g('buyer_email', 'buyerEmail') || mp.payer?.email || '';
     const nome = g('buyer_name', 'buyerName') || (mp.payer?.first_name ? `${mp.payer.first_name} ${mp.payer.last_name || ''}`.trim() : '');
     const productName = g('product_name', 'productName');
+
     await db.from('pedidos').insert({
       mp_payment_id: mpPaymentId,
       status: 'pago',
@@ -212,41 +216,26 @@ export default async function handler(req: any, res: any) {
       cpf_cnpj: g('buyer_cpf_cnpj', 'buyerCpfCnpj'),
       produto: productName,
       quantidade: Number(meta.quantity) || 0,
-      valor_total: mp.transaction_amount,
+      valor_total: valorTotal,
       endereco: g('address', 'address'),
       tipo_personalizacao: g('customization_type', 'customizationType'),
       cor_serigrafia: g('serigrafia_color', 'serigrafiaColor'),
       arte_url: meta.art_url || meta.artUrl || null,
       created_at: new Date().toISOString(),
     });
-
-    await sendOwnerNotification({
-      nome,
-      email: emailTo,
-      produto: productName,
-      quantidade: Number(meta.quantity) || 0,
-      valorTotal: mp.transaction_amount ?? 0,
-      endereco: g('address', 'address'),
-      tipoPersonalizacao: g('customization_type', 'customizationType'),
-      corSerigrafia: g('serigrafia_color', 'serigrafiaColor'),
-      mpPaymentId,
-    });
-
-    await sendConfirmationEmail({
-      to: emailTo,
-      nome,
-      produto: productName,
-      quantidade: Number(meta.quantity) || 0,
-      valorTotal: mp.transaction_amount ?? 0,
-      endereco: g('address', 'address'),
-      tipoPersonalizacao: g('customization_type', 'customizationType'),
-      corSerigrafia: g('serigrafia_color', 'serigrafiaColor'),
-      mpPaymentId,
-    });
+    console.log(`Webhook: pedido criado via metadata para pagamento ${mpPaymentId}`);
+    await sendEmails(
+      { nome, email: emailTo, produto: productName, quantidade: Number(meta.quantity) || 0,
+        endereco: g('address', 'address'), tipo_personalizacao: g('customization_type', 'customizationType'),
+        cor_serigrafia: g('serigrafia_color', 'serigrafiaColor') },
+      valorTotal, mpPaymentId,
+    );
 
     return res.status(200).json({ ok: true });
-  } catch (err) {
-    console.error('Webhook error:', err);
-    return res.status(500).end();
+
+  } catch (err: any) {
+    // CRÍTICO: mesmo com erro interno, retorna 200 para o MP não retentar
+    console.error('Webhook erro interno:', err?.message || err);
+    return res.status(200).json({ ok: false, error: 'internal_error' });
   }
 }
