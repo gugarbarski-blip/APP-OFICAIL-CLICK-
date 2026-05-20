@@ -181,15 +181,27 @@ export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ 
                   {p.arte_url && (
                     <div className="sm:col-span-2">
                       <span className="text-gray-400">Arte do cliente:</span>{' '}
-                      <a
-                        href={p.arte_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium underline"
+                      <button
+                        onClick={async () => {
+                          try {
+                            const res = await fetch(p.arte_url!);
+                            const blob = await res.blob();
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            const ext = p.arte_url!.split('.').pop()?.split('?')[0] || 'png';
+                            a.download = `arte-${p.id.slice(0, 8)}.${ext}`;
+                            a.click();
+                            URL.revokeObjectURL(url);
+                          } catch {
+                            window.open(p.arte_url!, '_blank');
+                          }
+                        }}
+                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium underline cursor-pointer"
                       >
                         <Download size={13} />
                         Baixar arquivo
-                      </a>
+                      </button>
                     </div>
                   )}
                 </div>
