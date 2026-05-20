@@ -169,8 +169,15 @@ export default async function handler(req: any, res: any) {
     return res.status(401).end();
   }
 
-  const { type, data } = req.body || {};
-  if (type !== 'payment') return res.status(200).end();
+  const { type, action, data } = req.body || {};
+
+  // Suporta formato IPN antigo (type:"payment") e Webhooks/Events novo (action:"payment.*")
+  const isPaymentEvent =
+    type === 'payment' ||
+    action === 'payment.created' ||
+    action === 'payment.updated';
+
+  if (!isPaymentEvent) return res.status(200).end();
 
   try {
     const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN! });
