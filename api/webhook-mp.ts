@@ -12,9 +12,11 @@ function verifyMpSignature(req: any): boolean {
 
   const xSignature = req.headers['x-signature'] as string | undefined;
   const xRequestId = req.headers['x-request-id'] as string | undefined;
-  const dataId = req.body?.data?.id;
 
-  console.log('Webhook headers:', JSON.stringify({ xSignature, xRequestId, dataId }));
+  // MP usa o query param data.id (não o body) para calcular o HMAC
+  const dataId = (req.query?.['data.id'] as string | undefined) || String(req.body?.data?.id ?? '');
+
+  console.log('Webhook headers:', JSON.stringify({ xSignature, xRequestId, dataId, query: req.query }));
 
   if (!xSignature || !xRequestId || !dataId) {
     console.warn('Webhook: headers obrigatórios ausentes', { xSignature: !!xSignature, xRequestId: !!xRequestId, dataId: !!dataId });
@@ -23,12 +25,19 @@ function verifyMpSignature(req: any): boolean {
 
   const tsMatch = xSignature.match(/ts=([^,]+)/);
   const v1Match = xSignature.match(/v1=([^,]+)/);
-  if (!tsMatch || !v1Match) return false;
+  if (!tsMatch || !v1Match) {
+    console.warn('Webhook: formato x-signature inválido', { xSignature });
+    return false;
+  }
 
   const ts = tsMatch[1];
   const v1 = v1Match[1];
   const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts}`;
   const expected = createHmac('sha256', secret).update(manifest).digest('hex');
+
+  if (expected !== v1) {
+    console.warn('Webhook: HMAC não bate', { manifest, expected, v1 });
+  }
 
   return expected === v1;
 }
