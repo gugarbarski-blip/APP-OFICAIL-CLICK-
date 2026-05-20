@@ -165,33 +165,44 @@ export default async function handler(req: any, res: any) {
     if (mp.status !== 'approved') return res.status(200).end();
 
     const meta = mp.metadata || {};
+    console.log('MP metadata raw:', JSON.stringify(meta));
     const db = getDb();
 
-    const emailTo = meta.buyer_email || mp.payer?.email || '';
-    const nome = meta.buyer_name || (mp.payer?.first_name
+    // MP SDK may return metadata keys as camelCase — check both formats
+    const g = (snake: string, camel: string) => meta[snake] || meta[camel] || '';
+    const emailTo = g('buyer_email', 'buyerEmail') || mp.payer?.email || '';
+    const nome = g('buyer_name', 'buyerName') || (mp.payer?.first_name
       ? `${mp.payer.first_name} ${mp.payer.last_name || ''}`.trim()
       : '');
+    const productName = g('product_name', 'productName');
+    const customizationType = g('customization_type', 'customizationType');
+    const serigrafiaColor = g('serigrafia_color', 'serigrafiaColor');
+    const address = g('address', 'address');
+    const buyerPhone = g('buyer_phone', 'buyerPhone');
+    const buyerCpfCnpj = g('buyer_cpf_cnpj', 'buyerCpfCnpj');
+    const artUrl = meta.art_url || meta.artUrl || null;
+    const pedidoId = meta.pedido_id || meta.pedidoId || '';
 
-    if (meta.pedido_id) {
+    if (pedidoId) {
       await db.from('pedidos').update({
         status: 'pago',
         mp_payment_id: String(mp.id),
-      }).eq('id', meta.pedido_id);
+      }).eq('id', pedidoId);
     } else {
       await db.from('pedidos').insert({
         mp_payment_id: String(mp.id),
         status: 'pago',
         nome,
         email: emailTo,
-        telefone: meta.buyer_phone || '',
-        cpf_cnpj: meta.buyer_cpf_cnpj || '',
-        produto: meta.product_name || '',
+        telefone: buyerPhone,
+        cpf_cnpj: buyerCpfCnpj,
+        produto: productName,
         quantidade: Number(meta.quantity) || 0,
         valor_total: mp.transaction_amount,
-        endereco: meta.address || '',
-        tipo_personalizacao: meta.customization_type || '',
-        cor_serigrafia: meta.serigrafia_color || '',
-        arte_url: meta.art_url || null,
+        endereco: address,
+        tipo_personalizacao: customizationType,
+        cor_serigrafia: serigrafiaColor,
+        arte_url: artUrl,
         created_at: new Date().toISOString(),
       });
     }
@@ -199,24 +210,24 @@ export default async function handler(req: any, res: any) {
     await sendOwnerNotification({
       nome,
       email: emailTo,
-      produto: meta.product_name || '',
+      produto: productName,
       quantidade: Number(meta.quantity) || 0,
       valorTotal: mp.transaction_amount ?? 0,
-      endereco: meta.address || '',
-      tipoPersonalizacao: meta.customization_type || '',
-      corSerigrafia: meta.serigrafia_color || '',
+      endereco: address,
+      tipoPersonalizacao: customizationType,
+      corSerigrafia: serigrafiaColor,
       mpPaymentId: String(mp.id),
     });
 
     await sendConfirmationEmail({
       to: emailTo,
       nome,
-      produto: meta.product_name || '',
+      produto: productName,
       quantidade: Number(meta.quantity) || 0,
       valorTotal: mp.transaction_amount ?? 0,
-      endereco: meta.address || '',
-      tipoPersonalizacao: meta.customization_type || '',
-      corSerigrafia: meta.serigrafia_color || '',
+      endereco: address,
+      tipoPersonalizacao: customizationType,
+      corSerigrafia: serigrafiaColor,
       mpPaymentId: String(mp.id),
     });
 
