@@ -2,7 +2,9 @@ import { createHmac, createHash } from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 
 function getSecret(): string {
-  return process.env.ADMIN_SECRET ?? process.env.SUPABASE_SERVICE_KEY ?? '';
+  const secret = process.env.ADMIN_SECRET;
+  if (!secret) throw new Error('ADMIN_SECRET not configured');
+  return secret;
 }
 
 function generateToken(): string {
@@ -33,8 +35,10 @@ export default async function handler(req: any, res: any) {
   const { password } = req.body || {};
   if (!password) return res.status(401).json({ error: 'Senha obrigatória' });
 
-  const secret = getSecret();
-  if (!secret) return res.status(500).json({ error: 'Servidor mal configurado' });
+  let secret: string;
+  try { secret = getSecret(); } catch {
+    return res.status(500).json({ error: 'Servidor mal configurado' });
+  }
 
   try {
     const storedHash = await getStoredHash();
