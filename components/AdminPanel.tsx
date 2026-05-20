@@ -45,17 +45,26 @@ export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ 
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('pago');
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (silent = false) => {
+    if (!silent) setLoading(true);
+    else setRefreshing(true);
     const res = await fetch('/api/admin/pedidos', { headers: authHeaders(token) });
     if (res.status === 401) { onLogout(); return; }
     const { pedidos: data } = await res.json();
     setPedidos(data || []);
-    setLoading(false);
+    setLastUpdated(new Date());
+    if (!silent) setLoading(false);
+    else setRefreshing(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    const interval = setInterval(() => load(true), 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const updateStatus = async (id: string, status: string) => {
     setUpdating(id);
@@ -85,9 +94,14 @@ export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ 
             <Package size={28} className="text-primary" />
             <h1 className="font-poppins text-2xl font-bold text-gray-900">Painel de Pedidos</h1>
           </div>
-          <div className="flex gap-2">
-            <button onClick={load} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">
-              <RefreshCw size={15} /> Atualizar
+          <div className="flex items-center gap-2">
+            {lastUpdated && (
+              <span className="text-xs text-gray-400 hidden sm:block">
+                {refreshing ? 'Atualizando...' : `Atualizado às ${lastUpdated.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`}
+              </span>
+            )}
+            <button onClick={() => load()} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">
+              <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} /> Atualizar
             </button>
             <button onClick={onLogout} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">
               <LogOut size={15} /> Sair
