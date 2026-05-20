@@ -39,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({ onCtaClick, onMeusPedidos, onMin
         <a href="#" className="flex items-center group">
           <div className="h-10 rounded-lg overflow-hidden">
             <img
-              src="/Logo.webp"
+              src="/Logo.original.png"
               alt="ImpreBrindes Logo"
               className="h-10 w-auto object-contain"
             />

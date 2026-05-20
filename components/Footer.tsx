@@ -12,7 +12,7 @@ export const Footer: React.FC = () => {
           <div>
             <div className="mb-4">
               <img
-                src="/Logo.webp"
+                src="/Logo.original.png"
                 alt="ImpreBrindes Logo"
                 className="h-10 w-auto object-contain rounded-lg"
                 loading="lazy"
