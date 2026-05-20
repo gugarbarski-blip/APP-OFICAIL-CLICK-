@@ -14,7 +14,7 @@ const H = 420;
 // Copo 475ml: 12cm×6cm gravação / 17.1cm×9.1cm copo
 // Cuia 320ml:  4cm×5cm gravação / 11.7cm×8.7cm copo
 const PRINT_AREAS: Record<string, { x: number; y: number; w: number; h: number }> = {
-  '/CopoPreview475.webp': { x: 59,  y: 90,  w: 136, h: 258 },
+  '/CopoPreview475.webp': { x: 93,  y: 155, w: 68,  h: 129 },
   '/CopoCuia.webp':       { x: 63,  y: 144, w: 153, h: 127 },
 };
 const PRINT_DEFAULT = { x: 59, y: 71, w: 136, h: 272 };

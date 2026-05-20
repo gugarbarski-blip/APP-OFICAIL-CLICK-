@@ -299,14 +299,12 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
           {/* ── Right column: preview ── */}
           <div className="flex flex-col items-center gap-4">
             <p className="font-semibold text-white text-sm">Preview da Arte no Copo</p>
-            <div className={product.image === '/CopoPreview475.webp' ? 'w-[150px]' : 'w-full flex justify-center'}>
-              <ArtPreviewCanvas
-                artUrl={value.artPreviewUrl}
-                cupImageUrl={product.image}
-                customizationType={value.type}
-                serigrafiaColorHex={serigrafiaHex}
-              />
-            </div>
+            <ArtPreviewCanvas
+              artUrl={value.artPreviewUrl}
+              cupImageUrl={product.image}
+              customizationType={value.type}
+              serigrafiaColorHex={serigrafiaHex}
+            />
             {value.artPreviewUrl && (
               <p className="text-xs text-gray-400 text-center">
                 Preview ilustrativo · cor aplicada: <strong>{SERIGRAFIA_COLORS.find(c => c.key === value.serigrafiaColor)?.label}</strong>
