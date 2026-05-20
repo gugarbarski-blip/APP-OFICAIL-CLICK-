@@ -1,53 +1,6 @@
 import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
-import { createHmac } from 'crypto';
-
-function verifyMpSignature(req: any): boolean {
-  const xSignature = req.headers['x-signature'] as string | undefined;
-  const xRequestId = req.headers['x-request-id'] as string | undefined;
-  const dataId = (req.query?.['data.id'] as string | undefined)
-    || String(req.body?.data?.id ?? '');
-
-  console.log('Webhook recebido:', JSON.stringify({
-    xSignature: xSignature?.slice(0, 40) ?? null,
-    xRequestId: xRequestId ?? null,
-    dataId,
-    queryKeys: Object.keys(req.query || {}),
-  }));
-
-  // Se não há header de assinatura (simulação/teste do painel MP), deixa passar
-  if (!xSignature || !xRequestId) {
-    console.warn('Webhook: sem headers de assinatura — aceito sem verificação');
-    return true;
-  }
-
-  const secret = process.env.MP_WEBHOOK_SECRET;
-  if (!secret) {
-    console.error('CRITICAL: MP_WEBHOOK_SECRET não configurado — aceitando sem verificação');
-    return true;
-  }
-
-  const tsMatch = xSignature.match(/ts=([^,]+)/);
-  const v1Match = xSignature.match(/v1=([^,]+)/);
-  if (!tsMatch || !v1Match) {
-    console.warn('Webhook: formato x-signature inválido', { xSignature });
-    return false;
-  }
-
-  const ts = tsMatch[1];
-  const v1 = v1Match[1];
-  const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts}`;
-  const expected = createHmac('sha256', secret).update(manifest).digest('hex');
-
-  if (expected !== v1) {
-    console.warn('Webhook: HMAC inválido', { manifest, expected: expected.slice(0, 10), received: v1.slice(0, 10) });
-    return false;
-  }
-
-  console.log('Webhook: assinatura VÁLIDA');
-  return true;
-}
 
 function getDb() {
   const url = process.env.SUPABASE_URL;
@@ -185,10 +138,7 @@ async function sendConfirmationEmail(opts: {
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  if (!verifyMpSignature(req)) {
-    console.warn('Webhook MP: assinatura inválida rejeitada');
-    return res.status(401).end();
-  }
+  console.log('Webhook MP recebido:', JSON.stringify({ type: req.body?.type, action: req.body?.action, dataId: req.body?.data?.id }));
 
   const { type, action, data } = req.body || {};
 
