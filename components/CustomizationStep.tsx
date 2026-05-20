@@ -1,11 +1,14 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X, ArrowRight, ArrowLeft, Zap, Printer, FileText, Loader } from 'lucide-react';
 import { Customization, CustomizationType, ProductDef, SerigrafiaColor, SERIGRAFIA_COLORS, calcUnitPrice } from '../types';
 import { ArtPreviewCanvas } from './ArtPreviewCanvas';
 
+const SERIGRAFIA_MIN_QTY = 25;
+
 interface CustomizationStepProps {
   product: ProductDef;
   value: Customization;
+  quantity: number;
   onChange: (c: Customization) => void;
   onBack: () => void;
   onNext: () => void;
@@ -51,13 +54,24 @@ async function renderPdfToUrl(file: File): Promise<string> {
 }
 
 export const CustomizationStep: React.FC<CustomizationStepProps> = ({
-  product, value, onChange, onBack, onNext,
+  product, value, quantity, onChange, onBack, onNext,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError,   setPdfError]   = useState('');
 
-  const handleTypeChange  = (type: CustomizationType)  => onChange({ ...value, type });
+  const serigrafiaBlocked = quantity < SERIGRAFIA_MIN_QTY;
+
+  useEffect(() => {
+    if (serigrafiaBlocked && value.type === 'serigrafia') {
+      onChange({ ...value, type: 'laser' });
+    }
+  }, [quantity]);
+
+  const handleTypeChange = (type: CustomizationType) => {
+    if (type === 'serigrafia' && serigrafiaBlocked) return;
+    onChange({ ...value, type });
+  };
   const handleColorChange = (serigrafiaColor: SerigrafiaColor) => onChange({ ...value, serigrafiaColor });
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,37 +164,46 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
                 {typeOptions.map(({ key, icon: Icon }) => {
                   const opt      = product.customizations[key];
                   const selected = value.type === key;
+                  const blocked  = key === 'serigrafia' && serigrafiaBlocked;
                   return (
                     <button
                       key={key}
                       onClick={() => handleTypeChange(key)}
+                      disabled={blocked}
                       className={`p-4 rounded-xl border-2 text-left transition-all ${
-                        selected ? 'border-[#D4AF37] bg-[#D4AF37]/10' : 'border-white/10 hover:border-white/20 bg-[#222019]'
+                        blocked
+                          ? 'border-white/5 bg-[#1a1917] opacity-50 cursor-not-allowed'
+                          : selected
+                            ? 'border-[#D4AF37] bg-[#D4AF37]/10'
+                            : 'border-white/10 hover:border-white/20 bg-[#222019]'
                       }`}
                     >
                       <div className="flex items-start justify-between mb-3">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${selected ? 'bg-[#D4AF37]' : 'bg-white/10'}`}>
-                          <Icon size={20} className={selected ? 'text-gray-900' : 'text-gray-400'} />
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${selected && !blocked ? 'bg-[#D4AF37]' : 'bg-white/10'}`}>
+                          <Icon size={20} className={selected && !blocked ? 'text-gray-900' : 'text-gray-400'} />
                         </div>
                         {key === 'serigrafia' && (
-                          <span className="text-[10px] font-semibold bg-amber-900/50 text-amber-400 px-2 py-0.5 rounded-full border border-amber-700/50">Mín. 25 un.</span>
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${blocked ? 'bg-red-950/50 text-red-400 border-red-800/50' : 'bg-amber-900/50 text-amber-400 border-amber-700/50'}`}>
+                            {blocked ? 'Indisponível' : 'Mín. 25 un.'}
+                          </span>
                         )}
                       </div>
-                      <p className="font-semibold text-white text-sm">{opt.label}</p>
-                      <p className="text-gray-400 text-xs mt-1">{opt.description}</p>
-                      <p className={`text-xs mt-2 font-medium ${selected ? 'text-[#F1C40F]' : 'text-gray-500'}`}>
+                      <p className={`font-semibold text-sm ${blocked ? 'text-gray-600' : 'text-white'}`}>{opt.label}</p>
+                      <p className="text-gray-500 text-xs mt-1">{opt.description}</p>
+                      <p className={`text-xs mt-2 font-medium ${selected && !blocked ? 'text-[#F1C40F]' : 'text-gray-600'}`}>
                         R$ {calcUnitPrice(product, key).toFixed(2).replace('.', ',')} / un.
-                        {opt.extraPrice === 0 && <span className="ml-1 text-green-400">(sem acréscimo)</span>}
+                        {opt.extraPrice === 0 && !blocked && <span className="ml-1 text-green-400">(sem acréscimo)</span>}
                       </p>
                     </button>
                   );
                 })}
               </div>
 
-              <div className="mt-3 bg-blue-950/50 border border-blue-800/50 rounded-xl px-4 py-3 text-xs text-blue-300 leading-relaxed">
-                <strong>ℹ️ Pedido mínimo:</strong> Serigrafia 1 Cor requer mínimo de <strong>25 unidades</strong>.
-                Para pedidos de <strong>10 a 24 unidades</strong>, está disponível apenas a Gravação a Laser.
-              </div>
+              {serigrafiaBlocked && (
+                <div className="mt-3 bg-amber-950/40 border border-amber-700/40 rounded-xl px-4 py-3 text-xs text-amber-300 leading-relaxed">
+                  <strong>⚠️ Quantidade insuficiente:</strong> Serigrafia requer mínimo de <strong>25 unidades</strong>. Com {quantity} unidades, apenas <strong>Gravação a Laser</strong> está disponível.
+                </div>
+              )}
             </div>
 
             {/* Cor da serigrafia */}

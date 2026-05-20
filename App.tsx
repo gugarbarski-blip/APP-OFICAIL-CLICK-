@@ -130,6 +130,7 @@ const App: React.FC = () => {
       <CustomizationStep
         product={selectedProduct}
         value={customization}
+        quantity={orderData.quantity}
         onChange={setCustomization}
         onBack={() => goTo('quantity')}
         onNext={() => goTo('order')}
