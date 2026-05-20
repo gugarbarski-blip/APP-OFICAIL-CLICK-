@@ -82,7 +82,7 @@ export default async function handler(req: any, res: any) {
           installments: 12,
         },
         auto_return: 'approved',
-        statement_descriptor: 'CLICK BRINDES',
+        statement_descriptor: 'IMPREBRINDES',
       },
     });
     return res.status(200).json({ checkoutUrl: result.init_point });
