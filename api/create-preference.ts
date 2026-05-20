@@ -1,5 +1,4 @@
 import { MercadoPagoConfig, Preference } from 'mercadopago';
-import { createClient } from '@supabase/supabase-js';
 
 // Tabela de preços autoritativa — nunca confiar no valor vindo do cliente
 const PRICES: Record<string, Record<string, number>> = {
@@ -12,13 +11,6 @@ function getServerPrice(productId: string, customizationType: string): number | 
   if (!product) return null;
   const price = product[customizationType] ?? product['serigrafia'];
   return price ?? null;
-}
-
-function getDb() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_KEY;
-  if (!url || !key) throw new Error('Supabase env vars missing');
-  return createClient(url, key);
 }
 
 export default async function handler(req: any, res: any) {
@@ -43,26 +35,6 @@ export default async function handler(req: any, res: any) {
   const qty = Math.max(1, Math.floor(Number(quantity)));
   const totalPrice = unitPrice * qty;
 
-  let pedidoId: string | undefined;
-  try {
-    const { data: pedido } = await getDb().from('pedidos').insert({
-      status: 'pendente',
-      nome: buyerName || '',
-      email: buyerEmail,
-      produto: productName,
-      quantidade: qty,
-      valor_total: totalPrice,
-      endereco: address || '',
-      tipo_personalizacao: customizationType || '',
-      cor_serigrafia: serigrafiaColor || '',
-      arte_url: artUrl || null,
-      created_at: new Date().toISOString(),
-    }).select('id').single();
-    pedidoId = pedido?.id;
-  } catch (dbErr) {
-    console.error('Supabase error (non-fatal):', dbErr);
-  }
-
   try {
     const client = new MercadoPagoConfig({ accessToken });
     const preference = new Preference(client);
@@ -70,7 +42,7 @@ export default async function handler(req: any, res: any) {
       body: {
         items: [{ id: productId, title: productName, quantity: qty, unit_price: unitPrice, currency_id: 'BRL' }],
         payer: { name: buyerName, email: buyerEmail },
-        metadata: { pedido_id: pedidoId, product_name: productName, quantity: String(qty), buyer_name: buyerName, buyer_email: buyerEmail, address: address || '', customization_type: customizationType || '', serigrafia_color: serigrafiaColor || '', art_url: artUrl || '' },
+        metadata: { product_name: productName, quantity: String(qty), buyer_name: buyerName, buyer_email: buyerEmail, address: address || '', customization_type: customizationType || '', serigrafia_color: serigrafiaColor || '', art_url: artUrl || '' },
         notification_url: 'https://imprebrindes.clickimpresso.com.br/api/webhook-mp',
         back_urls: {
           success: 'https://imprebrindes.clickimpresso.com.br/?pagamento=sucesso',
