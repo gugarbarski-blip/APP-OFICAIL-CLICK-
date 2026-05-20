@@ -25,7 +25,7 @@ export default async function handler(req: any, res: any) {
   const accessToken = process.env.MP_ACCESS_TOKEN;
   if (!accessToken) return res.status(500).json({ error: 'MP_ACCESS_TOKEN not configured' });
 
-  const { productId, productName, quantity, buyerName, buyerEmail, buyerPhone, buyerCpfCnpj, address, customizationType, serigrafiaColor, artUrl } = req.body || {};
+  const { productId, productName, quantity, buyerName, buyerEmail, buyerPhone, buyerCpfCnpj, address, customizationType, serigrafiaColor, artUrl, shippingPrice } = req.body || {};
 
   if (!productId || !productName || !quantity || !buyerEmail) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -35,7 +35,8 @@ export default async function handler(req: any, res: any) {
   if (!unitPrice) return res.status(400).json({ error: 'Produto inválido' });
 
   const qty = Math.max(1, Math.floor(Number(quantity)));
-  const total = unitPrice * qty;
+  const shipping = Math.max(0, Math.round(Number(shippingPrice) * 100) / 100) || 0;
+  const total = Math.round((unitPrice * qty + shipping) * 100) / 100;
 
   // Salva pedido ANTES de criar o pagamento — não dependemos de metadata do MP
   let pedidoId: string | null = null;

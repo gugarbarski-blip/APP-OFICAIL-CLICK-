@@ -44,6 +44,8 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
     customizationType: customization.type,
     serigrafiaColor: customization.type === 'serigrafia' ? customization.serigrafiaColor : '',
     artUrl: artUrl || null,
+    shippingPrice: shippingPrice,
+    shippingLabel: formData.shipping?.label || '',
   });
 
   const uploadArt = async (): Promise<string | null> => {
