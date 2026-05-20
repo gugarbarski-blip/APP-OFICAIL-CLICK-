@@ -168,44 +168,57 @@ export default async function handler(req: any, res: any) {
     console.log('MP metadata raw:', JSON.stringify(meta));
     const db = getDb();
 
-    // MP SDK may return metadata keys as camelCase — check both formats
-    const g = (snake: string, camel: string) => meta[snake] || meta[camel] || '';
-    const emailTo = g('buyer_email', 'buyerEmail') || mp.payer?.email || '';
-    const nome = g('buyer_name', 'buyerName') || (mp.payer?.first_name
-      ? `${mp.payer.first_name} ${mp.payer.last_name || ''}`.trim()
-      : '');
-    const productName = g('product_name', 'productName');
-    const customizationType = g('customization_type', 'customizationType');
-    const serigrafiaColor = g('serigrafia_color', 'serigrafiaColor');
-    const address = g('address', 'address');
-    const buyerPhone = g('buyer_phone', 'buyerPhone');
-    const buyerCpfCnpj = g('buyer_cpf_cnpj', 'buyerCpfCnpj');
-    const artUrl = meta.art_url || meta.artUrl || null;
-    const pedidoId = meta.pedido_id || meta.pedidoId || '';
+    const mpPaymentId = String(mp.id);
 
-    if (pedidoId) {
-      await db.from('pedidos').update({
-        status: 'pago',
-        mp_payment_id: String(mp.id),
-      }).eq('id', pedidoId);
-    } else {
-      await db.from('pedidos').insert({
-        mp_payment_id: String(mp.id),
-        status: 'pago',
-        nome,
-        email: emailTo,
-        telefone: buyerPhone,
-        cpf_cnpj: buyerCpfCnpj,
-        produto: productName,
-        quantidade: Number(meta.quantity) || 0,
-        valor_total: mp.transaction_amount,
-        endereco: address,
-        tipo_personalizacao: customizationType,
-        cor_serigrafia: serigrafiaColor,
-        arte_url: artUrl,
-        created_at: new Date().toISOString(),
-      });
+    // Estratégia 1: pedido já existe no banco (criado por create-pix.ts com mp_payment_id)
+    const { data: existingByPaymentId } = await db
+      .from('pedidos')
+      .select('id, nome, email, produto, quantidade, endereco, tipo_personalizacao, cor_serigrafia')
+      .eq('mp_payment_id', mpPaymentId)
+      .maybeSingle();
+
+    if (existingByPaymentId) {
+      await db.from('pedidos').update({ status: 'pago' }).eq('mp_payment_id', mpPaymentId);
+      const p = existingByPaymentId;
+      await sendOwnerNotification({ nome: p.nome, email: p.email, produto: p.produto, quantidade: p.quantidade, valorTotal: mp.transaction_amount ?? 0, endereco: p.endereco, tipoPersonalizacao: p.tipo_personalizacao, corSerigrafia: p.cor_serigrafia, mpPaymentId });
+      await sendConfirmationEmail({ to: p.email, nome: p.nome, produto: p.produto, quantidade: p.quantidade, valorTotal: mp.transaction_amount ?? 0, endereco: p.endereco, tipoPersonalizacao: p.tipo_personalizacao, corSerigrafia: p.cor_serigrafia, mpPaymentId });
+      return res.status(200).json({ ok: true });
     }
+
+    // Estratégia 2: busca por pedido_id na metadata (fallback)
+    const g = (snake: string, camel: string) => meta[snake] || meta[camel] || '';
+    const pedidoId = g('pedido_id', 'pedidoId');
+    if (pedidoId) {
+      const { data: existingByPedidoId } = await db.from('pedidos').select('id, nome, email, produto, quantidade, endereco, tipo_personalizacao, cor_serigrafia').eq('id', pedidoId).maybeSingle();
+      if (existingByPedidoId) {
+        await db.from('pedidos').update({ status: 'pago', mp_payment_id: mpPaymentId }).eq('id', pedidoId);
+        const p = existingByPedidoId;
+        await sendOwnerNotification({ nome: p.nome, email: p.email, produto: p.produto, quantidade: p.quantidade, valorTotal: mp.transaction_amount ?? 0, endereco: p.endereco, tipoPersonalizacao: p.tipo_personalizacao, corSerigrafia: p.cor_serigrafia, mpPaymentId });
+        await sendConfirmationEmail({ to: p.email, nome: p.nome, produto: p.produto, quantidade: p.quantidade, valorTotal: mp.transaction_amount ?? 0, endereco: p.endereco, tipoPersonalizacao: p.tipo_personalizacao, corSerigrafia: p.cor_serigrafia, mpPaymentId });
+        return res.status(200).json({ ok: true });
+      }
+    }
+
+    // Estratégia 3: INSERT com dados da metadata (último recurso para pagamentos externos)
+    const emailTo = g('buyer_email', 'buyerEmail') || mp.payer?.email || '';
+    const nome = g('buyer_name', 'buyerName') || (mp.payer?.first_name ? `${mp.payer.first_name} ${mp.payer.last_name || ''}`.trim() : '');
+    const productName = g('product_name', 'productName');
+    await db.from('pedidos').insert({
+      mp_payment_id: mpPaymentId,
+      status: 'pago',
+      nome,
+      email: emailTo,
+      telefone: g('buyer_phone', 'buyerPhone'),
+      cpf_cnpj: g('buyer_cpf_cnpj', 'buyerCpfCnpj'),
+      produto: productName,
+      quantidade: Number(meta.quantity) || 0,
+      valor_total: mp.transaction_amount,
+      endereco: g('address', 'address'),
+      tipo_personalizacao: g('customization_type', 'customizationType'),
+      cor_serigrafia: g('serigrafia_color', 'serigrafiaColor'),
+      arte_url: meta.art_url || meta.artUrl || null,
+      created_at: new Date().toISOString(),
+    });
 
     await sendOwnerNotification({
       nome,
@@ -213,10 +226,10 @@ export default async function handler(req: any, res: any) {
       produto: productName,
       quantidade: Number(meta.quantity) || 0,
       valorTotal: mp.transaction_amount ?? 0,
-      endereco: address,
-      tipoPersonalizacao: customizationType,
-      corSerigrafia: serigrafiaColor,
-      mpPaymentId: String(mp.id),
+      endereco: g('address', 'address'),
+      tipoPersonalizacao: g('customization_type', 'customizationType'),
+      corSerigrafia: g('serigrafia_color', 'serigrafiaColor'),
+      mpPaymentId,
     });
 
     await sendConfirmationEmail({
@@ -225,10 +238,10 @@ export default async function handler(req: any, res: any) {
       produto: productName,
       quantidade: Number(meta.quantity) || 0,
       valorTotal: mp.transaction_amount ?? 0,
-      endereco: address,
-      tipoPersonalizacao: customizationType,
-      corSerigrafia: serigrafiaColor,
-      mpPaymentId: String(mp.id),
+      endereco: g('address', 'address'),
+      tipoPersonalizacao: g('customization_type', 'customizationType'),
+      corSerigrafia: g('serigrafia_color', 'serigrafiaColor'),
+      mpPaymentId,
     });
 
     return res.status(200).json({ ok: true });

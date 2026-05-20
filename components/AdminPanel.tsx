@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Package, RefreshCw, LogOut, Download } from 'lucide-react';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
+  aguardando_pix: { label: 'Aguardando PIX', color: 'bg-gray-100 text-gray-600' },
   pendente:  { label: 'Pendente',   color: 'bg-yellow-100 text-yellow-800' },
   pago:      { label: 'Pago',       color: 'bg-blue-100 text-blue-800' },
   producao:  { label: 'Produção',   color: 'bg-purple-100 text-purple-800' },

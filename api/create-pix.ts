@@ -1,4 +1,5 @@
 import { MercadoPagoConfig, Payment } from 'mercadopago';
+import { createClient } from '@supabase/supabase-js';
 
 const PRICES: Record<string, Record<string, number>> = {
   'copo-475': { serigrafia: 23.00, laser: 28.00 },
@@ -9,6 +10,13 @@ function getServerPrice(productId: string, customizationType: string): number | 
   const product = PRICES[productId];
   if (!product) return null;
   return product[customizationType] ?? product['serigrafia'] ?? null;
+}
+
+function getDb() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  if (!url || !key) throw new Error('Supabase env vars missing');
+  return createClient(url, key);
 }
 
 export default async function handler(req: any, res: any) {
@@ -29,6 +37,30 @@ export default async function handler(req: any, res: any) {
   const qty = Math.max(1, Math.floor(Number(quantity)));
   const total = unitPrice * qty;
 
+  // Salva pedido ANTES de criar o pagamento — não dependemos de metadata do MP
+  let pedidoId: string | null = null;
+  try {
+    const db = getDb();
+    const { data } = await db.from('pedidos').insert({
+      status: 'aguardando_pix',
+      nome: buyerName || '',
+      email: buyerEmail,
+      telefone: buyerPhone || '',
+      cpf_cnpj: buyerCpfCnpj || '',
+      produto: productName,
+      quantidade: qty,
+      valor_total: total,
+      endereco: address || '',
+      tipo_personalizacao: customizationType || '',
+      cor_serigrafia: serigrafiaColor || '',
+      arte_url: artUrl || null,
+      created_at: new Date().toISOString(),
+    }).select('id').single();
+    pedidoId = data?.id ?? null;
+  } catch (dbErr) {
+    console.error('Supabase insert error:', dbErr);
+  }
+
   try {
     const client = new MercadoPagoConfig({ accessToken });
     const payment = new Payment(client);
@@ -43,21 +75,19 @@ export default async function handler(req: any, res: any) {
         transaction_amount: total,
         description: productName,
         payer: { email: buyerEmail, first_name: firstName, last_name: lastName },
-        metadata: {
-          product_name: productName,
-          quantity: String(qty),
-          buyer_name: buyerName || '',
-          buyer_email: buyerEmail,
-          buyer_phone: buyerPhone || '',
-          buyer_cpf_cnpj: buyerCpfCnpj || '',
-          address: address || '',
-          customization_type: customizationType || '',
-          serigrafia_color: serigrafiaColor || '',
-          art_url: artUrl || '',
-        },
+        // pedido_id na metadata como fallback extra
+        metadata: { pedido_id: pedidoId },
         notification_url: 'https://imprebrindes.clickimpresso.com.br/api/webhook-mp',
       },
     });
+
+    // Associa o mp_payment_id ao pedido salvo
+    if (pedidoId) {
+      try {
+        const db = getDb();
+        await db.from('pedidos').update({ mp_payment_id: String(result.id) }).eq('id', pedidoId);
+      } catch {}
+    }
 
     const txData = (result as any).point_of_interaction?.transaction_data;
     return res.status(200).json({
@@ -67,6 +97,10 @@ export default async function handler(req: any, res: any) {
       expiresAt: (result as any).date_of_expiration,
     });
   } catch (err: any) {
+    // Se o MP falhou, remove o pedido criado
+    if (pedidoId) {
+      try { await getDb().from('pedidos').delete().eq('id', pedidoId); } catch {}
+    }
     console.error('MP PIX error:', err);
     return res.status(500).json({ error: 'Falha ao criar PIX' });
   }
