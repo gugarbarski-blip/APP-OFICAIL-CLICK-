@@ -14,7 +14,12 @@ function verifyMpSignature(req: any): boolean {
   const xRequestId = req.headers['x-request-id'] as string | undefined;
   const dataId = req.body?.data?.id;
 
-  if (!xSignature || !xRequestId || !dataId) return false;
+  console.log('Webhook headers:', JSON.stringify({ xSignature, xRequestId, dataId }));
+
+  if (!xSignature || !xRequestId || !dataId) {
+    console.warn('Webhook: headers obrigatórios ausentes', { xSignature: !!xSignature, xRequestId: !!xRequestId, dataId: !!dataId });
+    return false;
+  }
 
   const tsMatch = xSignature.match(/ts=([^,]+)/);
   const v1Match = xSignature.match(/v1=([^,]+)/);
