@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle, Package, Truck, Phone, Home, Clock, Paintbrush, Star } from 'lucide-react';
+import { CheckCircle, Package, Truck, Phone, Home, Clock, Paintbrush, Star, Loader2 } from 'lucide-react';
 
 interface PosCompraProps {
   nome: string;
@@ -9,6 +9,7 @@ interface PosCompraProps {
   quantidade: string;
   valor: string;
   frete: string;
+  paymentId?: string;
 }
 
 const STEPS = [
@@ -45,12 +46,48 @@ const STEPS = [
 ];
 
 export const PosCompra: React.FC<PosCompraProps> = ({
-  nome, email, produto, personalizacao, quantidade, valor, frete,
+  nome: nomeInit, email: emailInit, produto: produtoInit,
+  personalizacao: personalizacaoInit, quantidade: quantidadeInit,
+  valor: valorInit, frete: freteInit, paymentId,
 }) => {
   const [visible, setVisible] = useState(false);
+  const [fetching, setFetching] = useState(false);
+  const [nome, setNome] = useState(nomeInit);
+  const [email, setEmail] = useState(emailInit);
+  const [produto, setProduto] = useState(produtoInit);
+  const [personalizacao, setPersonalizacao] = useState(personalizacaoInit);
+  const [quantidade, setQuantidade] = useState(quantidadeInit);
+  const [valor, setValor] = useState(valorInit);
 
   useEffect(() => {
     setTimeout(() => setVisible(true), 100);
+
+    if (paymentId && !nomeInit) {
+      setFetching(true);
+      const tryFetch = async (retries = 5) => {
+        try {
+          const res = await fetch(`/api/pedido-by-payment?payment_id=${paymentId}`);
+          if (res.ok) {
+            const d = await res.json();
+            setNome(d.nome || '');
+            setEmail(d.email || '');
+            setProduto(d.produto || '');
+            setPersonalizacao(d.tipo_personalizacao || '');
+            setQuantidade(String(d.quantidade || ''));
+            setValor(String(d.valor_total || ''));
+            setFetching(false);
+          } else if (retries > 0) {
+            setTimeout(() => tryFetch(retries - 1), 3000);
+          } else {
+            setFetching(false);
+          }
+        } catch {
+          if (retries > 0) setTimeout(() => tryFetch(retries - 1), 3000);
+          else setFetching(false);
+        }
+      };
+      tryFetch();
+    }
   }, []);
 
   const primeiroNome = nome.split(' ')[0] || 'Cliente';
@@ -92,32 +129,47 @@ export const PosCompra: React.FC<PosCompraProps> = ({
             Resumo do Pedido
           </h2>
 
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-500">Produto</span>
-              <span className="font-medium text-gray-900 text-right max-w-[60%]">{produto}</span>
+          {fetching ? (
+            <div className="flex items-center gap-2 text-gray-400 text-sm py-4">
+              <Loader2 size={16} className="animate-spin" />
+              Carregando detalhes do pedido...
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Personalização</span>
-              <span className="font-medium text-gray-900">{personalizacao}</span>
+          ) : (
+            <div className="space-y-3 text-sm">
+              {produto && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Produto</span>
+                  <span className="font-medium text-gray-900 text-right max-w-[60%]">{produto}</span>
+                </div>
+              )}
+              {personalizacao && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Personalização</span>
+                  <span className="font-medium text-gray-900">{personalizacao}</span>
+                </div>
+              )}
+              {qtd > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Quantidade</span>
+                  <span className="font-medium text-gray-900">{qtd} unidades</span>
+                </div>
+              )}
+              {freteInit && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Frete</span>
+                  <span className="font-medium text-gray-900">{freteInit}</span>
+                </div>
+              )}
+              {totalNum > 0 && (
+                <div className="border-t border-gray-100 pt-3 flex justify-between items-center">
+                  <span className="font-semibold text-gray-900">Total pago</span>
+                  <span className="font-bold text-xl text-primary">
+                    R$ {totalNum.toFixed(2).replace('.', ',')}
+                  </span>
+                </div>
+              )}
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Quantidade</span>
-              <span className="font-medium text-gray-900">{qtd} unidades</span>
-            </div>
-            {frete && (
-              <div className="flex justify-between">
-                <span className="text-gray-500">Frete</span>
-                <span className="font-medium text-gray-900">{frete}</span>
-              </div>
-            )}
-            <div className="border-t border-gray-100 pt-3 flex justify-between items-center">
-              <span className="font-semibold text-gray-900">Total pago</span>
-              <span className="font-bold text-xl text-primary">
-                R$ {totalNum.toFixed(2).replace('.', ',')}
-              </span>
-            </div>
-          </div>
+          )}
 
           <div className="mt-4 bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-center gap-3">
             <CheckCircle size={18} className="text-green-500 flex-shrink-0" />
@@ -135,7 +187,6 @@ export const PosCompra: React.FC<PosCompraProps> = ({
           </h2>
 
           <div className="relative">
-            {/* Linha vertical */}
             <div className="absolute left-5 top-6 bottom-6 w-0.5 bg-gray-100" />
 
             <div className="space-y-5">

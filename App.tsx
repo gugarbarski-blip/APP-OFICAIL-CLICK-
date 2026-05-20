@@ -70,6 +70,7 @@ const App: React.FC = () => {
         quantidade={p.get('quantidade') || ''}
         valor={p.get('valor') || ''}
         frete={p.get('frete') || ''}
+        paymentId={p.get('payment_id') || undefined}
       />
     );
   }

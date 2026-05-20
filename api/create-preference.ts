@@ -45,7 +45,7 @@ export default async function handler(req: any, res: any) {
         metadata: { product_name: productName, quantity: String(qty), buyer_name: buyerName, buyer_email: buyerEmail, address: address || '', customization_type: customizationType || '', serigrafia_color: serigrafiaColor || '', art_url: artUrl || '' },
         notification_url: 'https://imprebrindes.clickimpresso.com.br/api/webhook-mp',
         back_urls: {
-          success: 'https://imprebrindes.clickimpresso.com.br/?pagamento=sucesso',
+          success: 'https://imprebrindes.clickimpresso.com.br/pedido-confirmado',
           failure: 'https://imprebrindes.clickimpresso.com.br/?pagamento=erro',
           pending: 'https://imprebrindes.clickimpresso.com.br/?pagamento=pendente',
         },
