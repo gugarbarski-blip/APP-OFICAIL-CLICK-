@@ -174,7 +174,7 @@ export const PosCompra: React.FC<PosCompraProps> = ({
           </p>
           <div className="flex justify-center mt-3">
             <a
-              href="https://wa.me/5551999999999"
+              href="https://wa.me/5551995334623"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold text-sm px-5 py-2.5 rounded-full transition-colors"
