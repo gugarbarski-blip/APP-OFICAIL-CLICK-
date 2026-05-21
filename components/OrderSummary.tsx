@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Package, MapPin, User, Palette, AlertCircle, QrCode, Copy, CheckCheck, Loader2 } from 'lucide-react';
+import { ArrowLeft, Package, MapPin, User, Palette, AlertCircle, QrCode, Copy, CheckCheck, Loader2, CreditCard } from 'lucide-react';
 import { Customization, OrderFormData, ProductDef, SERIGRAFIA_COLORS, calcUnitPrice, calcTotal } from '../types';
 import { ArtPreviewCanvas } from './ArtPreviewCanvas';
 
@@ -20,6 +20,7 @@ interface PixData {
 
 export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customization, formData, onBack, onConfirm }) => {
   const [loading, setLoading] = useState(false);
+  const [cardLoading, setCardLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pixData, setPixData] = useState<PixData | null>(null);
   const [copied, setCopied] = useState(false);
@@ -89,6 +90,26 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
       setError('Não foi possível gerar o PIX. Tente novamente.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCardPay = async () => {
+    setCardLoading(true);
+    setError(null);
+    try {
+      const artUrl = await uploadArt();
+      const res = await fetch('/api/create-preference', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildBody(artUrl)),
+      });
+      if (!res.ok) throw new Error('Erro ao criar preferência');
+      const { checkoutUrl } = await res.json();
+      if (!checkoutUrl) throw new Error('URL de checkout não gerada');
+      window.location.href = checkoutUrl;
+    } catch {
+      setError('Não foi possível iniciar o pagamento com cartão. Tente novamente.');
+      setCardLoading(false);
     }
   };
 
@@ -277,21 +298,48 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
             )}
 
             {!pixData && (
-              <button
-                onClick={handlePay}
-                disabled={loading}
-                className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-semibold text-base transition-all ${
-                  loading
-                    ? 'bg-gray-700 text-gray-400 cursor-wait'
-                    : 'bg-[#32BCAD] hover:bg-[#29a99b] text-white hover:shadow-lg hover:shadow-[#32BCAD]/30'
-                }`}
-              >
-                {loading ? <><Loader2 size={20} className="animate-spin" />Gerando PIX...</> : <><QrCode size={20} />Gerar QR Code PIX</>}
-              </button>
+              <div className="space-y-3">
+                <button
+                  onClick={handlePay}
+                  disabled={loading || cardLoading}
+                  className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-semibold text-base transition-all ${
+                    loading
+                      ? 'bg-gray-700 text-gray-400 cursor-wait'
+                      : cardLoading
+                        ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                        : 'bg-[#32BCAD] hover:bg-[#29a99b] text-white hover:shadow-lg hover:shadow-[#32BCAD]/30'
+                  }`}
+                >
+                  {loading ? <><Loader2 size={20} className="animate-spin" />Gerando PIX...</> : <><QrCode size={20} />Gerar QR Code PIX</>}
+                </button>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-gray-700" />
+                  <span className="text-gray-500 text-xs">ou</span>
+                  <div className="flex-1 h-px bg-gray-700" />
+                </div>
+
+                <button
+                  onClick={handleCardPay}
+                  disabled={cardLoading || loading}
+                  className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-semibold text-base border transition-all ${
+                    cardLoading
+                      ? 'border-indigo-700 bg-indigo-900/50 text-indigo-300 cursor-wait'
+                      : loading
+                        ? 'border-gray-700 bg-gray-800 text-gray-500 cursor-not-allowed'
+                        : 'border-indigo-500 bg-indigo-600 hover:bg-indigo-500 text-white hover:shadow-lg hover:shadow-indigo-500/30'
+                  }`}
+                >
+                  {cardLoading
+                    ? <><Loader2 size={20} className="animate-spin" />Redirecionando...</>
+                    : <><CreditCard size={20} />Pagar com Cartão — até 12x</>
+                  }
+                </button>
+              </div>
             )}
 
             <p className="text-gray-500 text-xs text-center mt-3">
-              Pagamento seguro via Mercado Pago · PIX
+              Pagamento seguro via Mercado Pago · PIX ou Cartão
             </p>
           </div>
         </div>

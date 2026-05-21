@@ -16,7 +16,7 @@ const STEPS = [
   {
     icon: CheckCircle,
     title: 'Pagamento aprovado',
-    desc: 'Seu pagamento PIX foi confirmado com sucesso.',
+    desc: 'Seu pagamento foi confirmado com sucesso.',
     done: true,
   },
   {
@@ -173,7 +173,7 @@ export const PosCompra: React.FC<PosCompraProps> = ({
 
           <div className="mt-4 bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-center gap-3">
             <CheckCircle size={18} className="text-green-500 flex-shrink-0" />
-            <span className="text-green-800 font-medium text-sm">Pagamento PIX confirmado</span>
+            <span className="text-green-800 font-medium text-sm">Pagamento confirmado</span>
           </div>
         </div>
 
