@@ -16,7 +16,7 @@ const UF_ZONE = {
   BA: 5, SE: 5, AL: 5, PE: 5, PB: 5, RN: 5, CE: 5, PI: 5,
   MA: 6, TO: 6, PA: 6, AP: 6,
   AM: 7, RO: 7, RR: 7, AC: 7,
-} as Record<string, number>;
+};
 
 const PAC_TABLE = [
   { maxWeight:  1000, prices: [18.50, 20.00, 22.50, 25.00, 27.00, 32.00, 37.00] },
@@ -39,15 +39,15 @@ const SEDEX_TABLE = [
 const PAC_DEADLINE   = [5, 6, 7, 9, 11, 14, 17];
 const SEDEX_DEADLINE = [1, 2, 3, 4,  4,  5,  5];
 
-function round2(v: number) { return Math.round(v * 100) / 100; }
-function plural(n: number) { return `${n} dia${n !== 1 ? 's' : ''} ${n !== 1 ? 'úteis' : 'útil'}`; }
+function round2(v) { return Math.round(v * 100) / 100; }
+function plural(n) { return `${n} dia${n !== 1 ? 's' : ''} ${n !== 1 ? 'úteis' : 'útil'}`; }
 
-function tablePrice(table: typeof PAC_TABLE, weightG: number, zone: number): number {
-  const row = table.find(r => weightG <= r.maxWeight) ?? table[table.length - 1];
+function tablePrice(table, weightG, zone) {
+  const row = table.find(r => weightG <= r.maxWeight) || table[table.length - 1];
   return row.prices[zone - 1];
 }
 
-function buildStaticResults(zone: number, chargeG: number, numBoxes: number) {
+function buildStaticResults(zone, chargeG, numBoxes) {
   const pacDays    = PAC_DEADLINE[zone - 1];
   const pacTotal   = PRODUCAO_DIAS + pacDays;
   const sedexDays  = SEDEX_DEADLINE[zone - 1];
@@ -70,7 +70,7 @@ function buildStaticResults(zone: number, chargeG: number, numBoxes: number) {
   ];
 }
 
-async function calcFrenet(cepDestino: string, numBoxes: number, weightPerBoxKg: number) {
+async function calcFrenet(cepDestino, numBoxes, weightPerBoxKg) {
   const token = (process.env.FRENET_TOKEN || '').trim();
   if (!token || token === 'undefined' || token === 'null') {
     throw new Error('FRENET_TOKEN não configurado');
@@ -79,7 +79,7 @@ async function calcFrenet(cepDestino: string, numBoxes: number, weightPerBoxKg: 
   const controller = new AbortController();
   const tid = setTimeout(() => controller.abort(), 7000);
 
-  let resp: any;
+  let resp;
   try {
     resp = await fetch('https://freight.frenet.com.br/shipping/quote', {
       method: 'POST',
@@ -108,8 +108,8 @@ async function calcFrenet(cepDestino: string, numBoxes: number, weightPerBoxKg: 
   const data = await resp.json();
   if (data.Erro) throw new Error(`Frenet: ${data.Erro}`);
 
-  const services: any[] = data.ShippingSevicesArray ?? data.ShippingServicesArray ?? [];
-  const valid = services.filter((s: any) =>
+  const services = data.ShippingSevicesArray || data.ShippingServicesArray || [];
+  const valid = services.filter(s =>
     (!s.Error || s.Error === '') &&
     (s.ErrorCode === '0' || s.ErrorCode == null) &&
     Number(s.ShippingPrice) > 0,
@@ -118,27 +118,27 @@ async function calcFrenet(cepDestino: string, numBoxes: number, weightPerBoxKg: 
   console.log(`Frenet: ${services.length} serviços, ${valid.length} válidos`);
 
   return valid
-    .map((s: any) => {
+    .map(s => {
       const shippingDays = Number(s.DeliveryTime) || 0;
       const total        = PRODUCAO_DIAS + shippingDays;
-      const carrier      = String(s.Carrier ?? '');
-      const svcName      = String(s.ServiceDescription ?? '');
+      const carrier      = String(s.Carrier || '');
+      const svcName      = String(s.ServiceDescription || '');
       return {
-        service:      `FRN_${s.ServiceCode ?? svcName}`,
+        service:      `FRN_${s.ServiceCode || svcName}`,
         company:      carrier,
         price:        round2(Number(s.ShippingPrice)),
         deadlineDays: total,
         label:        `${carrier} ${svcName} — até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${shippingDays} frete)`,
       };
     })
-    .sort((a: any, b: any) => a.price - b.price);
+    .sort((a, b) => a.price - b.price);
 }
 
-async function getUFFromViaCep(cep: string): Promise<string | null> {
+async function getUFFromViaCep(cep) {
   try {
     const controller = new AbortController();
     const tid = setTimeout(() => controller.abort(), 5000);
-    let resp: any;
+    let resp;
     try {
       resp = await fetch(`https://viacep.com.br/ws/${cep}/json/`, { signal: controller.signal });
     } finally {
@@ -153,15 +153,15 @@ async function getUFFromViaCep(cep: string): Promise<string | null> {
   }
 }
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const body = req.body || {};
-    const cepDestino    = String(body.cepDestino || '');
-    const quantity      = Number(body.quantity);
-    const productId     = String(body.productId || '');
-    const ufParam       = String(body.uf || '');
+    const body        = req.body || {};
+    const cepDestino  = String(body.cepDestino || '');
+    const quantity    = Number(body.quantity);
+    const productId   = String(body.productId || '');
+    const ufParam     = String(body.uf || '');
 
     const cleanCEP = cepDestino.replace(/\D/g, '');
     if (cleanCEP.length !== 8) return res.status(400).json({ error: 'CEP inválido' });
@@ -171,7 +171,7 @@ export default async function handler(req: any, res: any) {
     const numBoxes           = Math.ceil(quantity / CUPS_PER_BOX);
     const realWeightPerBoxKg = (CUPS_PER_BOX * weightPerUnit + BOX_WEIGHT_G) / 1000;
 
-    const combined: any[] = [];
+    const combined = [];
 
     // 1. Frenet — cotação em tempo real
     if (process.env.FRENET_TOKEN) {
@@ -188,11 +188,11 @@ export default async function handler(req: any, res: any) {
     const temSEDEX = combined.some(r => /\bsedex\b/i.test(r.label) || r.service.includes('04014'));
 
     if (!temPAC || !temSEDEX) {
-      let uf: string | null = (ufParam && UF_ZONE[ufParam.toUpperCase().trim()])
+      let uf = (ufParam && UF_ZONE[ufParam.toUpperCase().trim()])
         ? ufParam.toUpperCase().trim()
         : null;
       if (!uf) uf = await getUFFromViaCep(cleanCEP);
-      const zone = uf ? (UF_ZONE[uf] ?? null) : null;
+      const zone = uf ? (UF_ZONE[uf] || null) : null;
 
       if (zone) {
         const chargeG    = Math.max(CUPS_PER_BOX * weightPerUnit + BOX_WEIGHT_G, BOX_CUBIC_G);
