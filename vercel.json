@@ -2,6 +2,11 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
+  "functions": {
+    "api/shipping.ts": {
+      "maxDuration": 15
+    }
+  },
   "rewrites": [
     { "source": "/((?!api/|sitemap\\.xml|robots\\.txt|google[^/]*\\.html).*)", "destination": "/index.html" }
   ],

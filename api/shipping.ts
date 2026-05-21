@@ -1,4 +1,3 @@
-
 const CEP_ORIGEM    = '91430221';
 const PRODUCAO_DIAS = 2;
 const CUPS_PER_BOX  = 20;
@@ -9,18 +8,7 @@ const BOX_LARG      = 33;
 const BOX_CUBIC_G   = Math.round((BOX_COMP * BOX_ALT * BOX_LARG) / 6000 * 1000);
 const MARGEM        = 1.15;
 
-interface ShippingResult {
-  service: string;
-  company: string;
-  price: number;
-  deadlineDays: number;
-  label: string;
-}
-
-const plural = (n: number) => `${n} dia${n !== 1 ? 's' : ''} ${n !== 1 ? 'úteis' : 'útil'}`;
-const round2 = (v: number) => Math.round(v * 100) / 100;
-
-const UF_ZONE: Record<string, number> = {
+const UF_ZONE = {
   RS: 1,
   SC: 2, PR: 2,
   SP: 3, RJ: 3, ES: 3, MG: 3,
@@ -28,7 +16,7 @@ const UF_ZONE: Record<string, number> = {
   BA: 5, SE: 5, AL: 5, PE: 5, PB: 5, RN: 5, CE: 5, PI: 5,
   MA: 6, TO: 6, PA: 6, AP: 6,
   AM: 7, RO: 7, RR: 7, AC: 7,
-};
+} as Record<string, number>;
 
 const PAC_TABLE = [
   { maxWeight:  1000, prices: [18.50, 20.00, 22.50, 25.00, 27.00, 32.00, 37.00] },
@@ -51,14 +39,17 @@ const SEDEX_TABLE = [
 const PAC_DEADLINE   = [5, 6, 7, 9, 11, 14, 17];
 const SEDEX_DEADLINE = [1, 2, 3, 4,  4,  5,  5];
 
+function round2(v: number) { return Math.round(v * 100) / 100; }
+function plural(n: number) { return `${n} dia${n !== 1 ? 's' : ''} ${n !== 1 ? 'úteis' : 'útil'}`; }
+
 function tablePrice(table: typeof PAC_TABLE, weightG: number, zone: number): number {
   const row = table.find(r => weightG <= r.maxWeight) ?? table[table.length - 1];
   return row.prices[zone - 1];
 }
 
-function buildStaticResults(zone: number, chargeG: number, numBoxes: number): ShippingResult[] {
-  const pacDays   = PAC_DEADLINE[zone - 1];
-  const pacTotal  = PRODUCAO_DIAS + pacDays;
+function buildStaticResults(zone: number, chargeG: number, numBoxes: number) {
+  const pacDays    = PAC_DEADLINE[zone - 1];
+  const pacTotal   = PRODUCAO_DIAS + pacDays;
   const sedexDays  = SEDEX_DEADLINE[zone - 1];
   const sedexTotal = PRODUCAO_DIAS + sedexDays;
   return [
@@ -79,82 +70,80 @@ function buildStaticResults(zone: number, chargeG: number, numBoxes: number): Sh
   ];
 }
 
-async function calcFrenet(
-  cepDestino: string,
-  numBoxes: number,
-  weightPerBoxKg: number,
-): Promise<ShippingResult[]> {
-  const token = process.env.FRENET_TOKEN?.trim();
+async function calcFrenet(cepDestino: string, numBoxes: number, weightPerBoxKg: number) {
+  const token = (process.env.FRENET_TOKEN || '').trim();
   if (!token || token === 'undefined' || token === 'null') {
-    throw new Error('FRENET_TOKEN não configurado ou inválido');
+    throw new Error('FRENET_TOKEN não configurado');
   }
 
-  const fetchPromise = fetch('https://freight.frenet.com.br/shipping/quote', {
-    method: 'POST',
-    headers: { 'token': token, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      SellerCEP: CEP_ORIGEM,
-      RecipientCEP: cepDestino,
-      ShipmentInvoiceValue: 150,
-      ShippingItemArray: [{
-        Height: BOX_ALT, Length: BOX_COMP, Width: BOX_LARG,
-        Weight: weightPerBoxKg, Quantity: numBoxes,
-        SKU: 'copos', Category: 'Utilidades Domesticas', isFragile: false,
-      }],
-    }),
-  });
+  const controller = new AbortController();
+  const tid = setTimeout(() => controller.abort(), 7000);
 
-  let timeoutId: any;
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    timeoutId = setTimeout(() => reject(new Error('Frenet timeout')), 7000);
-  });
-
+  let resp: any;
   try {
-    const resp = await Promise.race([fetchPromise, timeoutPromise]);
-    if (timeoutId) clearTimeout(timeoutId);
-
-    if (!resp.ok) {
-      const txt = await resp.text().catch(() => '');
-      throw new Error(`Frenet HTTP ${resp.status}: ${txt.slice(0, 200)}`);
-    }
-
-    const data = await resp.json();
-    if (data.Erro) throw new Error(`Frenet: ${data.Erro}`);
-
-    // Frenet tem um typo histórico no campo: "ShippingSevicesArray" (sem o 'i')
-    const services: any[] = data.ShippingSevicesArray ?? data.ShippingServicesArray ?? [];
-    const valid = services.filter(s =>
-      (!s.Error || s.Error === '') &&
-      (s.ErrorCode === '0' || s.ErrorCode == null) &&
-      Number(s.ShippingPrice) > 0,
-    );
-
-    console.log(`Frenet: ${services.length} serviços retornados, ${valid.length} válidos`);
-
-    return valid
-      .map(s => {
-        const shippingDays = Number(s.DeliveryTime) || 0;
-        const total        = PRODUCAO_DIAS + shippingDays;
-        const carrier      = String(s.Carrier ?? '');
-        const svcName      = String(s.ServiceDescription ?? '');
-        return {
-          service:      `FRN_${s.ServiceCode ?? svcName}`,
-          company:      carrier,
-          price:        round2(Number(s.ShippingPrice)),
-          deadlineDays: total,
-          label:        `${carrier} ${svcName} — até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${shippingDays} frete)`,
-        };
-      })
-      .sort((a, b) => a.price - b.price);
-  } catch (err) {
-    if (timeoutId) clearTimeout(timeoutId);
-    throw err;
+    resp = await fetch('https://freight.frenet.com.br/shipping/quote', {
+      method: 'POST',
+      headers: { 'token': token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        SellerCEP: CEP_ORIGEM,
+        RecipientCEP: cepDestino,
+        ShipmentInvoiceValue: 150,
+        ShippingItemArray: [{
+          Height: BOX_ALT, Length: BOX_COMP, Width: BOX_LARG,
+          Weight: weightPerBoxKg, Quantity: numBoxes,
+          SKU: 'copos', Category: 'Utilidades Domesticas', isFragile: false,
+        }],
+      }),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(tid);
   }
+
+  if (!resp.ok) {
+    const txt = await resp.text().catch(() => '');
+    throw new Error(`Frenet HTTP ${resp.status}: ${txt.slice(0, 200)}`);
+  }
+
+  const data = await resp.json();
+  if (data.Erro) throw new Error(`Frenet: ${data.Erro}`);
+
+  const services: any[] = data.ShippingSevicesArray ?? data.ShippingServicesArray ?? [];
+  const valid = services.filter((s: any) =>
+    (!s.Error || s.Error === '') &&
+    (s.ErrorCode === '0' || s.ErrorCode == null) &&
+    Number(s.ShippingPrice) > 0,
+  );
+
+  console.log(`Frenet: ${services.length} serviços, ${valid.length} válidos`);
+
+  return valid
+    .map((s: any) => {
+      const shippingDays = Number(s.DeliveryTime) || 0;
+      const total        = PRODUCAO_DIAS + shippingDays;
+      const carrier      = String(s.Carrier ?? '');
+      const svcName      = String(s.ServiceDescription ?? '');
+      return {
+        service:      `FRN_${s.ServiceCode ?? svcName}`,
+        company:      carrier,
+        price:        round2(Number(s.ShippingPrice)),
+        deadlineDays: total,
+        label:        `${carrier} ${svcName} — até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${shippingDays} frete)`,
+      };
+    })
+    .sort((a: any, b: any) => a.price - b.price);
 }
 
 async function getUFFromViaCep(cep: string): Promise<string | null> {
   try {
-    const resp = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), 5000);
+    let resp: any;
+    try {
+      resp = await fetch(`https://viacep.com.br/ws/${cep}/json/`, { signal: controller.signal });
+    } finally {
+      clearTimeout(tid);
+    }
     if (!resp.ok) return null;
     const json = await resp.json();
     if (json.erro || !json.uf) return null;
@@ -168,27 +157,23 @@ export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const body = req.body ?? {};
-    const { cepDestino, quantity, productId, uf: ufParam } = body as {
-      cepDestino?: string;
-      quantity?: number;
-      productId?: string;
-      uf?: string;
-    };
+    const body = req.body || {};
+    const cepDestino    = String(body.cepDestino || '');
+    const quantity      = Number(body.quantity);
+    const productId     = String(body.productId || '');
+    const ufParam       = String(body.uf || '');
 
-    const cleanCEP = String(cepDestino ?? '').replace(/\D/g, '');
+    const cleanCEP = cepDestino.replace(/\D/g, '');
     if (cleanCEP.length !== 8) return res.status(400).json({ error: 'CEP inválido' });
-
-    const qty = Number(quantity);
-    if (!qty || qty < 1) return res.status(400).json({ error: 'Quantidade inválida' });
+    if (!quantity || quantity < 1) return res.status(400).json({ error: 'Quantidade inválida' });
 
     const weightPerUnit      = productId === 'cuia-320' ? 173 : 268;
-    const numBoxes           = Math.ceil(qty / CUPS_PER_BOX);
+    const numBoxes           = Math.ceil(quantity / CUPS_PER_BOX);
     const realWeightPerBoxKg = (CUPS_PER_BOX * weightPerUnit + BOX_WEIGHT_G) / 1000;
 
-    const combined: ShippingResult[] = [];
+    const combined: any[] = [];
 
-    // 1. Frenet — cotação em tempo real (todas as transportadoras disponíveis)
+    // 1. Frenet — cotação em tempo real
     if (process.env.FRENET_TOKEN) {
       try {
         const frenetResults = await calcFrenet(cleanCEP, numBoxes, realWeightPerBoxKg);
@@ -198,8 +183,7 @@ export default async function handler(req: any, res: any) {
       }
     }
 
-    // 2. Correios PAC/SEDEX — garante que sempre apareçam
-    //    (se a Frenet já trouxe, não duplica)
+    // 2. Correios PAC/SEDEX estático — garante que sempre apareçam
     const temPAC   = combined.some(r => /\bpac\b/i.test(r.label) || r.service.includes('04510'));
     const temSEDEX = combined.some(r => /\bsedex\b/i.test(r.label) || r.service.includes('04014'));
 
@@ -213,8 +197,8 @@ export default async function handler(req: any, res: any) {
       if (zone) {
         const chargeG    = Math.max(CUPS_PER_BOX * weightPerUnit + BOX_WEIGHT_G, BOX_CUBIC_G);
         const staticOpts = buildStaticResults(zone, chargeG, numBoxes);
-        if (!temPAC)   combined.push(staticOpts.find(r => r.service === 'PAC')!);
-        if (!temSEDEX) combined.push(staticOpts.find(r => r.service === 'SEDEX')!);
+        if (!temPAC)   combined.push(staticOpts[0]);
+        if (!temSEDEX) combined.push(staticOpts[1]);
       }
     }
 
