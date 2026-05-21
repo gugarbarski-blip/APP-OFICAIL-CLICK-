@@ -96,7 +96,7 @@ async function calcMelhorEnvio(
 
   const pkg  = { height: BOX_ALT, width: BOX_LARG, length: BOX_COMP, weight: weightPerBoxKg };
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 7000);
+  const timer = setTimeout(() => ctrl.abort(), 4000);
 
   let data: any[];
   try {
@@ -123,6 +123,10 @@ async function calcMelhorEnvio(
     data = await resp.json();
   } finally {
     clearTimeout(timer);
+  }
+
+  if (!Array.isArray(data)) {
+    throw new Error('Melhor Envio retornou resposta inesperada (não é array)');
   }
 
   const valid = (data as any[]).filter(s => !s.error && s.price != null && parseFloat(s.price) > 0);
@@ -164,9 +168,19 @@ async function fetchUFFromCEP(cep: string): Promise<string> {
 // ── Handler ───────────────────────────────────────────────────────────────────
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  try {
+    return await handleShipping(req, res);
+  } catch (err) {
+    console.error('[SHIPPING-FATAL]', String(err));
+    return res.status(500).json({ error: 'Erro interno ao calcular frete. Tente novamente.' });
+  }
+}
+
+async function handleShipping(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { cepDestino, quantity, productId, uf: ufParam } = req.body as {
+  const body = req.body ?? {};
+  const { cepDestino, quantity, productId, uf: ufParam } = body as {
     cepDestino: string; quantity: number; productId: string; uf?: string;
   };
 
