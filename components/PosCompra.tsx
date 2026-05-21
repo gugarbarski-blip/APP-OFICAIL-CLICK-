@@ -10,6 +10,7 @@ interface PosCompraProps {
   valor: string;
   frete: string;
   paymentId?: string;
+  pedidoId?: string;
 }
 
 const STEPS = [
@@ -48,7 +49,7 @@ const STEPS = [
 export const PosCompra: React.FC<PosCompraProps> = ({
   nome: nomeInit, email: emailInit, produto: produtoInit,
   personalizacao: personalizacaoInit, quantidade: quantidadeInit,
-  valor: valorInit, frete: freteInit, paymentId,
+  valor: valorInit, frete: freteInit, paymentId, pedidoId,
 }) => {
   const [visible, setVisible] = useState(false);
   const [fetching, setFetching] = useState(false);
@@ -62,32 +63,47 @@ export const PosCompra: React.FC<PosCompraProps> = ({
   useEffect(() => {
     setTimeout(() => setVisible(true), 100);
 
-    if (paymentId && !nomeInit) {
-      setFetching(true);
-      const tryFetch = async (retries = 5) => {
-        try {
-          const res = await fetch(`/api/pedido-by-payment?payment_id=${paymentId}`);
-          if (res.ok) {
-            const d = await res.json();
-            setNome(d.nome || '');
-            setEmail(d.email || '');
-            setProduto(d.produto || '');
-            setPersonalizacao(d.tipo_personalizacao || '');
-            setQuantidade(String(d.quantidade || ''));
-            setValor(String(d.valor_total || ''));
-            setFetching(false);
-          } else if (retries > 0) {
-            setTimeout(() => tryFetch(retries - 1), 3000);
-          } else {
-            setFetching(false);
-          }
-        } catch {
-          if (retries > 0) setTimeout(() => tryFetch(retries - 1), 3000);
-          else setFetching(false);
-        }
-      };
-      tryFetch();
+    const needsFetch = !nomeInit && (pedidoId || paymentId);
+    if (!needsFetch) return;
+
+    setFetching(true);
+
+    const applyData = (d: any) => {
+      setNome(d.nome || '');
+      setEmail(d.email || '');
+      setProduto(d.produto || '');
+      setPersonalizacao(d.tipo_personalizacao || '');
+      setQuantidade(String(d.quantidade || ''));
+      setValor(String(d.valor_total || ''));
+      setFetching(false);
+    };
+
+    if (pedidoId) {
+      // Lookup direto por ID — pedido já está no banco, sem dependência de webhook
+      fetch(`/api/pedido-by-payment?pedido_id=${pedidoId}`)
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(applyData)
+        .catch(() => setFetching(false));
+      return;
     }
+
+    // Fallback: lookup por payment_id com retry (fluxo legado / PIX sem params na URL)
+    const tryFetch = async (retries = 8) => {
+      try {
+        const res = await fetch(`/api/pedido-by-payment?payment_id=${paymentId}`);
+        if (res.ok) {
+          applyData(await res.json());
+        } else if (retries > 0) {
+          setTimeout(() => tryFetch(retries - 1), 3000);
+        } else {
+          setFetching(false);
+        }
+      } catch {
+        if (retries > 0) setTimeout(() => tryFetch(retries - 1), 3000);
+        else setFetching(false);
+      }
+    };
+    tryFetch();
   }, []);
 
   const primeiroNome = nome.split(' ')[0] || 'Cliente';

@@ -95,7 +95,8 @@ export default async function handler(req: any, res: any) {
         },
         notification_url: 'https://imprebrindes.clickimpresso.com.br/api/webhook-mp',
         back_urls: {
-          success: 'https://imprebrindes.clickimpresso.com.br/pedido-confirmado',
+          // pedido_id na URL elimina dependência do webhook para carregar a tela de pós-compra
+          success: `https://imprebrindes.clickimpresso.com.br/pedido-confirmado${pedidoId ? `?pedido_id=${pedidoId}` : ''}`,
           failure: 'https://imprebrindes.clickimpresso.com.br/?pagamento=erro',
           pending: 'https://imprebrindes.clickimpresso.com.br/?pagamento=pendente',
         },
