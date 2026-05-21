@@ -11,8 +11,6 @@ const BOX_ALT      = 36;
 const BOX_LARG     = 33;
 const BOX_CUBIC_G  = Math.round((BOX_COMP * BOX_ALT * BOX_LARG) / 6000 * 1000);
 
-const PAC_CODE   = '04510';
-const SEDEX_CODE = '04014';
 
 // ── Tipo interno ─────────────────────────────────────────────────────────────
 
@@ -46,7 +44,7 @@ async function calcMelhorEnvio(
   const pkg = { height: BOX_ALT, width: BOX_LARG, length: BOX_COMP, weight: weightPerBoxKg };
 
   const ctrl  = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 12000);
+  const timer = setTimeout(() => ctrl.abort(), 7000);
 
   let data: any[];
   try {
@@ -95,57 +93,7 @@ async function calcMelhorEnvio(
     .sort((a, b) => a.price - b.price);
 }
 
-// ── Correios (API em tempo real) ──────────────────────────────────────────────
-
-async function calcCorreiosBox(cepDestino: string, pesoKg: number): Promise<{
-  pac: number; pacDays: number; sedex: number | null; sedexDays: number | null;
-}> {
-  const qs = new URLSearchParams({
-    nCdEmpresa: '', sDsSenha: '',
-    nCdServico: `${PAC_CODE},${SEDEX_CODE}`,
-    sCepOrigem: CEP_ORIGEM, sCepDestino: cepDestino,
-    nVlPeso: pesoKg.toFixed(3), nCdFormato: '1',
-    nVlComprimento: String(BOX_COMP), nVlAltura: String(BOX_ALT),
-    nVlLargura: String(BOX_LARG), nVlDiametro: '0',
-    sCdMaoPropria: 'N', nVlValorDeclarado: '0', sCdAvisoRecebimento: 'N',
-  }).toString();
-
-  const ctrl  = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 8000);
-  let xml: string;
-  try {
-    const resp = await fetch(
-      `http://ws.correios.com.br/calculador/CalcPrecoPrazo.aspx?${qs}`,
-      { signal: ctrl.signal },
-    );
-    if (!resp.ok) throw new Error(`Correios HTTP ${resp.status}`);
-    xml = await resp.text();
-  } finally {
-    clearTimeout(timer);
-  }
-
-  const blocks = xml.match(/<cServico>[\s\S]*?<\/cServico>/g) ?? [];
-  if (!blocks.length) throw new Error('Resposta inválida dos Correios');
-
-  let pac: { price: number; days: number } | null   = null;
-  let sedex: { price: number; days: number } | null = null;
-
-  for (const blk of blocks) {
-    const tag   = (n: string) => blk.match(new RegExp(`<${n}>([^<]*)</${n}>`))?.[1]?.trim() ?? '';
-    const code  = tag('Codigo');
-    if (tag('Erro') !== '0') continue;
-    const price = parseFloat(tag('Valor').replace(',', '.'));
-    const days  = parseInt(tag('PrazoEntrega'), 10);
-    if (!isFinite(price) || price <= 0 || !isFinite(days)) continue;
-    if (code === PAC_CODE)   pac   = { price, days };
-    if (code === SEDEX_CODE) sedex = { price, days };
-  }
-
-  if (!pac) throw new Error('PAC não disponível');
-  return { pac: pac.price, pacDays: pac.days, sedex: sedex?.price ?? null, sedexDays: sedex?.days ?? null };
-}
-
-// ── Tabelas estáticas (último fallback) ───────────────────────────────────────
+// ── Tabelas estáticas ─────────────────────────────────────────────────────────
 
 function getZone(uf: string): number {
   const u = uf.toUpperCase();
@@ -209,54 +157,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const numBoxes           = Math.ceil(quantity / CUPS_PER_BOX);
   const realWeightPerBoxKg = (CUPS_PER_BOX * weightPerUnit + BOX_WEIGHT_G) / 1000;
 
-  // Roda ME e Correios em paralelo, mostra tudo junto
-  const [meResult, correiosResult] = await Promise.allSettled([
-    process.env.MELHOR_ENVIO_TOKEN
-      ? calcMelhorEnvio(cleanCEP, numBoxes, realWeightPerBoxKg)
-      : Promise.resolve([] as ShippingResult[]),
-    calcCorreiosBox(cleanCEP, realWeightPerBoxKg),
-  ]);
-
   const combined: ShippingResult[] = [];
 
-  if (meResult.status === 'fulfilled') {
-    combined.push(...meResult.value);
-  } else {
-    console.error('[ME-ERRO]', meResult.reason);
+  // ── Melhor Envio (se token configurado) ───────────────────────────────────
+  if (process.env.MELHOR_ENVIO_TOKEN) {
+    try {
+      const meOpts = await calcMelhorEnvio(cleanCEP, numBoxes, realWeightPerBoxKg);
+      combined.push(...meOpts);
+    } catch (err) {
+      console.error('[ME-ERRO]', err);
+    }
   }
 
-  if (correiosResult.status === 'fulfilled') {
-    const box = correiosResult.value;
-    // Só adiciona Correios se o ME não os retornou já
-    const jaTemPAC   = combined.some(o => o.label.toLowerCase().includes('pac'));
-    const jaTemSEDEX = combined.some(o => o.label.toLowerCase().includes('sedex'));
-    if (!jaTemPAC) {
-      const total = PRODUCAO_DIAS + box.pacDays;
-      combined.push({
-        service: 'PAC', company: 'Correios',
-        price: round2(box.pac * numBoxes),
-        deadlineDays: total,
-        label: `Correios PAC — até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${box.pacDays} frete)`,
-      });
-    }
-    if (!jaTemSEDEX && box.sedex !== null && box.sedexDays !== null) {
-      const total = PRODUCAO_DIAS + box.sedexDays;
-      combined.push({
-        service: 'SEDEX', company: 'Correios',
-        price: round2(box.sedex * numBoxes),
-        deadlineDays: total,
-        label: `Correios SEDEX — até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${box.sedexDays} frete)`,
-      });
-    }
-  } else {
-    console.warn('Correios API falhou, usando tabela estática');
-    const uf      = await getUF(cleanCEP).catch(() => 'SP');
-    const zone    = getZone(uf);
+  // ── Correios via tabela estática (fallback sempre confiável) ──────────────
+  const jaTemPAC   = combined.some(o => o.label.toLowerCase().includes('pac'));
+  const jaTemSEDEX = combined.some(o => o.label.toLowerCase().includes('sedex'));
+
+  if (!jaTemPAC || !jaTemSEDEX) {
+    const uf   = await getUF(cleanCEP).catch(() => 'SP');
+    const zone = getZone(uf);
     const chargeG = Math.max(CUPS_PER_BOX * weightPerUnit + BOX_WEIGHT_G, BOX_CUBIC_G);
-    const jaTemPAC   = combined.some(o => o.label.toLowerCase().includes('pac'));
-    const jaTemSEDEX = combined.some(o => o.label.toLowerCase().includes('sedex'));
+
     if (!jaTemPAC) {
-      const d = PAC_DEADLINE[zone - 1];
+      const d     = PAC_DEADLINE[zone - 1];
       const total = PRODUCAO_DIAS + d;
       combined.push({
         service: 'PAC', company: 'Correios',
@@ -266,7 +189,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
     if (!jaTemSEDEX) {
-      const d = SEDEX_DEADLINE[zone - 1];
+      const d     = SEDEX_DEADLINE[zone - 1];
       const total = PRODUCAO_DIAS + d;
       combined.push({
         service: 'SEDEX', company: 'Correios',
@@ -278,6 +201,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   combined.sort((a, b) => a.price - b.price);
-
   return res.status(200).json({ options: combined, numBoxes, realWeightPerBoxKg });
 }
