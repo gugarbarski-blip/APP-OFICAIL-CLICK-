@@ -145,8 +145,8 @@ async function getUF(cep: string): Promise<string> {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { cepDestino, quantity, productId } = req.body as {
-    cepDestino: string; quantity: number; productId: string;
+  const { cepDestino, quantity, productId, uf: ufParam } = req.body as {
+    cepDestino: string; quantity: number; productId: string; uf?: string;
   };
 
   const cleanCEP = String(cepDestino).replace(/\D/g, '');
@@ -174,7 +174,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const jaTemSEDEX = combined.some(o => o.label.toLowerCase().includes('sedex'));
 
   if (!jaTemPAC || !jaTemSEDEX) {
-    const uf   = await getUF(cleanCEP).catch(() => 'SP');
+    const uf   = ufParam || await getUF(cleanCEP).catch(() => 'SP');
     const zone = getZone(uf);
     const chargeG = Math.max(CUPS_PER_BOX * weightPerUnit + BOX_WEIGHT_G, BOX_CUBIC_G);
 

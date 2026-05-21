@@ -44,7 +44,7 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
     const cep = d.address.cep.replace(/\D/g, '');
     if (cep.length === 8 && shippingOptions.length === 0 && !shippingLoading) {
       setShippingLoading(true);
-      calcularFrete(d.address.cep, d.quantity, product.id)
+      calcularFrete(d.address.cep, d.quantity, product.id, d.address.state)
         .then(opts => setShippingOptions(opts))
         .catch(() => setShippingError('Não foi possível calcular o frete.'))
         .finally(() => setShippingLoading(false));
@@ -63,7 +63,7 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
     setShippingError('');
     onChange({ ...d, shipping: null });
     setShippingLoading(true);
-    calcularFrete(d.address.cep, d.quantity, product.id)
+    calcularFrete(d.address.cep, d.quantity, product.id, d.address.state)
       .then(opts => setShippingOptions(opts))
       .catch(() => setShippingError('Não foi possível calcular o frete.'))
       .finally(() => setShippingLoading(false));
@@ -102,7 +102,7 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
         onChange(updated);
         setShippingLoading(true);
         try {
-          const opts = await calcularFrete(formatted, d.quantity, product.id);
+          const opts = await calcularFrete(formatted, d.quantity, product.id, addr.state);
           setShippingOptions(opts);
         } catch {
           setShippingError('Não foi possível calcular o frete. Verifique o CEP.');
