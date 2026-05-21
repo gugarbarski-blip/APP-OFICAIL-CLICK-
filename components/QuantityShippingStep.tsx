@@ -59,14 +59,25 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
     }
     const cep = d.address.cep.replace(/\D/g, '');
     if (cep.length !== 8) return;
+
     setShippingOptions([]);
     setShippingError('');
-    onChange({ ...d, shipping: null });
     setShippingLoading(true);
-    calcularFrete(d.address.cep, d.quantity, product.id, d.address.state)
-      .then(opts => setShippingOptions(opts))
-      .catch(() => setShippingError('Não foi possível calcular o frete.'))
-      .finally(() => setShippingLoading(false));
+    onChange({ ...d, shipping: null });
+
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      if (cancelled) return;
+      calcularFrete(d.address.cep, d.quantity, product.id, d.address.state)
+        .then(opts => { if (!cancelled) setShippingOptions(opts); })
+        .catch(() => { if (!cancelled) setShippingError('Não foi possível calcular o frete.'); })
+        .finally(() => { if (!cancelled) setShippingLoading(false); });
+    }, 600);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [d.quantity]);
 
