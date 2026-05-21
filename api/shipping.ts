@@ -85,11 +85,11 @@ async function calcFrenet(
   numBoxes: number,
   weightPerBoxKg: number,
 ): Promise<ShippingResult[]> {
-  const token = process.env.FRENET_TOKEN;
-  if (!token) throw new Error('FRENET_TOKEN não configurado');
+  const token = process.env.FRENET_TOKEN?.trim();
+  if (!token || token === 'undefined' || token === 'null') {
+    throw new Error('FRENET_TOKEN não configurado ou inválido');
+  }
 
-  // Sem AbortController: causa crash no Node.js 22 (unhandled error event na stream)
-  // Timeout via Promise.race é seguro e não cancela a conexão
   const fetchPromise = fetch('https://freight.frenet.com.br/shipping/quote', {
     method: 'POST',
     headers: { 'token': token, 'Content-Type': 'application/json' },
@@ -105,45 +105,52 @@ async function calcFrenet(
     }),
   });
 
-  const timeout = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error('Frenet timeout')), 7000),
-  );
+  let timeoutId: NodeJS.Timeout | undefined;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error('Frenet timeout')), 7000);
+  });
 
-  const resp = await Promise.race([fetchPromise, timeout]);
+  try {
+    const resp = await Promise.race([fetchPromise, timeoutPromise]);
+    if (timeoutId) clearTimeout(timeoutId);
 
-  if (!resp.ok) {
-    const txt = await resp.text().catch(() => '');
-    throw new Error(`Frenet HTTP ${resp.status}: ${txt.slice(0, 200)}`);
+    if (!resp.ok) {
+      const txt = await resp.text().catch(() => '');
+      throw new Error(`Frenet HTTP ${resp.status}: ${txt.slice(0, 200)}`);
+    }
+
+    const data = await resp.json();
+    if (data.Erro) throw new Error(`Frenet: ${data.Erro}`);
+
+    // Frenet tem um typo histórico no campo: "ShippingSevicesArray" (sem o 'i')
+    const services: any[] = data.ShippingSevicesArray ?? data.ShippingServicesArray ?? [];
+    const valid = services.filter(s =>
+      (!s.Error || s.Error === '') &&
+      (s.ErrorCode === '0' || s.ErrorCode == null) &&
+      Number(s.ShippingPrice) > 0,
+    );
+
+    console.log(`Frenet: ${services.length} serviços retornados, ${valid.length} válidos`);
+
+    return valid
+      .map(s => {
+        const shippingDays = Number(s.DeliveryTime) || 0;
+        const total        = PRODUCAO_DIAS + shippingDays;
+        const carrier      = String(s.Carrier ?? '');
+        const svcName      = String(s.ServiceDescription ?? '');
+        return {
+          service:      `FRN_${s.ServiceCode ?? svcName}`,
+          company:      carrier,
+          price:        round2(Number(s.ShippingPrice)),
+          deadlineDays: total,
+          label:        `${carrier} ${svcName} — até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${shippingDays} frete)`,
+        };
+      })
+      .sort((a, b) => a.price - b.price);
+  } catch (err) {
+    if (timeoutId) clearTimeout(timeoutId);
+    throw err;
   }
-
-  const data = await resp.json();
-  if (data.Erro) throw new Error(`Frenet: ${data.Erro}`);
-
-  // Frenet tem um typo histórico no campo: "ShippingSevicesArray" (sem o 'i')
-  const services: any[] = data.ShippingSevicesArray ?? data.ShippingServicesArray ?? [];
-  const valid = services.filter(s =>
-    (!s.Error || s.Error === '') &&
-    (s.ErrorCode === '0' || s.ErrorCode == null) &&
-    Number(s.ShippingPrice) > 0,
-  );
-
-  console.log(`Frenet: ${services.length} serviços retornados, ${valid.length} válidos`);
-
-  return valid
-    .map(s => {
-      const shippingDays = Number(s.DeliveryTime) || 0;
-      const total        = PRODUCAO_DIAS + shippingDays;
-      const carrier      = String(s.Carrier ?? '');
-      const svcName      = String(s.ServiceDescription ?? '');
-      return {
-        service:      `FRN_${s.ServiceCode ?? svcName}`,
-        company:      carrier,
-        price:        round2(Number(s.ShippingPrice)),
-        deadlineDays: total,
-        label:        `${carrier} ${svcName} — até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${shippingDays} frete)`,
-      };
-    })
-    .sort((a, b) => a.price - b.price);
 }
 
 async function getUFFromViaCep(cep: string): Promise<string | null> {
