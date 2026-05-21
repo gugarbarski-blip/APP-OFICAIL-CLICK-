@@ -93,6 +93,7 @@ export default async function handler(req: any, res: any) {
     const txData = (result as any).point_of_interaction?.transaction_data;
     return res.status(200).json({
       paymentId: result.id,
+      pedidoId,
       qrCode: txData?.qr_code,
       qrCodeBase64: txData?.qr_code_base64,
       expiresAt: (result as any).date_of_expiration,

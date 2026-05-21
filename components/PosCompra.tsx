@@ -150,6 +150,10 @@ export const PosCompra: React.FC<PosCompraProps> = ({
               <Loader2 size={16} className="animate-spin" />
               Carregando detalhes do pedido...
             </div>
+          ) : !produto ? (
+            <p className="text-sm text-gray-400 py-2">
+              Seu pagamento foi confirmado! Os detalhes do pedido foram enviados para o seu e-mail.
+            </p>
           ) : (
             <div className="space-y-3 text-sm">
               {produto && (

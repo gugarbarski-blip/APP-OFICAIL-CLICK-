@@ -13,6 +13,7 @@ interface OrderSummaryProps {
 
 interface PixData {
   paymentId: number;
+  pedidoId: string | null;
   qrCode: string;
   qrCodeBase64: string;
   expiresAt: string;
@@ -91,6 +92,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
         paymentId: data.paymentId,
         savedAt: Date.now(),
         params: {
+          pedido_id: data.pedidoId || '',
           nome: formData.name,
           email: formData.email,
           produto: `${product.name} — ${custOption.label}`,
@@ -146,6 +148,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
           clearInterval(pollRef.current!);
           sessionStorage.removeItem('pixPending');
           const params = new URLSearchParams({
+            pedido_id: pixData.pedidoId || '',
             nome: formData.name,
             email: formData.email,
             produto: `${product.name} — ${custOption.label}`,
