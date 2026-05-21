@@ -1,4 +1,3 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const CEP_ORIGEM    = '91430221';
 const PRODUCAO_DIAS = 2;
@@ -105,7 +104,7 @@ async function calcFrenet(
     }),
   });
 
-  let timeoutId: NodeJS.Timeout | undefined;
+  let timeoutId: any;
   const timeoutPromise = new Promise<never>((_, reject) => {
     timeoutId = setTimeout(() => reject(new Error('Frenet timeout')), 7000);
   });
@@ -165,7 +164,7 @@ async function getUFFromViaCep(cep: string): Promise<string | null> {
   }
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
