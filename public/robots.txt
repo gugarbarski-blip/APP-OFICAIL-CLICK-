@@ -3,4 +3,4 @@ Allow: /
 Disallow: /api/
 Disallow: /admin
 
-Sitemap: https://imprebrindes.clickimpresso.com.br/sitemap.xml
+Sitemap: https://imprebrindes.impresul.com.br/sitemap.xml

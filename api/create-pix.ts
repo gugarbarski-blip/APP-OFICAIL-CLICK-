@@ -78,7 +78,7 @@ export default async function handler(req: any, res: any) {
         payer: { email: buyerEmail, first_name: firstName, last_name: lastName },
         // pedido_id na metadata como fallback extra
         metadata: { pedido_id: pedidoId },
-        notification_url: 'https://imprebrindes.clickimpresso.com.br/api/webhook-mp',
+        notification_url: 'https://imprebrindes.impresul.com.br/api/webhook-mp',
       },
     });
 

@@ -93,12 +93,12 @@ export default async function handler(req: any, res: any) {
           serigrafia_color: serigrafiaColor || '',
           art_url: artUrl || '',
         },
-        notification_url: 'https://imprebrindes.clickimpresso.com.br/api/webhook-mp',
+        notification_url: 'https://imprebrindes.impresul.com.br/api/webhook-mp',
         back_urls: {
           // pedido_id na URL elimina dependência do webhook para carregar a tela de pós-compra
-          success: `https://imprebrindes.clickimpresso.com.br/pedido-confirmado${pedidoId ? `?pedido_id=${pedidoId}` : ''}`,
-          failure: 'https://imprebrindes.clickimpresso.com.br/?pagamento=erro',
-          pending: 'https://imprebrindes.clickimpresso.com.br/?pagamento=pendente',
+          success: `https://imprebrindes.impresul.com.br/pedido-confirmado${pedidoId ? `?pedido_id=${pedidoId}` : ''}`,
+          failure: 'https://imprebrindes.impresul.com.br/?pagamento=erro',
+          pending: 'https://imprebrindes.impresul.com.br/?pagamento=pendente',
         },
         payment_methods: {
           excluded_payment_types: [{ id: 'ticket' }],
