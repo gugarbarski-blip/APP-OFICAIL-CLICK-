@@ -93,6 +93,31 @@ const App: React.FC = () => {
       setPaymentStatus(status);
       window.history.replaceState({}, '', '/');
     }
+
+    // Recuperação de PIX: se o cliente pagou e saiu da página antes do polling detectar,
+    // na próxima vez que abrir o site verificamos e redirecionamos automaticamente
+    try {
+      const raw = sessionStorage.getItem('pixPending');
+      if (raw) {
+        const { paymentId, savedAt, params: redirectParams } = JSON.parse(raw);
+        const expired = Date.now() - savedAt > 30 * 60 * 1000; // PIX expira em 30 min
+        if (expired) {
+          sessionStorage.removeItem('pixPending');
+        } else {
+          fetch(`/api/check-pix?id=${paymentId}`)
+            .then(r => r.json())
+            .then(({ status: pixStatus }) => {
+              if (pixStatus === 'approved') {
+                sessionStorage.removeItem('pixPending');
+                window.location.href = `/pedido-confirmado?${new URLSearchParams(redirectParams)}`;
+              }
+            })
+            .catch(() => {});
+        }
+      }
+    } catch {
+      sessionStorage.removeItem('pixPending');
+    }
   }, []);
 
   const goTo = (s: AppStep) => {

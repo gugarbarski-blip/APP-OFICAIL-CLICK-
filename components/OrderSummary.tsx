@@ -86,6 +86,21 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
       const data = await res.json();
       if (!data.qrCode) throw new Error('PIX não gerado');
       setPixData(data);
+      // Salva no sessionStorage para recuperação se o usuário sair e voltar
+      sessionStorage.setItem('pixPending', JSON.stringify({
+        paymentId: data.paymentId,
+        savedAt: Date.now(),
+        params: {
+          nome: formData.name,
+          email: formData.email,
+          produto: `${product.name} — ${custOption.label}`,
+          personalizacao: custOption.label,
+          quantidade: String(formData.quantity),
+          valor: String(total.toFixed(2)),
+          frete: formData.shipping?.label || '',
+          payment_id: String(data.paymentId),
+        },
+      }));
     } catch {
       setError('Não foi possível gerar o PIX. Tente novamente.');
     } finally {
@@ -129,6 +144,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
         if (status === 'approved') {
           setPixStatus('approved');
           clearInterval(pollRef.current!);
+          sessionStorage.removeItem('pixPending');
           const params = new URLSearchParams({
             nome: formData.name,
             email: formData.email,
@@ -137,6 +153,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
             quantidade: String(formData.quantity),
             valor: String(total.toFixed(2)),
             frete: formData.shipping?.label || '',
+            payment_id: String(pixData.paymentId),
           });
           setTimeout(() => { window.location.href = `/pedido-confirmado?${params}`; }, 2000);
         }
