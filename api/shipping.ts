@@ -8,7 +8,7 @@ const BOX_LARG      = 33;
 const BOX_CUBIC_G   = Math.round((BOX_COMP * BOX_ALT * BOX_LARG) / 6000 * 1000);
 const MARGEM        = 1.15;
 
-const UF_ZONE = {
+const UF_ZONE: Record<string, number> = {
   RS: 1,
   SC: 2, PR: 2,
   SP: 3, RJ: 3, ES: 3, MG: 3,
@@ -39,15 +39,15 @@ const SEDEX_TABLE = [
 const PAC_DEADLINE   = [5, 6, 7, 9, 11, 14, 17];
 const SEDEX_DEADLINE = [1, 2, 3, 4,  4,  5,  5];
 
-function round2(v) { return Math.round(v * 100) / 100; }
-function plural(n) { return `${n} dia${n !== 1 ? 's' : ''} ${n !== 1 ? 'úteis' : 'útil'}`; }
+function round2(v: number) { return Math.round(v * 100) / 100; }
+function plural(n: number) { return `${n} dia${n !== 1 ? 's' : ''} ${n !== 1 ? 'úteis' : 'útil'}`; }
 
-function tablePrice(table, weightG, zone) {
+function tablePrice(table: typeof PAC_TABLE, weightG: number, zone: number): number {
   const row = table.find(r => weightG <= r.maxWeight) || table[table.length - 1];
   return row.prices[zone - 1];
 }
 
-function buildStaticResults(zone, chargeG, numBoxes) {
+function buildStaticResults(zone: number, chargeG: number, numBoxes: number) {
   const pacDays    = PAC_DEADLINE[zone - 1];
   const pacTotal   = PRODUCAO_DIAS + pacDays;
   const sedexDays  = SEDEX_DEADLINE[zone - 1];
@@ -70,7 +70,7 @@ function buildStaticResults(zone, chargeG, numBoxes) {
   ];
 }
 
-async function calcFrenet(cepDestino, numBoxes, weightPerBoxKg) {
+async function calcFrenet(cepDestino: string, numBoxes: number, weightPerBoxKg: number) {
   const token = (process.env.FRENET_TOKEN || '').trim();
   if (!token || token === 'undefined' || token === 'null') {
     throw new Error('FRENET_TOKEN não configurado');
@@ -79,7 +79,7 @@ async function calcFrenet(cepDestino, numBoxes, weightPerBoxKg) {
   const controller = new AbortController();
   const tid = setTimeout(() => controller.abort(), 7000);
 
-  let resp;
+  let resp: Response;
   try {
     resp = await fetch('https://freight.frenet.com.br/shipping/quote', {
       method: 'POST',
@@ -108,8 +108,8 @@ async function calcFrenet(cepDestino, numBoxes, weightPerBoxKg) {
   const data = await resp.json();
   if (data.Erro) throw new Error(`Frenet: ${data.Erro}`);
 
-  const services = data.ShippingSevicesArray || data.ShippingServicesArray || [];
-  const valid = services.filter(s =>
+  const services: any[] = data.ShippingSevicesArray || data.ShippingServicesArray || [];
+  const valid = services.filter((s: any) =>
     (!s.Error || s.Error === '') &&
     (s.ErrorCode === '0' || s.ErrorCode == null) &&
     Number(s.ShippingPrice) > 0,
@@ -118,7 +118,7 @@ async function calcFrenet(cepDestino, numBoxes, weightPerBoxKg) {
   console.log(`Frenet: ${services.length} serviços, ${valid.length} válidos`);
 
   return valid
-    .map(s => {
+    .map((s: any) => {
       const shippingDays = Number(s.DeliveryTime) || 0;
       const total        = PRODUCAO_DIAS + shippingDays;
       const carrier      = String(s.Carrier || '');
@@ -131,14 +131,14 @@ async function calcFrenet(cepDestino, numBoxes, weightPerBoxKg) {
         label:        `${carrier} ${svcName} — até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${shippingDays} frete)`,
       };
     })
-    .sort((a, b) => a.price - b.price);
+    .sort((a: any, b: any) => a.price - b.price);
 }
 
-async function getUFFromViaCep(cep) {
+async function getUFFromViaCep(cep: string): Promise<string | null> {
   try {
     const controller = new AbortController();
     const tid = setTimeout(() => controller.abort(), 5000);
-    let resp;
+    let resp: Response;
     try {
       resp = await fetch(`https://viacep.com.br/ws/${cep}/json/`, { signal: controller.signal });
     } finally {
@@ -153,7 +153,7 @@ async function getUFFromViaCep(cep) {
   }
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
@@ -171,7 +171,7 @@ module.exports = async function handler(req, res) {
     const numBoxes           = Math.ceil(quantity / CUPS_PER_BOX);
     const realWeightPerBoxKg = (CUPS_PER_BOX * weightPerUnit + BOX_WEIGHT_G) / 1000;
 
-    const combined = [];
+    const combined: any[] = [];
 
     // 1. Frenet — cotação em tempo real
     if (process.env.FRENET_TOKEN) {
@@ -188,7 +188,7 @@ module.exports = async function handler(req, res) {
     const temSEDEX = combined.some(r => /\bsedex\b/i.test(r.label) || r.service.includes('04014'));
 
     if (!temPAC || !temSEDEX) {
-      let uf = (ufParam && UF_ZONE[ufParam.toUpperCase().trim()])
+      let uf: string | null = (ufParam && UF_ZONE[ufParam.toUpperCase().trim()])
         ? ufParam.toUpperCase().trim()
         : null;
       if (!uf) uf = await getUFFromViaCep(cleanCEP);
