@@ -88,44 +88,35 @@ async function calcFrenet(
   const token = process.env.FRENET_TOKEN;
   if (!token) throw new Error('FRENET_TOKEN não configurado');
 
-  const ctrl  = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 8000);
+  // Sem AbortController: causa crash no Node.js 22 (unhandled error event na stream)
+  // Timeout via Promise.race é seguro e não cancela a conexão
+  const fetchPromise = fetch('https://freight.frenet.com.br/shipping/quote', {
+    method: 'POST',
+    headers: { 'token': token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      SellerCEP: CEP_ORIGEM,
+      RecipientCEP: cepDestino,
+      ShipmentInvoiceValue: 150,
+      ShippingItemArray: [{
+        Height: BOX_ALT, Length: BOX_COMP, Width: BOX_LARG,
+        Weight: weightPerBoxKg, Quantity: numBoxes,
+        SKU: 'copos', Category: 'Utilidades Domesticas', isFragile: false,
+      }],
+    }),
+  });
 
-  let data: any;
-  try {
-    const resp = await fetch('https://freight.frenet.com.br/shipping/quote', {
-      method: 'POST',
-      headers: {
-        'token': token,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        SellerCEP: CEP_ORIGEM,
-        RecipientCEP: cepDestino,
-        ShipmentInvoiceValue: 150,
-        ShippingItemArray: [{
-          Height:    BOX_ALT,
-          Length:    BOX_COMP,
-          Width:     BOX_LARG,
-          Weight:    weightPerBoxKg,
-          Quantity:  numBoxes,
-          SKU:       'copos',
-          Category:  'Utilidades Domesticas',
-          isFragile: false,
-        }],
-      }),
-      signal: ctrl.signal,
-    });
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Frenet timeout')), 7000),
+  );
 
-    if (!resp.ok) {
-      const txt = await resp.text().catch(() => '');
-      throw new Error(`Frenet HTTP ${resp.status}: ${txt.slice(0, 200)}`);
-    }
-    data = await resp.json();
-  } finally {
-    clearTimeout(timer);
+  const resp = await Promise.race([fetchPromise, timeout]);
+
+  if (!resp.ok) {
+    const txt = await resp.text().catch(() => '');
+    throw new Error(`Frenet HTTP ${resp.status}: ${txt.slice(0, 200)}`);
   }
 
+  const data = await resp.json();
   if (data.Erro) throw new Error(`Frenet: ${data.Erro}`);
 
   // Frenet tem um typo histórico no campo: "ShippingSevicesArray" (sem o 'i')
