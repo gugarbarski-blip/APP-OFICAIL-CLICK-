@@ -57,6 +57,104 @@ function tablePrice(table: typeof PAC_TABLE, weightG: number, zone: number): num
   return row.prices[zone - 1];
 }
 
+function buildStaticResults(zone: number, chargeG: number, numBoxes: number): ShippingResult[] {
+  const pacDays   = PAC_DEADLINE[zone - 1];
+  const pacTotal  = PRODUCAO_DIAS + pacDays;
+  const sedexDays  = SEDEX_DEADLINE[zone - 1];
+  const sedexTotal = PRODUCAO_DIAS + sedexDays;
+  return [
+    {
+      service:      'PAC',
+      company:      'Correios',
+      price:        round2(tablePrice(PAC_TABLE, chargeG, zone) * numBoxes * MARGEM),
+      deadlineDays: pacTotal,
+      label:        `Correios PAC — até ${plural(pacTotal)} (${PRODUCAO_DIAS} prod. + ${pacDays} frete)`,
+    },
+    {
+      service:      'SEDEX',
+      company:      'Correios',
+      price:        round2(tablePrice(SEDEX_TABLE, chargeG, zone) * numBoxes * MARGEM),
+      deadlineDays: sedexTotal,
+      label:        `Correios SEDEX — até ${plural(sedexTotal)} (${PRODUCAO_DIAS} prod. + ${sedexDays} frete)`,
+    },
+  ];
+}
+
+async function calcFrenet(
+  cepDestino: string,
+  numBoxes: number,
+  weightPerBoxKg: number,
+): Promise<ShippingResult[]> {
+  const token = process.env.FRENET_TOKEN;
+  if (!token) throw new Error('FRENET_TOKEN não configurado');
+
+  const ctrl  = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 8000);
+
+  let data: any;
+  try {
+    const resp = await fetch('https://freight.frenet.com.br/shipping/quote', {
+      method: 'POST',
+      headers: {
+        'token': token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        SellerCEP: CEP_ORIGEM,
+        RecipientCEP: cepDestino,
+        ShipmentInvoiceValue: 150,
+        ShippingItemArray: [{
+          Height:    BOX_ALT,
+          Length:    BOX_COMP,
+          Width:     BOX_LARG,
+          Weight:    weightPerBoxKg,
+          Quantity:  numBoxes,
+          SKU:       'copos',
+          Category:  'Utilidades Domesticas',
+          isFragile: false,
+        }],
+      }),
+      signal: ctrl.signal,
+    });
+
+    if (!resp.ok) {
+      const txt = await resp.text().catch(() => '');
+      throw new Error(`Frenet HTTP ${resp.status}: ${txt.slice(0, 200)}`);
+    }
+    data = await resp.json();
+  } finally {
+    clearTimeout(timer);
+  }
+
+  if (data.Erro) throw new Error(`Frenet: ${data.Erro}`);
+
+  // Frenet tem um typo histórico no campo: "ShippingSevicesArray" (sem o 'i')
+  const services: any[] = data.ShippingSevicesArray ?? data.ShippingServicesArray ?? [];
+  const valid = services.filter(s =>
+    (!s.Error || s.Error === '') &&
+    (s.ErrorCode === '0' || s.ErrorCode == null) &&
+    Number(s.ShippingPrice) > 0,
+  );
+
+  console.log(`Frenet: ${services.length} serviços retornados, ${valid.length} válidos`);
+
+  return valid
+    .map(s => {
+      const shippingDays = Number(s.DeliveryTime) || 0;
+      const total        = PRODUCAO_DIAS + shippingDays;
+      const carrier      = String(s.Carrier ?? '');
+      const svcName      = String(s.ServiceDescription ?? '');
+      return {
+        service:      `FRN_${s.ServiceCode ?? svcName}`,
+        company:      carrier,
+        price:        round2(Number(s.ShippingPrice)),
+        deadlineDays: total,
+        label:        `${carrier} ${svcName} — até ${plural(total)} (${PRODUCAO_DIAS} prod. + ${shippingDays} frete)`,
+      };
+    })
+    .sort((a, b) => a.price - b.price);
+}
+
 async function getUFFromViaCep(cep: string): Promise<string | null> {
   try {
     const resp = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
@@ -91,6 +189,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const numBoxes           = Math.ceil(qty / CUPS_PER_BOX);
     const realWeightPerBoxKg = (CUPS_PER_BOX * weightPerUnit + BOX_WEIGHT_G) / 1000;
 
+    // Tenta Frenet primeiro (preços em tempo real)
+    if (process.env.FRENET_TOKEN) {
+      try {
+        const frenetResults = await calcFrenet(cleanCEP, numBoxes, realWeightPerBoxKg);
+        if (frenetResults.length > 0) {
+          return res.status(200).json({ options: frenetResults, numBoxes, realWeightPerBoxKg });
+        }
+      } catch (err) {
+        console.warn('[FRENET-ERRO]', String(err));
+      }
+    }
+
+    // Fallback: tabela estática com base na zona do CEP
     let uf: string | null = (ufParam && UF_ZONE[ufParam.toUpperCase().trim()])
       ? ufParam.toUpperCase().trim()
       : null;
@@ -108,29 +219,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const chargeG = Math.max(CUPS_PER_BOX * weightPerUnit + BOX_WEIGHT_G, BOX_CUBIC_G);
-    const results: ShippingResult[] = [];
-
-    const pacDays  = PAC_DEADLINE[zone - 1];
-    const pacTotal = PRODUCAO_DIAS + pacDays;
-    results.push({
-      service:      'PAC',
-      company:      'Correios',
-      price:        round2(tablePrice(PAC_TABLE, chargeG, zone) * numBoxes * MARGEM),
-      deadlineDays: pacTotal,
-      label:        `Correios PAC — até ${plural(pacTotal)} (${PRODUCAO_DIAS} prod. + ${pacDays} frete)`,
-    });
-
-    const sedexDays  = SEDEX_DEADLINE[zone - 1];
-    const sedexTotal = PRODUCAO_DIAS + sedexDays;
-    results.push({
-      service:      'SEDEX',
-      company:      'Correios',
-      price:        round2(tablePrice(SEDEX_TABLE, chargeG, zone) * numBoxes * MARGEM),
-      deadlineDays: sedexTotal,
-      label:        `Correios SEDEX — até ${plural(sedexTotal)} (${PRODUCAO_DIAS} prod. + ${sedexDays} frete)`,
-    });
-
+    const results = buildStaticResults(zone, chargeG, numBoxes);
     results.sort((a, b) => a.price - b.price);
+
     return res.status(200).json({ options: results, numBoxes, realWeightPerBoxKg });
 
   } catch (err) {
