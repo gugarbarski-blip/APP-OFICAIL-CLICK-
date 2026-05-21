@@ -189,40 +189,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const numBoxes           = Math.ceil(qty / CUPS_PER_BOX);
     const realWeightPerBoxKg = (CUPS_PER_BOX * weightPerUnit + BOX_WEIGHT_G) / 1000;
 
-    // Tenta Frenet primeiro (preços em tempo real)
+    const combined: ShippingResult[] = [];
+
+    // 1. Frenet — cotação em tempo real (todas as transportadoras disponíveis)
     if (process.env.FRENET_TOKEN) {
       try {
         const frenetResults = await calcFrenet(cleanCEP, numBoxes, realWeightPerBoxKg);
-        if (frenetResults.length > 0) {
-          return res.status(200).json({ options: frenetResults, numBoxes, realWeightPerBoxKg });
-        }
+        combined.push(...frenetResults);
       } catch (err) {
         console.warn('[FRENET-ERRO]', String(err));
       }
     }
 
-    // Fallback: tabela estática com base na zona do CEP
-    let uf: string | null = (ufParam && UF_ZONE[ufParam.toUpperCase().trim()])
-      ? ufParam.toUpperCase().trim()
-      : null;
+    // 2. Correios PAC/SEDEX — garante que sempre apareçam
+    //    (se a Frenet já trouxe, não duplica)
+    const temPAC   = combined.some(r => /\bpac\b/i.test(r.label) || r.service.includes('04510'));
+    const temSEDEX = combined.some(r => /\bsedex\b/i.test(r.label) || r.service.includes('04014'));
 
-    if (!uf) {
-      uf = await getUFFromViaCep(cleanCEP);
+    if (!temPAC || !temSEDEX) {
+      let uf: string | null = (ufParam && UF_ZONE[ufParam.toUpperCase().trim()])
+        ? ufParam.toUpperCase().trim()
+        : null;
+      if (!uf) uf = await getUFFromViaCep(cleanCEP);
+      const zone = uf ? (UF_ZONE[uf] ?? null) : null;
+
+      if (zone) {
+        const chargeG    = Math.max(CUPS_PER_BOX * weightPerUnit + BOX_WEIGHT_G, BOX_CUBIC_G);
+        const staticOpts = buildStaticResults(zone, chargeG, numBoxes);
+        if (!temPAC)   combined.push(staticOpts.find(r => r.service === 'PAC')!);
+        if (!temSEDEX) combined.push(staticOpts.find(r => r.service === 'SEDEX')!);
+      }
     }
 
-    const zone = uf ? (UF_ZONE[uf] ?? null) : null;
-
-    if (!zone) {
+    if (combined.length === 0) {
       return res.status(400).json({
         error: 'Não foi possível calcular o frete para este CEP. Entre em contato pelo WhatsApp.',
       });
     }
 
-    const chargeG = Math.max(CUPS_PER_BOX * weightPerUnit + BOX_WEIGHT_G, BOX_CUBIC_G);
-    const results = buildStaticResults(zone, chargeG, numBoxes);
-    results.sort((a, b) => a.price - b.price);
-
-    return res.status(200).json({ options: results, numBoxes, realWeightPerBoxKg });
+    combined.sort((a, b) => a.price - b.price);
+    return res.status(200).json({ options: combined, numBoxes, realWeightPerBoxKg });
 
   } catch (err) {
     console.error('[SHIPPING-FATAL]', String(err));
