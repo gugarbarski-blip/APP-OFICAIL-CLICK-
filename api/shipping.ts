@@ -133,11 +133,17 @@ function staticPrice(table: typeof PAC_TABLE, weightG: number, zone: number): nu
 }
 
 async function getUF(cep: string): Promise<string> {
-  const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-  if (!r.ok) throw new Error('CEP inválido');
-  const d = await r.json();
-  if (d.erro) throw new Error('CEP não encontrado');
-  return d.uf as string;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 4000);
+  try {
+    const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`, { signal: ctrl.signal });
+    if (!r.ok) throw new Error('CEP inválido');
+    const d = await r.json();
+    if (d.erro) throw new Error('CEP não encontrado');
+    return d.uf as string;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 // ── Handler ───────────────────────────────────────────────────────────────────
