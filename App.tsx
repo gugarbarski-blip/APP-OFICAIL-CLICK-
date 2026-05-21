@@ -19,6 +19,7 @@ import { FAQ } from './components/FAQ';
 import { QuemSomos } from './components/QuemSomos';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { PosCompra } from './components/PosCompra';
+import { WhatsAppButton } from './components/WhatsAppButton';
 
 const makeEmptyOrder = (product: ProductDef): OrderFormData => ({
   name: '',
@@ -115,51 +116,63 @@ const App: React.FC = () => {
 
   if (step === 'quantity') {
     return (
-      <QuantityShippingStep
-        product={selectedProduct}
-        initialData={orderData}
-        onChange={setOrderData}
-        onBack={() => goTo('landing')}
-        onNext={() => goTo('customize')}
-      />
+      <>
+        <QuantityShippingStep
+          product={selectedProduct}
+          initialData={orderData}
+          onChange={setOrderData}
+          onBack={() => goTo('landing')}
+          onNext={() => goTo('customize')}
+        />
+        <WhatsAppButton />
+      </>
     );
   }
 
   if (step === 'customize') {
     return (
-      <CustomizationStep
-        product={selectedProduct}
-        value={customization}
-        quantity={orderData.quantity}
-        onChange={setCustomization}
-        onBack={() => goTo('quantity')}
-        onNext={() => goTo('order')}
-      />
+      <>
+        <CustomizationStep
+          product={selectedProduct}
+          value={customization}
+          quantity={orderData.quantity}
+          onChange={setCustomization}
+          onBack={() => goTo('quantity')}
+          onNext={() => goTo('order')}
+        />
+        <WhatsAppButton />
+      </>
     );
   }
 
   if (step === 'order') {
     return (
-      <OrderForm
-        product={selectedProduct}
-        customization={customization}
-        initialData={orderData}
-        onChange={setOrderData}
-        onBack={() => goTo('customize')}
-        onNext={() => goTo('confirmation')}
-      />
+      <>
+        <OrderForm
+          product={selectedProduct}
+          customization={customization}
+          initialData={orderData}
+          onChange={setOrderData}
+          onBack={() => goTo('customize')}
+          onNext={() => goTo('confirmation')}
+        />
+        <WhatsAppButton />
+      </>
     );
   }
 
   if (step === 'confirmation') {
     return (
-      <OrderSummary
-        product={selectedProduct}
-        customization={customization}
-        formData={orderData}
-        onBack={() => goTo('order')}
-        onConfirm={() => goTo('landing')}
-      />
+      <>
+        <OrderSummary
+          product={selectedProduct}
+          customization={customization}
+          formData={orderData}
+          onBack={() => goTo('order')}
+          onConfirm={() => goTo('landing')}
+        />
+        <WhatsAppButton />
+      </>
     );
   }
 
@@ -220,6 +233,7 @@ const App: React.FC = () => {
       </section>
 
       <Footer />
+      <WhatsAppButton />
     </div>
   );
 };
