@@ -65,7 +65,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <button
-              onClick={onCtaClick}
+              onClick={() => document.getElementById('produto')?.scrollIntoView({ behavior: 'smooth' })}
               className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#D4AF37] to-[#d49924] hover:from-[#d49924] hover:to-[#c28511] text-gray-900 font-extrabold px-8 py-4 rounded-xl text-base transition-all shadow-[0_8px_20px_rgba(212,175,55,0.4)] hover:-translate-y-0.5"
             >
               Compre Já!
