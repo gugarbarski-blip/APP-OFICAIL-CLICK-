@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Package, RefreshCw, LogOut, Download, DollarSign, TrendingUp, BarChart3, ShoppingBag } from 'lucide-react';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  aguardando_pix: { label: 'Aguardando PIX', color: 'bg-gray-100 text-gray-600' },
   pendente:  { label: 'Pendente',   color: 'bg-yellow-100 text-yellow-800' },
   pago:      { label: 'Pago',       color: 'bg-blue-100 text-blue-800' },
   producao:  { label: 'Produção',   color: 'bg-purple-100 text-purple-800' },
@@ -57,7 +56,8 @@ export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ 
     const res = await fetch('/api/admin/pedidos', { headers: authHeaders(token) });
     if (res.status === 401) { onLogout(); return; }
     const { pedidos: data } = await res.json();
-    setPedidos(data || []);
+    const HIDDEN = ['aguardando_pix', 'aguardando_cartao'];
+    setPedidos((data || []).filter((p: Pedido) => !HIDDEN.includes(p.status)));
     setLastUpdated(new Date());
     if (!silent) setLoading(false);
     else setRefreshing(false);
