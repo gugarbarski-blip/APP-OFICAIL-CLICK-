@@ -1,5 +1,45 @@
 'use strict';
 
+const crypto = require('crypto');
+
+function verifySignature(req, secret) {
+  const sig = req.headers['x-signature'];
+  const reqId = req.headers['x-request-id'];
+
+  if (!sig) return false;
+
+  // Extrai ts e v1 do header "ts=...,v1=..."
+  let ts = '';
+  let v1 = '';
+  sig.split(',').forEach(function(part) {
+    const eqIdx = part.indexOf('=');
+    if (eqIdx === -1) return;
+    const key = part.slice(0, eqIdx).trim();
+    const val = part.slice(eqIdx + 1).trim();
+    if (key === 'ts') ts = val;
+    if (key === 'v1') v1 = val;
+  });
+
+  if (!ts || !v1) return false;
+
+  // Monta a string exatamente como o MP documenta
+  const parts = [];
+  const dataId = req.body && req.body.data && req.body.data.id;
+  if (dataId) parts.push('id:' + dataId);
+  if (reqId)  parts.push('request-id:' + reqId);
+  parts.push('ts:' + ts);
+  const manifest = parts.join(';');
+
+  const expected = crypto.createHmac('sha256', secret).update(manifest).digest('hex');
+
+  // Comparação em tempo constante para evitar timing attack
+  try {
+    return crypto.timingSafeEqual(Buffer.from(v1, 'hex'), Buffer.from(expected, 'hex'));
+  } catch {
+    return false;
+  }
+}
+
 function getDb() {
   const { createClient } = require('@supabase/supabase-js');
   const url = process.env.SUPABASE_URL;
@@ -112,6 +152,16 @@ async function sendEmails(p, valorTotal, mpPaymentId) {
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
+
+  const webhookSecret = process.env.MP_WEBHOOK_SECRET;
+  if (webhookSecret) {
+    if (!verifySignature(req, webhookSecret)) {
+      console.warn('Webhook MP: assinatura inválida rejeitada');
+      return res.status(401).json({ error: 'invalid_signature' });
+    }
+  } else {
+    console.warn('Webhook MP: MP_WEBHOOK_SECRET não configurado — verificação desabilitada');
+  }
 
   console.log('Webhook MP recebido:', JSON.stringify({
     type: req.body?.type, action: req.body?.action, dataId: req.body?.data?.id,
