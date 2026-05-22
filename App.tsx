@@ -87,12 +87,23 @@ const App: React.FC = () => {
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>(null);
 
   useEffect(() => {
+    // Registra o estado inicial para que o botão voltar funcione desde a landing
+    window.history.replaceState({ step: 'landing' }, '');
+
     const params = new URLSearchParams(window.location.search);
     const status = params.get('pagamento') as PaymentStatus;
     if (status && PAYMENT_BANNERS[status]) {
       setPaymentStatus(status);
-      window.history.replaceState({}, '', '/');
+      window.history.replaceState({ step: 'landing' }, '', '/');
     }
+
+    // Botão voltar/avançar do navegador
+    const handlePopState = (e: PopStateEvent) => {
+      const s = (e.state?.step as AppStep) ?? 'landing';
+      setStep(s);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    window.addEventListener('popstate', handlePopState);
 
     // Recuperação de PIX: se o cliente pagou e saiu da página antes do polling detectar,
     // na próxima vez que abrir o site verificamos e redirecionamos automaticamente
@@ -118,9 +129,12 @@ const App: React.FC = () => {
     } catch {
       sessionStorage.removeItem('pixPending');
     }
+
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const goTo = (s: AppStep) => {
+    window.history.pushState({ step: s }, '');
     setStep(s);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
