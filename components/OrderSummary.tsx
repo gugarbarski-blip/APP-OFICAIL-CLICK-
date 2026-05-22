@@ -83,7 +83,10 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(buildBody(artUrl)),
       });
-      if (!res.ok) throw new Error('Erro ao gerar PIX');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData?.detail?.message || errData?.error || 'Erro ao gerar PIX');
+      }
       const data = await res.json();
       if (!data.qrCode) throw new Error('PIX não gerado');
       setPixData(data);
@@ -103,8 +106,8 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
           payment_id: String(data.paymentId),
         },
       }));
-    } catch {
-      setError('Não foi possível gerar o PIX. Tente novamente.');
+    } catch (e: any) {
+      setError(e?.message || 'Não foi possível gerar o PIX. Tente novamente.');
     } finally {
       setLoading(false);
     }
