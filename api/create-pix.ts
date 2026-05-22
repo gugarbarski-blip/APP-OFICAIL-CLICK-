@@ -70,12 +70,20 @@ export default async function handler(req: any, res: any) {
     const firstName = nameParts[0];
     const lastName = nameParts.slice(1).join(' ') || firstName;
 
+    const cpfCnpjDigits = (buyerCpfCnpj || '').replace(/\D/g, '');
+    const identificationType = cpfCnpjDigits.length === 14 ? 'CNPJ' : 'CPF';
+
     const result = await payment.create({
       body: {
         payment_method_id: 'pix',
         transaction_amount: total,
         description: productName,
-        payer: { email: buyerEmail, first_name: firstName, last_name: lastName },
+        payer: {
+          email: buyerEmail,
+          first_name: firstName,
+          last_name: lastName,
+          identification: { type: identificationType, number: cpfCnpjDigits },
+        },
         // pedido_id na metadata como fallback extra
         metadata: { pedido_id: pedidoId },
         notification_url: 'https://imprebrindes.impresul.com.br/api/webhook-mp',
