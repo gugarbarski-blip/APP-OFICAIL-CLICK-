@@ -132,6 +132,56 @@ async function sendConfirmationEmail(opts) {
   });
 }
 
+async function sendAlert(mpPaymentId, errorMessage) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+  try {
+    const { Resend } = require('resend');
+    const resend = new Resend(apiKey);
+    const horario = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+    await resend.emails.send({
+      from: 'ImpreBrindes <pedidos@imprebrindes.com.br>',
+      to: ['gugarbarski@gmail.com'],
+      subject: `⚠️ Falha no webhook MP — pagamento ${mpPaymentId}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+          <div style="background: #7f1d1d; padding: 20px; border-radius: 12px 12px 0 0; text-align: center;">
+            <h1 style="color: #fca5a5; margin: 0; font-size: 20px;">⚠️ Falha no Webhook MP</h1>
+          </div>
+          <div style="background: #f9f9f9; padding: 24px; border-radius: 0 0 12px 12px;">
+            <p style="margin: 0 0 16px; font-size: 14px; color: #555;">
+              O webhook encontrou um erro ao processar um pagamento aprovado no Mercado Pago.
+            </p>
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+              <tr>
+                <td style="padding: 6px 0; color: #888; width: 140px;">Payment ID (MP)</td>
+                <td style="padding: 6px 0; font-weight: 700; font-family: monospace;">${mpPaymentId}</td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; color: #888;">Horário</td>
+                <td style="padding: 6px 0;">${horario}</td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; color: #888; vertical-align: top;">Erro</td>
+                <td style="padding: 6px 0; color: #dc2626; font-family: monospace; word-break: break-all; font-size: 12px;">${errorMessage}</td>
+              </tr>
+            </table>
+            <div style="margin-top: 20px; padding: 14px 16px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px;">
+              <p style="margin: 0; font-size: 13px; color: #991b1b; line-height: 1.5;">
+                <strong>Ação necessária:</strong> Verifique no Supabase se o pedido com
+                <strong>mp_payment_id = ${mpPaymentId}</strong> está marcado como <em>pago</em>.
+                Se não estiver, atualize o status manualmente no painel admin.
+              </p>
+            </div>
+          </div>
+        </div>
+      `,
+    });
+  } catch {
+    // Não deixa o alerta travar o handler
+  }
+}
+
 async function sendEmails(p, valorTotal, mpPaymentId) {
   const emailOpts = {
     nome: p.nome, email: p.email, produto: p.produto,
@@ -209,7 +259,8 @@ module.exports = async function handler(req, res) {
         console.log(`Webhook: pagamento ${mpPaymentId} já processado, ignorando`);
         return res.status(200).json({ ok: true, skipped: 'already_paid' });
       }
-      await db.from('pedidos').update({ status: 'pago' }).eq('mp_payment_id', mpPaymentId);
+      const { error: upErr1 } = await db.from('pedidos').update({ status: 'pago' }).eq('mp_payment_id', mpPaymentId);
+      if (upErr1) throw new Error(`DB update by mp_payment_id falhou: ${upErr1.message}`);
       console.log(`Webhook: pedido ${existing.id} → pago`);
       await sendEmails(existing, valorTotal, mpPaymentId);
       return res.status(200).json({ ok: true });
@@ -230,7 +281,8 @@ module.exports = async function handler(req, res) {
         if (byId.status === 'pago') {
           return res.status(200).json({ ok: true, skipped: 'already_paid' });
         }
-        await db.from('pedidos').update({ status: 'pago', mp_payment_id: mpPaymentId }).eq('id', pedidoId);
+        const { error: upErr2 } = await db.from('pedidos').update({ status: 'pago', mp_payment_id: mpPaymentId }).eq('id', pedidoId);
+        if (upErr2) throw new Error(`DB update by pedido_id falhou: ${upErr2.message}`);
         console.log(`Webhook: pedido ${pedidoId} → pago (via metadata)`);
         await sendEmails(byId, valorTotal, mpPaymentId);
         return res.status(200).json({ ok: true });
@@ -241,7 +293,7 @@ module.exports = async function handler(req, res) {
     const nome = g('buyer_name', 'buyerName') || (mp.payer?.first_name ? `${mp.payer.first_name} ${mp.payer.last_name || ''}`.trim() : '');
     const productName = g('product_name', 'productName');
 
-    await db.from('pedidos').insert({
+    const { error: insErr } = await db.from('pedidos').insert({
       mp_payment_id: mpPaymentId,
       status: 'pago',
       nome,
@@ -257,6 +309,7 @@ module.exports = async function handler(req, res) {
       arte_url: meta.art_url || meta.artUrl || null,
       created_at: new Date().toISOString(),
     });
+    if (insErr) throw new Error(`DB insert via metadata falhou: ${insErr.message}`);
     console.log(`Webhook: pedido criado via metadata para pagamento ${mpPaymentId}`);
     await sendEmails(
       { nome, email: emailTo, produto: productName, quantidade: Number(meta.quantity) || 0,
@@ -268,6 +321,8 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ ok: true });
 
   } catch (err) {
+    const alertId = data?.id ? String(data.id) : 'desconhecido';
+    sendAlert(alertId, err?.message || String(err)); // fire-and-forget
     console.error('Webhook erro interno:', err?.message || err);
     return res.status(200).json({ ok: false, error: 'internal_error' });
   }
