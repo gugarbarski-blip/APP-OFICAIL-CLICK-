@@ -40,8 +40,8 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
 
           <h1 className="font-poppins text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight drop-shadow-lg">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#F1C40F] to-[#D4AF37]">
-              Brindes que<br />
-              Marcam Momentos
+              Copos Térmicos<br />
+              Personalizados
             </span>
           </h1>
 
