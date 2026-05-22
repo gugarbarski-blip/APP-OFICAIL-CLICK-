@@ -141,7 +141,7 @@ async function sendAlert(mpPaymentId, errorMessage) {
     const horario = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
     await resend.emails.send({
       from: 'ImpreBrindes <pedidos@imprebrindes.com.br>',
-      to: ['gugarbarski@gmail.com'],
+      to: ['gugarbarski@gmail.com', 'gustavo@impresul.com.br'],
       subject: `⚠️ Falha no webhook MP — pagamento ${mpPaymentId}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
