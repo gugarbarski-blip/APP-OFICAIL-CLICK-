@@ -140,9 +140,31 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
     setTimeout(() => setCopied(false), 3000);
   };
 
+  const handleReset = () => {
+    setPixData(null);
+    setPixStatus('pending');
+    setCopied(false);
+    sessionStorage.removeItem('pixPending');
+  };
+
   useEffect(() => {
     if (!pixData) return;
+
+    const isExpired = () => pixData.expiresAt && new Date() >= new Date(pixData.expiresAt);
+
+    // Verifica expiração imediatamente (ex: usuário ficou na tela parada)
+    if (isExpired()) {
+      setPixStatus('expired');
+      return;
+    }
+
     pollRef.current = setInterval(async () => {
+      // Bug 3 fix: para o polling quando o PIX expira
+      if (isExpired()) {
+        setPixStatus('expired');
+        clearInterval(pollRef.current!);
+        return;
+      }
       try {
         const res = await fetch(`/api/check-pix?id=${pixData.paymentId}`);
         const { status } = await res.json();
@@ -162,6 +184,9 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
             payment_id: String(pixData.paymentId),
           });
           setTimeout(() => { window.location.href = `/pedido-confirmado?${params}`; }, 2000);
+        } else if (status === 'cancelled' || status === 'expired' || status === 'rejected') {
+          setPixStatus('expired');
+          clearInterval(pollRef.current!);
         }
       } catch {}
     }, 5000);
@@ -289,6 +314,20 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
                     <CheckCheck size={48} className="text-green-500 mx-auto mb-2" />
                     <p className="font-semibold text-green-600 text-lg">Pagamento aprovado!</p>
                     <p className="text-gray-500 text-sm mt-1">Redirecionando...</p>
+                  </div>
+                ) : pixStatus === 'expired' ? (
+                  // Bug 4 fix: estado expirado com opção de gerar novo PIX
+                  <div className="text-center py-4">
+                    <AlertCircle size={40} className="text-red-400 mx-auto mb-2" />
+                    <p className="font-semibold text-red-600">PIX expirado</p>
+                    <p className="text-gray-500 text-sm mt-1 mb-4">O tempo para pagamento expirou.</p>
+                    <button
+                      onClick={handleReset}
+                      className="w-full flex items-center justify-center gap-2 bg-[#32BCAD] hover:bg-[#29a99b] text-white rounded-xl py-3 px-4 text-sm font-semibold transition-colors"
+                    >
+                      <QrCode size={16} />
+                      Gerar novo PIX
+                    </button>
                   </div>
                 ) : (
                   <>
