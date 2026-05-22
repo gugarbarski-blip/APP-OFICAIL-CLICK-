@@ -1,5 +1,7 @@
 'use strict';
 
+const { getClientIp, isRateLimited } = require('./_ratelimit');
+
 const PRICES = {
   'copo-475': { serigrafia: 23.00, laser: 28.00 },
   'cuia-320':  { serigrafia: 23.00, laser: 28.00 },
@@ -21,6 +23,12 @@ function getDb() {
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  // Rate limit: 5 requisições por IP por minuto
+  const ip = getClientIp(req);
+  if (isRateLimited('pix:' + ip, 5, 60 * 1000)) {
+    return res.status(429).json({ error: 'Muitas requisições. Aguarde um momento e tente novamente.' });
+  }
 
   const accessToken = process.env.MP_ACCESS_TOKEN;
   if (!accessToken) return res.status(500).json({ error: 'MP_ACCESS_TOKEN not configured' });

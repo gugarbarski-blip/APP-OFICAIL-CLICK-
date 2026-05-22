@@ -12,6 +12,35 @@ interface OrderFormProps {
   onNext: () => void;
 }
 
+// Algoritmo módulo 11 — verifica os dois dígitos verificadores do CPF
+function isValidCpf(raw: string): boolean {
+  const d = raw.replace(/\D/g, '');
+  if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += +d[i] * (10 - i);
+  let r = (sum * 10) % 11;
+  if (r === 10 || r === 11) r = 0;
+  if (r !== +d[9]) return false;
+  sum = 0;
+  for (let i = 0; i < 10; i++) sum += +d[i] * (11 - i);
+  r = (sum * 10) % 11;
+  if (r === 10 || r === 11) r = 0;
+  return r === +d[10];
+}
+
+// Algoritmo módulo 11 — verifica os dois dígitos verificadores do CNPJ
+function isValidCnpj(raw: string): boolean {
+  const d = raw.replace(/\D/g, '');
+  if (d.length !== 14 || /^(\d)\1{13}$/.test(d)) return false;
+  const calc = (nums: string, weights: number[]) => {
+    const sum = weights.reduce((acc, w, i) => acc + +nums[i] * w, 0);
+    const r = sum % 11;
+    return r < 2 ? 0 : 11 - r;
+  };
+  if (calc(d, [5,4,3,2,9,8,7,6,5,4,3,2]) !== +d[12]) return false;
+  return calc(d, [6,5,4,3,2,9,8,7,6,5,4,3,2]) === +d[13];
+}
+
 export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, initialData, onChange, onBack, onNext }) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -56,7 +85,9 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, in
     if (!d.email.trim() || !/\S+@\S+\.\S+/.test(d.email)) e.email = 'E-mail inválido';
     if (!d.phone.replace(/\D/g, '') || d.phone.replace(/\D/g, '').length < 10) e.phone = 'Telefone inválido';
     const cpfCnpjDigits = d.cpfCnpj.replace(/\D/g, '');
-    if (cpfCnpjDigits.length !== 11 && cpfCnpjDigits.length !== 14) e.cpfCnpj = 'CPF (11 dígitos) ou CNPJ (14 dígitos) inválido';
+    if (cpfCnpjDigits.length === 11 && !isValidCpf(cpfCnpjDigits)) e.cpfCnpj = 'CPF inválido';
+    else if (cpfCnpjDigits.length === 14 && !isValidCnpj(cpfCnpjDigits)) e.cpfCnpj = 'CNPJ inválido';
+    else if (cpfCnpjDigits.length !== 11 && cpfCnpjDigits.length !== 14) e.cpfCnpj = 'CPF (11 dígitos) ou CNPJ (14 dígitos) inválido';
     if (!d.address.street.trim()) e.street = 'Rua é obrigatória';
     if (!d.address.number.trim()) e.number = 'Número é obrigatório';
     if (!d.address.city.trim()) e.city = 'Cidade é obrigatória';
