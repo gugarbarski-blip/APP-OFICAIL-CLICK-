@@ -77,8 +77,8 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
             </ul>
             <p className="mt-2">
               Para exercer qualquer um desses direitos, entre em contato pelo e-mail{' '}
-              <a href="mailto:contato@imprebrindes.com.br" className="text-primary underline">
-                contato@imprebrindes.com.br
+              <a href="mailto:gustavo@impresul.com.br" className="text-primary underline">
+                gustavo@impresul.com.br
               </a>.
             </p>
           </Section>
@@ -99,7 +99,7 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
             <p>
               Dúvidas sobre esta política? Entre em contato:<br />
               <strong>ImpreBrindes</strong><br />
-              E-mail: <a href="mailto:contato@imprebrindes.com.br" className="text-primary underline">contato@imprebrindes.com.br</a>
+              E-mail: <a href="mailto:gustavo@impresul.com.br" className="text-primary underline">gustavo@impresul.com.br</a>
             </p>
           </Section>
         </div>

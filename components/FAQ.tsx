@@ -39,7 +39,7 @@ export const FAQ: React.FC = () => (
       <div className="text-center mb-12">
         <span className="text-[#D4AF37] font-semibold text-sm uppercase tracking-wider">Dúvidas</span>
         <h2 className="font-poppins text-3xl sm:text-4xl font-bold text-white mt-2">Perguntas Frequentes</h2>
-        <p className="text-gray-400 mt-3">Não encontrou o que precisava? Entre em contato pelo e-mail contato@imprebrindes.com.br</p>
+        <p className="text-gray-400 mt-3">Não encontrou o que precisava? Entre em contato pelo e-mail gustavo@impresul.com.br</p>
       </div>
       <div className="space-y-3">
         {faqs.map(f => <FAQItem key={f.q} q={f.q} a={f.a} />)}

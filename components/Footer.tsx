@@ -50,7 +50,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2">
                 <Mail size={14} className="text-[#D4AF37] flex-shrink-0" />
-                contato@imprebrindes.com.br
+                gustavo@impresul.com.br
               </li>
 
               <li className="flex items-center gap-2">
