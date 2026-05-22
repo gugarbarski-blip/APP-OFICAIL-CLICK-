@@ -26,6 +26,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
   const [pixData, setPixData] = useState<PixData | null>(null);
   const [copied, setCopied] = useState(false);
   const [pixStatus, setPixStatus] = useState<'pending' | 'approved' | 'expired'>('pending');
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const custOption = product.customizations[customization.type];
@@ -143,6 +144,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
   const handleReset = () => {
     setPixData(null);
     setPixStatus('pending');
+    setTimeLeft(null);
     setCopied(false);
     sessionStorage.removeItem('pixPending');
   };
@@ -192,6 +194,18 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
     }, 5000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [pixData]);
+
+  // Bug 5 fix: countdown regressivo exibido ao cliente
+  useEffect(() => {
+    if (!pixData?.expiresAt || pixStatus !== 'pending') return;
+    const tick = () => {
+      const secs = Math.max(0, Math.floor((new Date(pixData.expiresAt).getTime() - Date.now()) / 1000));
+      setTimeLeft(secs);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [pixData, pixStatus]);
 
   const colorOpt = customization.type === 'serigrafia'
     ? SERIGRAFIA_COLORS.find(c => c.key === customization.serigrafiaColor)
@@ -350,7 +364,12 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
                       {copied ? <CheckCheck size={16} className="text-green-500" /> : <Copy size={16} />}
                       {copied ? 'Copiado!' : 'Copiar código PIX'}
                     </button>
-                    <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400">
+                    {timeLeft !== null && (
+                      <p className={`text-xs text-center mt-3 font-medium ${timeLeft < 120 ? 'text-red-500' : 'text-amber-600'}`}>
+                        ⏱ Expira em {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+                      </p>
+                    )}
+                    <div className="mt-3 flex items-center justify-center gap-2 text-xs text-gray-400">
                       <Loader2 size={12} className="animate-spin" />
                       Aguardando pagamento...
                     </div>

@@ -44,6 +44,12 @@ module.exports = async function handler(req, res) {
   let pedidoId = null;
   try {
     const db = getDb();
+
+    // Bug 6 fix: limpa pedidos de cartão abandonados com mais de 24h
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    db.from('pedidos').delete().eq('status', 'aguardando_cartao').lt('created_at', cutoff)
+      .then(() => {}).catch(() => {});
+
     const { data } = await db.from('pedidos').insert({
       status: 'aguardando_cartao',
       nome: buyerName || '',
