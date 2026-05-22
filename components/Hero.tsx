@@ -94,7 +94,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
 
         {/* Cup photo area */}
         <div className="order-1 md:order-2 flex justify-center relative">
-          <div className="relative w-full max-w-md">
+          <div className="relative w-full max-w-lg">
 
             <img
               src="/mockup-copo-preto.webp"
