@@ -1,10 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
+'use strict';
 
-export default async function handler(req: any, res: any) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).end();
 
-  const paymentId = req.query?.payment_id as string | undefined;
-  const pedidoId  = req.query?.pedido_id  as string | undefined;
+  const paymentId = req.query?.payment_id;
+  const pedidoId  = req.query?.pedido_id;
 
   if (!paymentId && !pedidoId) {
     return res.status(400).json({ error: 'payment_id or pedido_id required' });
@@ -14,10 +14,11 @@ export default async function handler(req: any, res: any) {
   const key = process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) return res.status(500).end();
 
+  const { createClient } = require('@supabase/supabase-js');
   const db = createClient(url, key);
 
   const col = pedidoId ? 'id' : 'mp_payment_id';
-  const val = pedidoId ?? paymentId!;
+  const val = pedidoId ?? paymentId;
 
   const { data } = await db
     .from('pedidos')
@@ -27,4 +28,4 @@ export default async function handler(req: any, res: any) {
 
   if (!data) return res.status(404).json({ error: 'not found' });
   return res.status(200).json(data);
-}
+};

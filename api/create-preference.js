@@ -1,25 +1,25 @@
-import { MercadoPagoConfig, Preference } from 'mercadopago';
-import { createClient } from '@supabase/supabase-js';
+'use strict';
 
-const PRICES: Record<string, Record<string, number>> = {
+const PRICES = {
   'copo-475': { serigrafia: 23.00, laser: 28.00 },
-  'cuia-320': { serigrafia: 23.00, laser: 28.00 },
+  'cuia-320':  { serigrafia: 23.00, laser: 28.00 },
 };
 
-function getServerPrice(productId: string, customizationType: string): number | null {
+function getServerPrice(productId, customizationType) {
   const product = PRICES[productId];
   if (!product) return null;
   return product[customizationType] ?? product['serigrafia'] ?? null;
 }
 
 function getDb() {
+  const { createClient } = require('@supabase/supabase-js');
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) throw new Error('Supabase env vars missing');
   return createClient(url, key);
 }
 
-export default async function handler(req: any, res: any) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const accessToken = process.env.MP_ACCESS_TOKEN;
@@ -41,8 +41,7 @@ export default async function handler(req: any, res: any) {
   const shipping = Math.max(0, Math.round(Number(shippingPrice) * 100) / 100) || 0;
   const total = Math.round((unitPrice * qty + shipping) * 100) / 100;
 
-  // Salva pedido antes de criar a preferência
-  let pedidoId: string | null = null;
+  let pedidoId = null;
   try {
     const db = getDb();
     const { data } = await db.from('pedidos').insert({
@@ -66,10 +65,11 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
+    const { MercadoPagoConfig, Preference } = require('mercadopago');
     const client = new MercadoPagoConfig({ accessToken });
     const preference = new Preference(client);
 
-    const items: any[] = [
+    const items = [
       { id: productId, title: productName, quantity: qty, unit_price: unitPrice, currency_id: 'BRL' },
     ];
     if (shipping > 0) {
@@ -95,7 +95,6 @@ export default async function handler(req: any, res: any) {
         },
         notification_url: 'https://imprebrindes.impresul.com.br/api/webhook-mp',
         back_urls: {
-          // pedido_id na URL elimina dependência do webhook para carregar a tela de pós-compra
           success: `https://imprebrindes.impresul.com.br/pedido-confirmado${pedidoId ? `?pedido_id=${pedidoId}` : ''}`,
           failure: 'https://imprebrindes.impresul.com.br/?pagamento=erro',
           pending: 'https://imprebrindes.impresul.com.br/?pagamento=pendente',
@@ -110,11 +109,11 @@ export default async function handler(req: any, res: any) {
     });
 
     return res.status(200).json({ checkoutUrl: result.init_point });
-  } catch (err: any) {
+  } catch (err) {
     if (pedidoId) {
       try { await getDb().from('pedidos').delete().eq('id', pedidoId); } catch {}
     }
     console.error('MP preference error:', err);
     return res.status(500).json({ error: 'Falha ao criar preferência de pagamento' });
   }
-}
+};

@@ -1,24 +1,26 @@
-import { createHmac, createHash } from 'crypto';
-import { createClient } from '@supabase/supabase-js';
+'use strict';
 
-function getSecret(): string {
+const { createHmac, createHash } = require('crypto');
+
+function getSecret() {
   const secret = process.env.ADMIN_SECRET;
   if (!secret) throw new Error('ADMIN_SECRET not configured');
   return secret;
 }
 
-function generateToken(): string {
+function generateToken() {
   const ts = Date.now().toString();
   const hmac = createHmac('sha256', getSecret()).update(ts).digest('hex');
   return `${ts}.${hmac}`;
 }
 
-async function getStoredHash(): Promise<string | null> {
+async function getStoredHash() {
   if (process.env.ADMIN_PASSWORD) {
     return createHash('sha256').update(process.env.ADMIN_PASSWORD).digest('hex');
   }
-  const url = process.env.SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_KEY!;
+  const { createClient } = require('@supabase/supabase-js');
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
   const db = createClient(url, key);
   const { data, error } = await db
     .from('admin_config')
@@ -26,16 +28,16 @@ async function getStoredHash(): Promise<string | null> {
     .eq('key', 'password_hash')
     .single();
   if (error || !data) return null;
-  return (data as { value: string }).value;
+  return data.value;
 }
 
-export default async function handler(req: any, res: any) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const { password } = req.body || {};
   if (!password) return res.status(401).json({ error: 'Senha obrigatória' });
 
-  let secret: string;
+  let secret;
   try { secret = getSecret(); } catch {
     return res.status(500).json({ error: 'Servidor mal configurado' });
   }
@@ -53,4 +55,4 @@ export default async function handler(req: any, res: any) {
   } catch {
     return res.status(500).json({ error: 'Erro interno ao verificar credenciais' });
   }
-}
+};

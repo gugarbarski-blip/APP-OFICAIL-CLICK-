@@ -1,16 +1,17 @@
-import { createClient } from '@supabase/supabase-js';
+'use strict';
 
 function getDb() {
+  const { createClient } = require('@supabase/supabase-js');
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) throw new Error('Supabase env vars missing');
   return createClient(url, key);
 }
 
-export default async function handler(req: any, res: any) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-  const authHeader = req.headers.authorization as string | undefined;
+  const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Não autenticado' });
   }
@@ -32,7 +33,7 @@ export default async function handler(req: any, res: any) {
 
     if (error) throw error;
     return res.status(200).json({ pedidos: data || [] });
-  } catch (err: any) {
+  } catch (err) {
     return res.status(500).json({ error: err.message });
   }
-}
+};
