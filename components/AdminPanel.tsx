@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Package, RefreshCw, LogOut, Download } from 'lucide-react';
+import { Package, RefreshCw, LogOut, Download, DollarSign, TrendingUp, BarChart3, ShoppingBag } from 'lucide-react';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   aguardando_pix: { label: 'Aguardando PIX', color: 'bg-gray-100 text-gray-600' },
@@ -112,6 +112,80 @@ export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ 
           </div>
         </div>
 
+        {/* ── Métricas de negócio ── */}
+        {(() => {
+          const PAID = ['pago', 'producao', 'enviado', 'entregue'];
+          const paidAll = pedidos.filter(p => PAID.includes(p.status));
+          const now = new Date();
+          const paidMes = paidAll.filter(p => {
+            const d = new Date(p.created_at);
+            return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+          });
+          const fatMes    = paidMes.reduce((s, p) => s + (p.valor_total || 0), 0);
+          const fatTotal  = paidAll.reduce((s, p) => s + (p.valor_total || 0), 0);
+          const ticket    = paidAll.length > 0 ? fatTotal / paidAll.length : 0;
+          const unidMes   = paidMes.reduce((s, p) => s + (p.quantidade || 0), 0);
+
+          const fmt = (v: number) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+          const cards = [
+            { icon: DollarSign, bg: 'bg-green-50',  ic: 'text-green-600',  label: 'Faturamento do Mês', value: fmt(fatMes),   sub: `${paidMes.length} pedido${paidMes.length !== 1 ? 's' : ''}` },
+            { icon: TrendingUp, bg: 'bg-blue-50',   ic: 'text-blue-600',   label: 'Faturamento Total',  value: fmt(fatTotal),  sub: `${paidAll.length} pedidos pagos` },
+            { icon: BarChart3,  bg: 'bg-purple-50', ic: 'text-purple-600', label: 'Ticket Médio',       value: fmt(ticket),    sub: 'por pedido pago' },
+            { icon: Package,    bg: 'bg-amber-50',  ic: 'text-amber-600',  label: 'Unidades no Mês',    value: String(unidMes), sub: 'copos personalizados' },
+          ];
+
+          // Produto mais vendido
+          const prodMap: Record<string, { pedidos: number; unidades: number }> = {};
+          paidAll.forEach(p => {
+            const nome = p.produto?.split(' — ')[0]?.trim() || 'Desconhecido';
+            if (!prodMap[nome]) prodMap[nome] = { pedidos: 0, unidades: 0 };
+            prodMap[nome].pedidos++;
+            prodMap[nome].unidades += p.quantidade || 0;
+          });
+          const prodStats = Object.entries(prodMap)
+            .map(([nome, s]) => ({ nome, ...s }))
+            .sort((a, b) => b.unidades - a.unidades);
+
+          return (
+            <>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                {cards.map(({ icon: Icon, bg, ic, label, value, sub }) => (
+                  <div key={label} className="bg-white rounded-2xl border border-gray-200 p-4">
+                    <div className={`w-9 h-9 rounded-xl ${bg} flex items-center justify-center mb-3`}>
+                      <Icon size={18} className={ic} />
+                    </div>
+                    <p className="text-xl font-bold text-gray-900 leading-tight">{value}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{label}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
+                  </div>
+                ))}
+              </div>
+
+              {prodStats.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                  {prodStats.map(({ nome, pedidos: qtd, unidades }) => (
+                    <div key={nome} className="bg-white rounded-2xl border border-gray-200 p-4 flex items-center gap-4">
+                      <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
+                        <ShoppingBag size={18} className="text-amber-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{nome}</p>
+                        <p className="text-xs text-gray-500">{qtd} pedido{qtd !== 1 ? 's' : ''} · {unidades} unidades vendidas</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-xl font-bold text-gray-900">{unidades}</p>
+                        <p className="text-xs text-gray-400">unid.</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          );
+        })()}
+
+        {/* ── Pipeline de status ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           {['pago','producao','enviado','entregue'].map(s => (
             <div key={s} className="bg-white rounded-2xl border border-gray-200 p-4 text-center">
