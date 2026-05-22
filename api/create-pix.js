@@ -46,6 +46,10 @@ module.exports = async function handler(req, res) {
   const shipping = Math.max(0, Math.round(Number(shippingPrice) * 100) / 100) || 0;
   const total = Math.round((unitPrice * qty + shipping) * 100) / 100;
 
+  // Pedidos >= R$500 (B2B) recebem 24h para pagar; demais têm 30 min
+  const PIX_EXPIRY_MS = total >= 500 ? 24 * 60 * 60 * 1000 : 30 * 60 * 1000;
+  const dateOfExpiration = new Date(Date.now() + PIX_EXPIRY_MS).toISOString();
+
   let pedidoId = null;
   try {
     const db = getDb();
@@ -85,6 +89,7 @@ module.exports = async function handler(req, res) {
       body: {
         payment_method_id: 'pix',
         transaction_amount: total,
+        date_of_expiration: dateOfExpiration,
         description: productName,
         payer: {
           email: buyerEmail,
