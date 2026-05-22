@@ -111,7 +111,13 @@ export default async function handler(req: any, res: any) {
     if (pedidoId) {
       try { await getDb().from('pedidos').delete().eq('id', pedidoId); } catch {}
     }
-    console.error('MP PIX error:', err);
-    return res.status(500).json({ error: 'Falha ao criar PIX' });
+    const detail = {
+      message: err?.message,
+      status: err?.status,
+      cause: err?.cause ? JSON.stringify(err.cause) : undefined,
+      body: err?.body ? JSON.stringify(err.body) : undefined,
+    };
+    console.error('MP PIX error:', JSON.stringify(detail));
+    return res.status(500).json({ error: 'Falha ao criar PIX', detail });
   }
 }
