@@ -331,7 +331,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, in
                 <input
                   type="text"
                   value={d.address.state}
-                  onChange={e => setAddr('state', e.target.value)}
+                  onChange={e => setAddr('state', e.target.value.toUpperCase())}
                   placeholder="SP"
                   maxLength={2}
                   className="w-full border border-white/15 rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 uppercase"
