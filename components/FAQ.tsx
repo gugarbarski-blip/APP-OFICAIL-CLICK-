@@ -4,7 +4,7 @@ import { ChevronDown } from 'lucide-react';
 const faqs = [
   { q: 'Qual é o pedido mínimo?', a: 'O pedido mínimo é de 10 unidades por modelo. Esse número foi pensado para atender tanto pequenas empresas quanto grandes eventos corporativos.' },
   { q: 'Qual o prazo de produção e entrega?', a: 'O prazo de produção é de 3 a 5 dias úteis após aprovação da arte, mais o prazo do frete. O frete varia de acordo com o CEP: PAC (5–12 dias úteis) ou SEDEX (1–5 dias úteis). O prazo exato é calculado automaticamente no checkout.' },
-  { q: 'Como envio minha arte/logo?', a: 'No processo de pedido, você faz o upload diretamente no site. Aceitamos arquivos PDF. Para melhor qualidade, recomendamos arquivos vetoriais com fundo transparente em alta resolução.' },
+  { q: 'Como envio minha arte/logo?', a: 'No processo de pedido, você faz o upload diretamente no site. Aceitamos arquivos PDF, JPG, PNG e WebP (máx. 20 MB). Para melhor qualidade, recomendamos arquivos vetoriais com fundo transparente em alta resolução.' },
   { q: 'Qual a diferença entre Serigrafia e Gravação a Laser?', a: 'A Serigrafia é uma impressão em tinta colorida diretamente no copo — ótima para logos coloridos e preços mais acessíveis. A Gravação a Laser remove a tinta do copo criando um efeito espelhado, permanente e sofisticado — ideal para logos simples e resultado premium (+ R$ 5,00/unidade).' },
   { q: 'Quais formas de pagamento são aceitas?', a: 'Aceitamos PIX (com desconto), cartão de crédito (em até 12x) e boleto bancário — tudo via Mercado Pago de forma segura.' },
   { q: 'E se a arte não ficar como esperado?', a: 'Trabalhamos com aprovação prévia justamente para evitar isso. Mas se após a entrega o produto não estiver dentro do acordado, reprocessamos sem custo adicional.' },
