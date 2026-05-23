@@ -73,9 +73,9 @@ export const ProductShowcase: React.FC<ProductShowcaseProps> = ({ onSelectProduc
   const products = Object.values(PRODUCTS);
 
   return (
-    <section id="produto" className="py-20 bg-[#1a1917]">
+    <section id="produto" className="py-12 md:py-20 bg-[#1a1917]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-12">
+        <div className="text-center mb-8 md:mb-12">
           <span className="text-[#D4AF37] font-semibold text-sm uppercase tracking-wider">Nossos Produtos</span>
           <h2 className="font-poppins text-3xl sm:text-4xl font-bold text-white mt-2">Escolha seu Modelo</h2>
           <p className="text-gray-400 mt-3 max-w-xl mx-auto">

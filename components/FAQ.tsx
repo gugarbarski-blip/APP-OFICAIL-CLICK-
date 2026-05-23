@@ -35,9 +35,9 @@ const FAQItem: React.FC<{ q: string; a: string }> = ({ q, a }) => {
 };
 
 export const FAQ: React.FC = () => (
-  <section id="faq" className="py-20 bg-[#1a1917]">
+  <section id="faq" className="py-12 md:py-20 bg-[#1a1917]">
     <div className="max-w-3xl mx-auto px-4 sm:px-6">
-      <div className="text-center mb-12">
+      <div className="text-center mb-8 md:mb-12">
         <span className="text-[#D4AF37] font-semibold text-sm uppercase tracking-wider">Dúvidas</span>
         <h2 className="font-poppins text-3xl sm:text-4xl font-bold text-white mt-2">Perguntas Frequentes</h2>
         <p className="text-gray-400 mt-3">Não encontrou o que precisava? Entre em contato pelo e-mail contato@imprebrindes.com.br</p>

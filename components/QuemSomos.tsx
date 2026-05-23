@@ -10,12 +10,12 @@ const stats = [
 
 export const QuemSomos: React.FC = () => {
   return (
-    <section id="quem-somos" className="py-20 bg-gradient-to-br from-[#2c2a27] via-[#3a3731] to-[#2c2a27] relative overflow-hidden">
+    <section id="quem-somos" className="py-12 md:py-20 bg-gradient-to-br from-[#2c2a27] via-[#3a3731] to-[#2c2a27] relative overflow-hidden">
       {/* Glow decorativo */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#D4AF37]/5 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
-        <div className="text-center mb-12">
+        <div className="text-center mb-8 md:mb-12">
           <span className="text-[#D4AF37] font-semibold text-sm uppercase tracking-widest">Nossa história</span>
           <h2 className="font-poppins text-3xl sm:text-4xl font-extrabold text-white mt-2">
             Quem Somos
@@ -23,10 +23,10 @@ export const QuemSomos: React.FC = () => {
           <div className="w-16 h-1 bg-gradient-to-r from-[#D4AF37] to-[#F1C40F] rounded-full mx-auto mt-4" />
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Texto */}
-          <div className="space-y-5">
-            <p className="text-gray-200 text-lg leading-relaxed">
+          <div className="space-y-4 md:space-y-5">
+            <p className="text-gray-200 text-base md:text-lg leading-relaxed">
               A <strong className="text-[#F1C40F]">ImpreBrindes</strong> faz parte do{' '}
               <strong className="text-[#F1C40F]">Grupo Impresul</strong>, um dos grupos empresariais
               mais sólidos do Sul do Brasil, fundado em <strong className="text-white">1968</strong>.
