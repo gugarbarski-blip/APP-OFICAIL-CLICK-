@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Gift, ArrowRight, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { AppStep, Customization, OrderFormData, ProductDef, PRODUCTS } from './types';
 import { Header } from './components/Header';
@@ -7,19 +7,27 @@ import { ProductShowcase } from './components/ProductShowcase';
 import { HowItWorks } from './components/HowItWorks';
 import { WhyChooseUs } from './components/WhyChooseUs';
 import { Footer } from './components/Footer';
-import { QuantityShippingStep } from './components/QuantityShippingStep';
-import { CustomizationStep } from './components/CustomizationStep';
-import { OrderForm } from './components/OrderForm';
-import { OrderSummary } from './components/OrderSummary';
-import { AdminPanel, AdminLogin } from './components/AdminPanel';
-import { MeusPedidos } from './components/MeusPedidos';
-import { CustomerArea } from './components/CustomerArea';
 import { Testimonials } from './components/Testimonials';
 import { FAQ } from './components/FAQ';
 import { QuemSomos } from './components/QuemSomos';
-import { PrivacyPolicy } from './components/PrivacyPolicy';
-import { PosCompra } from './components/PosCompra';
 import { WhatsAppButton } from './components/WhatsAppButton';
+
+const QuantityShippingStep = lazy(() => import('./components/QuantityShippingStep').then(m => ({ default: m.QuantityShippingStep })));
+const CustomizationStep    = lazy(() => import('./components/CustomizationStep').then(m => ({ default: m.CustomizationStep })));
+const OrderForm            = lazy(() => import('./components/OrderForm').then(m => ({ default: m.OrderForm })));
+const OrderSummary         = lazy(() => import('./components/OrderSummary').then(m => ({ default: m.OrderSummary })));
+const AdminPanel           = lazy(() => import('./components/AdminPanel').then(m => ({ default: m.AdminPanel })));
+const AdminLogin           = lazy(() => import('./components/AdminPanel').then(m => ({ default: m.AdminLogin })));
+const MeusPedidos          = lazy(() => import('./components/MeusPedidos').then(m => ({ default: m.MeusPedidos })));
+const CustomerArea         = lazy(() => import('./components/CustomerArea').then(m => ({ default: m.CustomerArea })));
+const PrivacyPolicy        = lazy(() => import('./components/PrivacyPolicy').then(m => ({ default: m.PrivacyPolicy })));
+const PosCompra            = lazy(() => import('./components/PosCompra').then(m => ({ default: m.PosCompra })));
+
+const Loader = () => (
+  <div className="min-h-screen bg-[#1a1917] flex items-center justify-center">
+    <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 const makeEmptyOrder = (product: ProductDef): OrderFormData => ({
   name: '',
@@ -51,35 +59,37 @@ const App: React.FC = () => {
 
   // Meus Pedidos route
   if (window.location.pathname === '/meus-pedidos') {
-    return <MeusPedidos onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} />;
+    return <Suspense fallback={<Loader />}><MeusPedidos onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} /></Suspense>;
   }
 
   // Minha Conta route
   if (window.location.pathname === '/minha-conta') {
-    return <CustomerArea onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} />;
+    return <Suspense fallback={<Loader />}><CustomerArea onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} /></Suspense>;
   }
 
   // Pos-compra route
   if (window.location.pathname === '/pedido-confirmado') {
     const p = new URLSearchParams(window.location.search);
     return (
-      <PosCompra
-        nome={p.get('nome') || ''}
-        email={p.get('email') || ''}
-        produto={p.get('produto') || ''}
-        personalizacao={p.get('personalizacao') || ''}
-        quantidade={p.get('quantidade') || ''}
-        valor={p.get('valor') || ''}
-        frete={p.get('frete') || ''}
-        paymentId={p.get('payment_id') || undefined}
-        pedidoId={p.get('pedido_id') || undefined}
-      />
+      <Suspense fallback={<Loader />}>
+        <PosCompra
+          nome={p.get('nome') || ''}
+          email={p.get('email') || ''}
+          produto={p.get('produto') || ''}
+          personalizacao={p.get('personalizacao') || ''}
+          quantidade={p.get('quantidade') || ''}
+          valor={p.get('valor') || ''}
+          frete={p.get('frete') || ''}
+          paymentId={p.get('payment_id') || undefined}
+          pedidoId={p.get('pedido_id') || undefined}
+        />
+      </Suspense>
     );
   }
 
   // Privacy policy route
   if (window.location.pathname === '/privacidade') {
-    return <PrivacyPolicy onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} />;
+    return <Suspense fallback={<Loader />}><PrivacyPolicy onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} /></Suspense>;
   }
   const [selectedProduct, setSelectedProduct] = useState<ProductDef>(PRODUCTS['copo-475']);
   const [customization, setCustomization] = useState<Customization>(EMPTY_CUSTOMIZATION);
@@ -150,13 +160,13 @@ const App: React.FC = () => {
   const isAdmin = window.location.pathname === '/admin';
   const [adminToken, setAdminToken] = useState(() => sessionStorage.getItem('admin_token') || '');
   if (isAdmin) {
-    if (!adminToken) return <AdminLogin onLogin={(token) => { sessionStorage.setItem('admin_token', token); setAdminToken(token); }} />;
-    return <AdminPanel token={adminToken} onLogout={() => { sessionStorage.removeItem('admin_token'); setAdminToken(''); }} />;
+    if (!adminToken) return <Suspense fallback={<Loader />}><AdminLogin onLogin={(token) => { sessionStorage.setItem('admin_token', token); setAdminToken(token); }} /></Suspense>;
+    return <Suspense fallback={<Loader />}><AdminPanel token={adminToken} onLogout={() => { sessionStorage.removeItem('admin_token'); setAdminToken(''); }} /></Suspense>;
   }
 
   if (step === 'quantity') {
     return (
-      <>
+      <Suspense fallback={<Loader />}>
         <QuantityShippingStep
           product={selectedProduct}
           initialData={orderData}
@@ -165,13 +175,13 @@ const App: React.FC = () => {
           onNext={() => goTo('customize')}
         />
         <WhatsAppButton />
-      </>
+      </Suspense>
     );
   }
 
   if (step === 'customize') {
     return (
-      <>
+      <Suspense fallback={<Loader />}>
         <CustomizationStep
           product={selectedProduct}
           value={customization}
@@ -181,13 +191,13 @@ const App: React.FC = () => {
           onNext={() => goTo('order')}
         />
         <WhatsAppButton />
-      </>
+      </Suspense>
     );
   }
 
   if (step === 'order') {
     return (
-      <>
+      <Suspense fallback={<Loader />}>
         <OrderForm
           product={selectedProduct}
           customization={customization}
@@ -197,13 +207,13 @@ const App: React.FC = () => {
           onNext={() => goTo('confirmation')}
         />
         <WhatsAppButton />
-      </>
+      </Suspense>
     );
   }
 
   if (step === 'confirmation') {
     return (
-      <>
+      <Suspense fallback={<Loader />}>
         <OrderSummary
           product={selectedProduct}
           customization={customization}
@@ -212,7 +222,7 @@ const App: React.FC = () => {
           onConfirm={() => goTo('landing')}
         />
         <WhatsAppButton />
-      </>
+      </Suspense>
     );
   }
 

@@ -11,6 +11,18 @@ export default defineConfig(({ mode }) => {
         host: '0.0.0.0',
       },
       plugins: [react(), tailwindcss()],
+      build: {
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              'vendor-react':    ['react', 'react-dom'],
+              'vendor-three':    ['three'],
+              'vendor-pdfjs':    ['pdfjs-dist'],
+              'vendor-supabase': ['@supabase/supabase-js'],
+            },
+          },
+        },
+      },
       define: {
         'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL),
         'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(env.VITE_SUPABASE_ANON_KEY),
