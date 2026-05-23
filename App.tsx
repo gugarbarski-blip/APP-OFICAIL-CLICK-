@@ -20,6 +20,7 @@ import { QuemSomos } from './components/QuemSomos';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { PosCompra } from './components/PosCompra';
 import { WhatsAppButton } from './components/WhatsAppButton';
+import { StickyCtaBar } from './components/StickyCtaBar';
 
 const makeEmptyOrder = (product: ProductDef): OrderFormData => ({
   name: '',
@@ -260,6 +261,7 @@ const App: React.FC = () => {
 
       <Footer />
       <WhatsAppButton />
+      <StickyCtaBar onCtaClick={() => document.getElementById('produto')?.scrollIntoView({ behavior: 'smooth' })} />
     </div>
   );
 };
