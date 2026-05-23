@@ -59,7 +59,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
               </span>
               <span className="text-gray-300 text-sm font-medium">/ unidade</span>
             </div>
-            <p className="text-gray-400 text-sm">Pedido mínimo: {PRODUCT.minQuantity} unidades</p>
+            <p className="text-gray-400 text-sm">Comece com apenas {PRODUCT.minQuantity} unidades</p>
           </div>
 
           {/* CTAs */}
