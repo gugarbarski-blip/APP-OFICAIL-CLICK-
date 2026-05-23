@@ -9,7 +9,7 @@ export const WhatsAppButton: React.FC = () => (
     target="_blank"
     rel="noopener noreferrer"
     aria-label="Falar pelo WhatsApp"
-    className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-13 h-13 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-95"
+    className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-50 flex items-center justify-center w-13 h-13 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-95"
     style={{ width: 52, height: 52, backgroundColor: '#25D366' }}
   >
     <svg
