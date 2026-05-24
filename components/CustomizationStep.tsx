@@ -63,7 +63,7 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
   const serigrafiaBlocked = quantity < SERIGRAFIA_MIN_QTY;
 
   useEffect(() => {
-    if (serigrafiaBlocked && value.type === 'serigrafia') {
+    if (serigrafiaBlocked && value.type === 'serigrafia' && product.customizations.laser) {
       onChange({ ...value, type: 'laser' });
     }
   }, [quantity]);
@@ -161,8 +161,8 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
             <div>
               <label className="block font-semibold text-white mb-3">Tipo de Personalização</label>
               <div className="grid grid-cols-2 gap-3">
-                {typeOptions.map(({ key, icon: Icon }) => {
-                  const opt      = product.customizations[key];
+                {typeOptions.filter(({ key }) => !!product.customizations[key]).map(({ key, icon: Icon }) => {
+                  const opt      = product.customizations[key]!;
                   const selected = value.type === key;
                   const blocked  = key === 'serigrafia' && serigrafiaBlocked;
                   return (

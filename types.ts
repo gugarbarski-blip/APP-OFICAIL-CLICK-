@@ -2,7 +2,7 @@ export type CustomizationType = 'serigrafia' | 'laser';
 
 export type AppStep = 'landing' | 'quantity' | 'customize' | 'order' | 'confirmation';
 
-export type ProductId = 'copo-475' | 'cuia-320';
+export type ProductId = 'copo-475' | 'cuia-320' | 'ecobag';
 
 export interface ProductDef {
   id: ProductId;
@@ -15,7 +15,7 @@ export interface ProductDef {
   cardImage: string;
   customizations: {
     serigrafia: { label: string; extraPrice: number; description: string };
-    laser: { label: string; extraPrice: number; description: string };
+    laser?: { label: string; extraPrice: number; description: string };
   };
   minQuantity: number;
 }
@@ -66,6 +66,27 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
     customizations: {
       serigrafia: { label: 'Serigrafia 1 Cor', extraPrice: 0, description: 'Impressão em tinta de alta durabilidade' },
       laser: { label: 'Gravação a Laser', extraPrice: 5.00, description: 'Gravação permanente na superfície do copo' },
+    },
+    minQuantity: 10,
+  },
+  'ecobag': {
+    id: 'ecobag',
+    name: 'Sacola Ecobag em Algodão',
+    color: 'Natural',
+    description: 'Sacola ecológica em algodão cru, resistente e sustentável. Ideal para brindes corporativos que transmitem cuidado com o meio ambiente.',
+    features: [
+      '100% algodão natural',
+      'Dimensões: 35cm × 39,5cm',
+      'Alça: 29cm',
+      'Área de impressão: 21 × 30cm',
+      'Alta resistência e durabilidade',
+      'Sustentável e reutilizável',
+    ],
+    basePrice: 18.00,
+    image: '/EcobagSeuLogo.webp',
+    cardImage: '/EcobagSeuLogo.webp',
+    customizations: {
+      serigrafia: { label: 'Serigrafia 1 Cor', extraPrice: 0, description: 'Impressão em tinta de alta durabilidade sobre algodão' },
     },
     minQuantity: 10,
   },
