@@ -93,7 +93,13 @@ export const Header: React.FC<HeaderProps> = ({ onCtaClick, onMeusPedidos, onMin
               <a
                 key={link.href}
                 href={link.href}
-                onClick={() => setMenuOpen(false)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setMenuOpen(false);
+                  setTimeout(() => {
+                    document.querySelector(link.href)?.scrollIntoView({ behavior: 'smooth' });
+                  }, 150);
+                }}
                 className="text-sm font-semibold text-[#D4AF37] py-2 hover:text-[#F1C40F] transition-colors"
               >
                 {link.label}
