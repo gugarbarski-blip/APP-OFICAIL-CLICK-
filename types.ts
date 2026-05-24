@@ -88,7 +88,7 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
     customizations: {
       serigrafia: { label: 'Serigrafia 1 Cor', extraPrice: 0, description: 'Impressão em tinta de alta durabilidade sobre algodão' },
     },
-    minQuantity: 10,
+    minQuantity: 25,
   },
 };
 
@@ -150,7 +150,7 @@ export interface Order {
 }
 
 export function calcUnitPrice(product: ProductDef, type: CustomizationType): number {
-  return product.basePrice + product.customizations[type].extraPrice;
+  return product.basePrice + (product.customizations[type]?.extraPrice ?? 0);
 }
 
 export function calcTotal(product: ProductDef, type: CustomizationType, quantity: number): number {

@@ -146,9 +146,9 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
   };
 
   const unitPriceSerigrafia = calcUnitPrice(product, 'serigrafia');
-  const unitPriceLaser = calcUnitPrice(product, 'laser');
+  const unitPriceLaser = product.customizations.laser ? calcUnitPrice(product, 'laser') : null;
   const totalSerigrafia = calcTotal(product, 'serigrafia', d.quantity);
-  const totalLaser = calcTotal(product, 'laser', d.quantity);
+  const totalLaser = product.customizations.laser ? calcTotal(product, 'laser', d.quantity) : null;
 
   return (
     <div className="min-h-screen pt-16 bg-[#1a1917]">
@@ -222,7 +222,7 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
             </div>
 
             {/* Price comparison table */}
-            <div className="mt-5 grid grid-cols-2 gap-3">
+            <div className={`mt-5 grid gap-3 ${unitPriceLaser !== null ? 'grid-cols-2' : 'grid-cols-1'}`}>
               <div className="bg-[#222019] rounded-xl p-4 border border-white/8">
                 <div className="flex items-center gap-2 mb-2">
                   <Printer size={16} className="text-[#D4AF37]" />
@@ -234,21 +234,23 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
                 <p className="font-poppins text-xl font-bold text-[#F1C40F]">
                   R$ {totalSerigrafia.toFixed(2).replace('.', ',')}
                 </p>
-                <p className="text-[10px] text-amber-400 mt-1">Mínimo 25 unidades</p>
+                <p className="text-[10px] text-amber-400 mt-1">Mínimo {MIN_QTY} unidades</p>
               </div>
-              <div className="bg-[#222019] rounded-xl p-4 border border-white/8">
-                <div className="flex items-center gap-2 mb-2">
-                  <Zap size={16} className="text-[#D4AF37]" />
-                  <span className="text-xs font-semibold text-gray-300">Gravação a Laser</span>
+              {unitPriceLaser !== null && totalLaser !== null && (
+                <div className="bg-[#222019] rounded-xl p-4 border border-white/8">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Zap size={16} className="text-[#D4AF37]" />
+                    <span className="text-xs font-semibold text-gray-300">Gravação a Laser</span>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    R$ {unitPriceLaser.toFixed(2).replace('.', ',')} × {d.quantity} un.
+                  </p>
+                  <p className="font-poppins text-xl font-bold text-[#F1C40F]">
+                    R$ {totalLaser.toFixed(2).replace('.', ',')}
+                  </p>
+                  <p className="text-[10px] text-green-400 mt-1">A partir de {MIN_QTY} unidades</p>
                 </div>
-                <p className="text-xs text-gray-500">
-                  R$ {unitPriceLaser.toFixed(2).replace('.', ',')} × {d.quantity} un.
-                </p>
-                <p className="font-poppins text-xl font-bold text-[#F1C40F]">
-                  R$ {totalLaser.toFixed(2).replace('.', ',')}
-                </p>
-                <p className="text-[10px] text-green-400 mt-1">A partir de 10 unidades</p>
-              </div>
+              )}
             </div>
             <p className="text-xs text-gray-500 mt-3">*Frete não incluído no total acima. Escolha do tipo de personalização na próxima etapa.</p>
           </div>
