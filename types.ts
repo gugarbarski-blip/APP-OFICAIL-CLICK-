@@ -78,7 +78,7 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
       '100% algodão natural',
       'Altura: 37,5 cm · Largura: 30,5 cm',
       'Alças costuradas internamente (29 cm)',
-      'Área de impressão: 30 × 30 cm',
+      'Área de impressão: 21 × 30 cm',
       'Peso: ~69g',
       'Sustentável e reutilizável',
     ],
