@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, MapPin, Loader, Truck, Zap, Printer, ChevronDown } from 'lucide-react';
+import { ArrowLeft, ArrowRight, MapPin, Loader, Truck, Printer, Zap } from 'lucide-react';
 import {
   OrderFormData,
   Address,
   ProductDef,
-  ShippingOption,
   calcUnitPrice,
   calcTotal,
 } from '../types';
@@ -32,52 +31,22 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
   const [quantityInput, setQuantityInput] = useState(String(d.quantity));
   const [cepLoading, setCepLoading] = useState(false);
   const [cepError, setCepError] = useState('');
-  const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
-  const [shippingLoading, setShippingLoading] = useState(false);
-  const [shippingError, setShippingError] = useState('');
-  const [showAllShipping, setShowAllShipping] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const isFirstRender = React.useRef(true);
 
   useEffect(() => {
-    const cep = d.address.cep.replace(/\D/g, '');
-    if (cep.length === 8 && shippingOptions.length === 0 && !shippingLoading) {
-      setShippingLoading(true);
-      calcularFrete(d.address.cep, d.quantity, product.id, d.address.state)
-        .then(opts => setShippingOptions(opts))
-        .catch(err => setShippingError(err.message || 'Não foi possível calcular o frete.'))
-        .finally(() => setShippingLoading(false));
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
+      if (d.address.state && !d.shipping) {
+        const total = calcTotal(product, 'serigrafia', d.quantity);
+        onChange({ ...d, shipping: calcularFrete(total, d.address.state) });
+      }
       return;
     }
-    const cep = d.address.cep.replace(/\D/g, '');
-    if (cep.length !== 8) return;
-
-    setShippingOptions([]);
-    setShippingError('');
-    setShippingLoading(true);
-    onChange({ ...d, shipping: null });
-
-    let cancelled = false;
-    const timer = setTimeout(() => {
-      if (cancelled) return;
-      calcularFrete(d.address.cep, d.quantity, product.id, d.address.state)
-        .then(opts => { if (!cancelled) setShippingOptions(opts); })
-        .catch(err => { if (!cancelled) setShippingError(err.message || 'Não foi possível calcular o frete.'); })
-        .finally(() => { if (!cancelled) setShippingLoading(false); });
-    }, 600);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
+    if (!d.address.state) return;
+    const total = calcTotal(product, 'serigrafia', d.quantity);
+    onChange({ ...d, shipping: calcularFrete(total, d.address.state) });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [d.quantity]);
 
@@ -90,15 +59,15 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
     const formatted = formatCEP(raw);
     setAddr('cep', formatted);
     setCepError('');
-    setShippingOptions([]);
-    setShippingError('');
     onChange({ ...d, address: { ...d.address, cep: formatted }, shipping: null });
 
     if (formatted.replace(/\D/g, '').length === 8) {
       setCepLoading(true);
       try {
         const addr = await lookupCEP(formatted);
-        const updated: OrderFormData = {
+        const total = calcTotal(product, 'serigrafia', d.quantity);
+        const shipping = calcularFrete(total, addr.state);
+        onChange({
           ...d,
           address: {
             ...d.address,
@@ -108,18 +77,8 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
             city: addr.city,
             state: addr.state,
           },
-          shipping: null,
-        };
-        onChange(updated);
-        setShippingLoading(true);
-        try {
-          const opts = await calcularFrete(formatted, d.quantity, product.id, addr.state);
-          setShippingOptions(opts);
-        } catch (err: any) {
-          setShippingError(err.message || 'Não foi possível calcular o frete. Verifique o CEP.');
-        } finally {
-          setShippingLoading(false);
-        }
+          shipping,
+        });
       } catch {
         setCepError('CEP não encontrado. Verifique e tente novamente.');
       } finally {
@@ -128,15 +87,10 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
     }
   };
 
-  const selectShipping = (option: ShippingOption) => {
-    onChange({ ...d, shipping: option });
-    setErrors(e => ({ ...e, shipping: '' }));
-  };
-
   const validate = (): boolean => {
     const e: Record<string, string> = {};
     if (d.quantity < MIN_QTY) e.quantity = `Mínimo ${MIN_QTY} unidades`;
-    if (!d.shipping) e.shipping = 'Selecione uma opção de frete para continuar';
+    if (!d.shipping) e.shipping = 'Informe o CEP de entrega para continuar';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -146,9 +100,9 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
   };
 
   const unitPriceSerigrafia = calcUnitPrice(product, 'serigrafia');
-  const unitPriceLaser = calcUnitPrice(product, 'laser');
+  const unitPriceLaser = product.customizations.laser ? calcUnitPrice(product, 'laser') : null;
   const totalSerigrafia = calcTotal(product, 'serigrafia', d.quantity);
-  const totalLaser = calcTotal(product, 'laser', d.quantity);
+  const totalLaser = product.customizations.laser ? calcTotal(product, 'laser', d.quantity) : null;
 
   return (
     <div className="min-h-screen pt-16 bg-[#1a1917]">
@@ -222,7 +176,7 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
             </div>
 
             {/* Price comparison table */}
-            <div className="mt-5 grid grid-cols-2 gap-3">
+            <div className={`mt-5 grid gap-3 ${unitPriceLaser !== null ? 'grid-cols-2' : 'grid-cols-1'}`}>
               <div className="bg-[#222019] rounded-xl p-4 border border-white/8">
                 <div className="flex items-center gap-2 mb-2">
                   <Printer size={16} className="text-[#D4AF37]" />
@@ -234,21 +188,23 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
                 <p className="font-poppins text-xl font-bold text-[#F1C40F]">
                   R$ {totalSerigrafia.toFixed(2).replace('.', ',')}
                 </p>
-                <p className="text-[10px] text-amber-400 mt-1">Mínimo 25 unidades</p>
+                <p className="text-[10px] text-amber-400 mt-1">Mínimo {MIN_QTY} unidades</p>
               </div>
-              <div className="bg-[#222019] rounded-xl p-4 border border-white/8">
-                <div className="flex items-center gap-2 mb-2">
-                  <Zap size={16} className="text-[#D4AF37]" />
-                  <span className="text-xs font-semibold text-gray-300">Gravação a Laser</span>
+              {unitPriceLaser !== null && totalLaser !== null && (
+                <div className="bg-[#222019] rounded-xl p-4 border border-white/8">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Zap size={16} className="text-[#D4AF37]" />
+                    <span className="text-xs font-semibold text-gray-300">Gravação a Laser</span>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    R$ {unitPriceLaser.toFixed(2).replace('.', ',')} × {d.quantity} un.
+                  </p>
+                  <p className="font-poppins text-xl font-bold text-[#F1C40F]">
+                    R$ {totalLaser.toFixed(2).replace('.', ',')}
+                  </p>
+                  <p className="text-[10px] text-green-400 mt-1">A partir de {MIN_QTY} unidades</p>
                 </div>
-                <p className="text-xs text-gray-500">
-                  R$ {unitPriceLaser.toFixed(2).replace('.', ',')} × {d.quantity} un.
-                </p>
-                <p className="font-poppins text-xl font-bold text-[#F1C40F]">
-                  R$ {totalLaser.toFixed(2).replace('.', ',')}
-                </p>
-                <p className="text-[10px] text-green-400 mt-1">A partir de 10 unidades</p>
-              </div>
+              )}
             </div>
             <p className="text-xs text-gray-500 mt-3">*Frete não incluído no total acima. Escolha do tipo de personalização na próxima etapa.</p>
           </div>
@@ -287,91 +243,28 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
             </div>
           </div>
 
-          {/* Shipping options */}
-          {(shippingLoading || shippingOptions.length > 0 || shippingError) && (
+          {/* Shipping info card */}
+          {d.shipping && (
             <div className="bg-[#2a2825] rounded-2xl border border-white/8 p-6">
               <h3 className="font-poppins font-semibold text-white mb-4 flex items-center gap-2">
                 <Truck size={18} className="text-[#D4AF37]" />
-                Opções de Frete
+                Frete
               </h3>
-
-              {shippingLoading && (
-                <div className="flex items-center gap-3 text-gray-400 text-sm py-2">
-                  <Loader size={16} className="animate-spin text-[#D4AF37]" />
-                  Calculando frete para o seu CEP...
+              <div className="flex items-center justify-between bg-[#222019] rounded-xl border border-[#D4AF37]/30 px-5 py-4">
+                <div>
+                  <p className="font-semibold text-white text-sm">{d.shipping.label.split(' — ')[0]}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{d.shipping.label.split(' — ').slice(1).join(' — ')}</p>
                 </div>
-              )}
-
-              {shippingError && (
-                <p className="text-red-400 text-sm">{shippingError}</p>
-              )}
-
-              {!shippingLoading && shippingOptions.length > 0 && (() => {
-                const fastest = shippingOptions.reduce((a, b) => a.deadlineDays < b.deadlineDays ? a : b);
-                const top3 = shippingOptions.slice(0, 3);
-                const fastestInTop3 = top3.some(o => o.service === fastest.service);
-                const initialVisible = fastestInTop3
-                  ? top3
-                  : [...top3, fastest];
-                const remaining = shippingOptions.filter(o => !initialVisible.some(v => v.service === o.service));
-                const toShow = showAllShipping ? shippingOptions : initialVisible;
-
-                return (
-                  <div className="space-y-3">
-                    {toShow.map(opt => {
-                      const selected = d.shipping?.service === opt.service;
-                      const isFastest = opt.service === fastest.service;
-                      return (
-                        <button
-                          key={opt.service}
-                          type="button"
-                          onClick={() => selectShipping(opt)}
-                          className={`w-full flex items-center justify-between rounded-xl border-2 px-5 py-4 transition-all text-left ${
-                            selected
-                              ? 'border-[#D4AF37] bg-[#D4AF37]/10'
-                              : 'border-white/10 hover:border-[#D4AF37]/40 bg-[#222019]'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${selected ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-gray-500'}`} />
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <p className={`font-semibold text-sm ${selected ? 'text-[#F1C40F]' : 'text-white'}`}>
-                                  {opt.label.split(' — ')[0]}
-                                </p>
-                                {isFastest && (
-                                  <span className="text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded px-1.5 py-0.5">
-                                    Mais rápida
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs text-gray-400">{opt.label.split(' — ').slice(1).join(' — ')}</p>
-                            </div>
-                          </div>
-                          <span className={`font-bold text-base ${selected ? 'text-[#F1C40F]' : 'text-white'}`}>
-                            R$ {opt.price.toFixed(2).replace('.', ',')}
-                          </span>
-                        </button>
-                      );
-                    })}
-
-                    {!showAllShipping && remaining.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setShowAllShipping(true)}
-                        className="w-full flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-[#D4AF37] border border-white/10 hover:border-[#D4AF37]/30 rounded-xl py-3 transition-all"
-                      >
-                        <ChevronDown size={15} />
-                        Ver mais {remaining.length} {remaining.length === 1 ? 'opção' : 'opções'} de frete
-                      </button>
-                    )}
-
-                    <p className="text-xs text-gray-500 pt-1">* Prazo estimado a partir da postagem.</p>
-                    {errors.shipping && <p className="text-red-400 text-xs">{errors.shipping}</p>}
-                  </div>
-                );
-              })()}
+                <span className="font-bold text-lg text-[#F1C40F]">
+                  R$ {d.shipping.price.toFixed(2).replace('.', ',')}
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 mt-3">* Prazo estimado a partir da postagem. Valor calculado sobre o total do pedido.</p>
             </div>
+          )}
+
+          {errors.shipping && (
+            <p className="text-red-400 text-sm -mt-3">{errors.shipping}</p>
           )}
 
           {/* Actions */}
@@ -384,7 +277,7 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
             </button>
             <button
               onClick={handleNext}
-              className="flex-1 flex items-center justify-center gap-2 bg-primary hover:bg-primaryDark text-white font-semibold py-3 rounded-xl text-base transition-all hover:shadow-lg hover:shadow-primary/30"
+              className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-[#D4AF37] to-[#d49924] hover:from-[#d49924] hover:to-[#c28511] text-gray-900 font-semibold py-3 rounded-xl text-base transition-all hover:shadow-lg hover:shadow-[#D4AF37]/30"
             >
               Continuar — Enviar Arte
               <ArrowRight size={18} />
