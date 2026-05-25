@@ -31,6 +31,7 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
   const [quantityInput, setQuantityInput] = useState(String(d.quantity));
   const [cepLoading, setCepLoading] = useState(false);
   const [cepError, setCepError] = useState('');
+  const [showStateSelector, setShowStateSelector] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const isFirstRender = React.useRef(true);
@@ -59,6 +60,7 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
     const formatted = formatCEP(raw);
     setAddr('cep', formatted);
     setCepError('');
+    setShowStateSelector(false);
     onChange({ ...d, address: { ...d.address, cep: formatted }, shipping: null });
 
     if (formatted.replace(/\D/g, '').length === 8) {
@@ -80,7 +82,8 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
           shipping,
         });
       } catch {
-        setCepError('CEP não encontrado. Verifique e tente novamente.');
+        setCepError('CEP não encontrado.');
+        setShowStateSelector(true);
       } finally {
         setCepLoading(false);
       }
@@ -239,6 +242,29 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
                 <p className="text-green-400 text-xs mt-1">
                   {d.address.city} – {d.address.state}
                 </p>
+              )}
+              {showStateSelector && (
+                <div className="mt-3">
+                  <p className="text-amber-400 text-xs mb-2">Selecione seu estado para calcular o frete:</p>
+                  <select
+                    value={d.address.state}
+                    onChange={e => {
+                      const uf = e.target.value;
+                      if (!uf) return;
+                      const total = calcTotal(product, 'serigrafia', d.quantity);
+                      const shipping = calcularFrete(total, uf);
+                      onChange({ ...d, address: { ...d.address, state: uf }, shipping });
+                      setShowStateSelector(false);
+                      setCepError('');
+                    }}
+                    className="w-full border border-white/15 rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+                  >
+                    <option value="">— Selecione o estado —</option>
+                    {['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'].map(uf => (
+                      <option key={uf} value={uf}>{uf}</option>
+                    ))}
+                  </select>
+                </div>
               )}
             </div>
           </div>
