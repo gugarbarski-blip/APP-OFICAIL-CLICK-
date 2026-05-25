@@ -74,73 +74,86 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
         </div>
 
         {/* ── RIGHT COLUMN ── */}
-        <div className="order-1 lg:order-2 relative flex items-center justify-center h-[420px] sm:h-[520px] lg:h-screen max-h-[700px]">
+        <div className="order-1 lg:order-2 relative h-[420px] sm:h-[520px] lg:h-[640px]">
 
-          {/* Golden circle ring */}
-          <div
-            className="absolute rounded-full pointer-events-none"
-            style={{
-              width: '520px',
-              height: '520px',
-              border: '2px solid rgba(212,175,55,0.45)',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-            }}
-          />
+          {/* Golden ring — behind everything */}
+          <div className="absolute pointer-events-none" style={{
+            width: '500px', height: '500px',
+            border: '2px solid rgba(212,175,55,0.55)',
+            borderRadius: '50%',
+            bottom: '60px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 1,
+          }} />
 
-          {/* Warm glow beneath products */}
-          <div
-            className="absolute pointer-events-none"
-            style={{
-              width: '420px',
-              height: '140px',
-              bottom: '80px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              background: 'radial-gradient(ellipse at 50% 100%, rgba(200,130,20,0.28) 0%, transparent 70%)',
-            }}
-          />
+          {/* Amber backlight glow — intense, behind products */}
+          <div className="absolute pointer-events-none" style={{
+            width: '320px', height: '320px',
+            bottom: '210px',
+            left: '42%',
+            transform: 'translateX(-50%)',
+            background: 'radial-gradient(circle, rgba(255,175,20,0.55) 0%, rgba(220,130,10,0.25) 40%, transparent 68%)',
+            borderRadius: '50%',
+            filter: 'blur(22px)',
+            zIndex: 2,
+          }} />
 
-          {/* Products */}
-          <div
-            className="relative z-10 flex items-end justify-center gap-2 sm:gap-4"
-            style={{ paddingBottom: '80px' }}
-          >
-            <img
-              src="/CopoTermicoSeuLogo.nobg.webp"
-              alt="Copo Térmico 475ml"
-              className="object-contain drop-shadow-2xl"
-              style={{ height: '280px' }}
+          {/* Products — sitting on platform top face */}
+          <div className="absolute pointer-events-none" style={{
+            bottom: '170px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            alignItems: 'flex-end',
+            gap: '12px',
+            zIndex: 8,
+          }}>
+            <img src="/CopoTermicoSeuLogo.nobg.webp" alt="Copo 475ml"
+              style={{ height: '270px', objectFit: 'contain', filter: 'drop-shadow(0 20px 30px rgba(0,0,0,0.8))' }}
               fetchPriority="high"
             />
-            <img
-              src="/CopoCuiaSeuNome.nobg.webp"
-              alt="Copo Cuia 320ml"
-              className="object-contain drop-shadow-2xl"
-              style={{ height: '210px', marginBottom: '4px' }}
+            <img src="/CopoCuiaSeuNome.nobg.webp" alt="Cuia 320ml"
+              style={{ height: '200px', objectFit: 'contain', filter: 'drop-shadow(0 20px 30px rgba(0,0,0,0.8))' }}
             />
-            <img
-              src="/EcobagSeuLogo.webp"
-              alt="Sacola Ecobag"
-              className="object-contain drop-shadow-2xl"
-              style={{ height: '240px', mixBlendMode: 'multiply' }}
+            <img src="/EcobagSeuLogo.nobg.webp" alt="Ecobag"
+              style={{ height: '240px', objectFit: 'contain', filter: 'drop-shadow(0 20px 30px rgba(0,0,0,0.7))' }}
             />
           </div>
 
-          {/* Platform disc */}
-          <div
-            className="absolute pointer-events-none"
-            style={{
-              width: '480px',
-              height: '48px',
-              bottom: '60px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              background: 'radial-gradient(ellipse at 50% 0%, #2e2e2e 0%, #111 60%, transparent 100%)',
-              borderRadius: '50%',
-            }}
-          />
+          {/* Platform — top face (ellipse) */}
+          <div className="absolute pointer-events-none" style={{
+            width: '540px', height: '52px',
+            bottom: '168px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'radial-gradient(ellipse at 50% 35%, #363636 0%, #1e1e1e 100%)',
+            borderRadius: '50%',
+            border: '1px solid rgba(212,175,55,0.25)',
+            zIndex: 6,
+          }} />
+
+          {/* Platform — body (cylinder side wall) */}
+          <div className="absolute pointer-events-none" style={{
+            width: '540px', height: '110px',
+            bottom: '58px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'linear-gradient(to bottom, #1e1e1e 0%, #121212 50%, #0c0c0c 100%)',
+            borderBottomLeftRadius: '50% 22px',
+            borderBottomRightRadius: '50% 22px',
+            zIndex: 5,
+          }} />
+
+          {/* Platform — subtle floor shadow */}
+          <div className="absolute pointer-events-none" style={{
+            width: '500px', height: '30px',
+            bottom: '42px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.6) 0%, transparent 70%)',
+            zIndex: 4,
+          }} />
         </div>
       </div>
     </section>
