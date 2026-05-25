@@ -40,10 +40,10 @@ export function calcularFrete(orderValue: number, uf?: string): ShippingOption {
   const region  = info?.region  ?? 'Brasil';
 
   return {
-    service:     'Transportadora',
+    service:     'Frete',
     price,
     deadlineDays: maxDays,
-    label:        `Transportadora — ${region} · ${minDays}–${maxDays} dias úteis`,
-    company:      'Transportadora',
+    label:        `Frete — ${region} · ${minDays}–${maxDays} dias úteis`,
+    company:      'Frete',
   };
 }
