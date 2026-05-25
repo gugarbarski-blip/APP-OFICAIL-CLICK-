@@ -30,6 +30,34 @@ const Loader = () => (
   </div>
 );
 
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { error: Error | null }
+> {
+  state = { error: null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  componentDidCatch(error: Error) { console.error('[ErrorBoundary]', error); }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="min-h-screen bg-[#1a1917] flex items-center justify-center px-6">
+          <div className="text-center">
+            <p className="text-white text-lg mb-2">Algo deu errado nesta página.</p>
+            <p className="text-gray-400 text-sm mb-6">Recarregue para continuar.</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-[#D4AF37] text-gray-900 font-bold px-6 py-3 rounded-xl hover:bg-[#F1C40F] transition-colors"
+            >
+              Recarregar página
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const makeEmptyOrder = (product: ProductDef): OrderFormData => ({
   name: '',
   email: '',
@@ -55,50 +83,18 @@ const PAYMENT_BANNERS: Record<NonNullable<PaymentStatus>, { icon: React.FC<{size
   erro:     { icon: XCircle,      bg: 'bg-red-50 border-red-200 text-red-800',      text: 'Pagamento não concluído', msg: 'Houve um problema com seu pagamento. Tente novamente.' },
 };
 
+const pathname = window.location.pathname;
+
 const App: React.FC = () => {
-  const [step, setStep] = useState<AppStep>('landing');
-
-  // Meus Pedidos route
-  if (window.location.pathname === '/meus-pedidos') {
-    return <Suspense fallback={<Loader />}><MeusPedidos onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} /></Suspense>;
-  }
-
-  // Minha Conta route
-  if (window.location.pathname === '/minha-conta') {
-    return <Suspense fallback={<Loader />}><CustomerArea onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} /></Suspense>;
-  }
-
-  // Pos-compra route
-  if (window.location.pathname === '/pedido-confirmado') {
-    const p = new URLSearchParams(window.location.search);
-    return (
-      <Suspense fallback={<Loader />}>
-        <PosCompra
-          nome={p.get('nome') || ''}
-          email={p.get('email') || ''}
-          produto={p.get('produto') || ''}
-          personalizacao={p.get('personalizacao') || ''}
-          quantidade={p.get('quantidade') || ''}
-          valor={p.get('valor') || ''}
-          frete={p.get('frete') || ''}
-          paymentId={p.get('payment_id') || undefined}
-          pedidoId={p.get('pedido_id') || undefined}
-        />
-      </Suspense>
-    );
-  }
-
-  // Privacy policy route
-  if (window.location.pathname === '/privacidade') {
-    return <Suspense fallback={<Loader />}><PrivacyPolicy onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} /></Suspense>;
-  }
+  // Todos os hooks no topo — sem condicional antes deles
+  const [step, setStep]                   = useState<AppStep>('landing');
   const [selectedProduct, setSelectedProduct] = useState<ProductDef>(PRODUCTS['copo-475']);
   const [customization, setCustomization] = useState<Customization>(EMPTY_CUSTOMIZATION);
-  const [orderData, setOrderData] = useState<OrderFormData>(makeEmptyOrder(PRODUCTS['copo-475']));
+  const [orderData, setOrderData]         = useState<OrderFormData>(makeEmptyOrder(PRODUCTS['copo-475']));
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>(null);
+  const [adminToken, setAdminToken]       = useState(() => sessionStorage.getItem('admin_token') || '');
 
   useEffect(() => {
-    // Registra o estado inicial para que o botão voltar funcione desde a landing
     window.history.replaceState({ step: 'landing' }, '');
 
     const params = new URLSearchParams(window.location.search);
@@ -108,7 +104,6 @@ const App: React.FC = () => {
       window.history.replaceState({ step: 'landing' }, '', '/');
     }
 
-    // Botão voltar/avançar do navegador
     const handlePopState = (e: PopStateEvent) => {
       const s = (e.state?.step as AppStep) ?? 'landing';
       setStep(s);
@@ -116,13 +111,11 @@ const App: React.FC = () => {
     };
     window.addEventListener('popstate', handlePopState);
 
-    // Recuperação de PIX: se o cliente pagou e saiu da página antes do polling detectar,
-    // na próxima vez que abrir o site verificamos e redirecionamos automaticamente
     try {
       const raw = sessionStorage.getItem('pixPending');
       if (raw) {
         const { paymentId, savedAt, params: redirectParams } = JSON.parse(raw);
-        const expired = Date.now() - savedAt > 30 * 60 * 1000; // PIX expira em 30 min
+        const expired = Date.now() - savedAt > 30 * 60 * 1000;
         if (expired) {
           sessionStorage.removeItem('pixPending');
         } else {
@@ -157,73 +150,106 @@ const App: React.FC = () => {
     goTo('quantity');
   };
 
-  // Admin route
-  const isAdmin = window.location.pathname === '/admin';
-  const [adminToken, setAdminToken] = useState(() => sessionStorage.getItem('admin_token') || '');
-  if (isAdmin) {
-    if (!adminToken) return <Suspense fallback={<Loader />}><AdminLogin onLogin={(token) => { sessionStorage.setItem('admin_token', token); setAdminToken(token); }} /></Suspense>;
-    return <Suspense fallback={<Loader />}><AdminPanel token={adminToken} onLogout={() => { sessionStorage.removeItem('admin_token'); setAdminToken(''); }} /></Suspense>;
+  // Rotas especiais
+  if (pathname === '/meus-pedidos') {
+    return <ErrorBoundary><Suspense fallback={<Loader />}><MeusPedidos onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} /></Suspense></ErrorBoundary>;
+  }
+  if (pathname === '/minha-conta') {
+    return <ErrorBoundary><Suspense fallback={<Loader />}><CustomerArea onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} /></Suspense></ErrorBoundary>;
+  }
+  if (pathname === '/pedido-confirmado') {
+    const p = new URLSearchParams(window.location.search);
+    return (
+      <ErrorBoundary><Suspense fallback={<Loader />}>
+        <PosCompra
+          nome={p.get('nome') || ''}
+          email={p.get('email') || ''}
+          produto={p.get('produto') || ''}
+          personalizacao={p.get('personalizacao') || ''}
+          quantidade={p.get('quantidade') || ''}
+          valor={p.get('valor') || ''}
+          frete={p.get('frete') || ''}
+          paymentId={p.get('payment_id') || undefined}
+          pedidoId={p.get('pedido_id') || undefined}
+        />
+      </Suspense></ErrorBoundary>
+    );
+  }
+  if (pathname === '/privacidade') {
+    return <ErrorBoundary><Suspense fallback={<Loader />}><PrivacyPolicy onBack={() => { window.history.pushState({}, '', '/'); window.location.reload(); }} /></Suspense></ErrorBoundary>;
+  }
+  if (pathname === '/admin') {
+    if (!adminToken) return <ErrorBoundary><Suspense fallback={<Loader />}><AdminLogin onLogin={(token) => { sessionStorage.setItem('admin_token', token); setAdminToken(token); }} /></Suspense></ErrorBoundary>;
+    return <ErrorBoundary><Suspense fallback={<Loader />}><AdminPanel token={adminToken} onLogout={() => { sessionStorage.removeItem('admin_token'); setAdminToken(''); }} /></Suspense></ErrorBoundary>;
   }
 
   if (step === 'quantity') {
     return (
-      <Suspense fallback={<Loader />}>
-        <QuantityShippingStep
-          product={selectedProduct}
-          initialData={orderData}
-          onChange={setOrderData}
-          onBack={() => goTo('landing')}
-          onNext={() => goTo('customize')}
-        />
-        <WhatsAppButton />
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense fallback={<Loader />}>
+          <QuantityShippingStep
+            product={selectedProduct}
+            initialData={orderData}
+            onChange={setOrderData}
+            onBack={() => goTo('landing')}
+            onNext={() => goTo('customize')}
+          />
+          <WhatsAppButton />
+        </Suspense>
+      </ErrorBoundary>
     );
   }
 
   if (step === 'customize') {
     return (
-      <Suspense fallback={<Loader />}>
-        <CustomizationStep
-          product={selectedProduct}
-          value={customization}
-          quantity={orderData.quantity}
-          onChange={setCustomization}
-          onBack={() => goTo('quantity')}
-          onNext={() => goTo('order')}
-        />
-        <WhatsAppButton />
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense fallback={<Loader />}>
+          <CustomizationStep
+            product={selectedProduct}
+            value={customization}
+            quantity={orderData.quantity}
+            onChange={setCustomization}
+            onBack={() => goTo('quantity')}
+            onNext={() => goTo('order')}
+          />
+          <WhatsAppButton />
+        </Suspense>
+      </ErrorBoundary>
     );
   }
 
   if (step === 'order') {
     return (
-      <Suspense fallback={<Loader />}>
-        <OrderForm
-          product={selectedProduct}
-          customization={customization}
-          initialData={orderData}
-          onChange={setOrderData}
-          onBack={() => goTo('customize')}
-          onNext={() => goTo('confirmation')}
-        />
-        <WhatsAppButton />
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense fallback={<Loader />}>
+          <OrderForm
+            product={selectedProduct}
+            customization={customization}
+            initialData={orderData}
+            onChange={setOrderData}
+            onBack={() => goTo('customize')}
+            onNext={() => goTo('confirmation')}
+          />
+          <WhatsAppButton />
+        </Suspense>
+      </ErrorBoundary>
     );
   }
 
   if (step === 'confirmation') {
     return (
-      <Suspense fallback={<Loader />}>
-        <OrderSummary
-          product={selectedProduct}
-          customization={customization}
-          formData={orderData}
-          onBack={() => goTo('order')}
-          onConfirm={() => goTo('landing')}
-        />
-        <WhatsAppButton />
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense fallback={<Loader />}>
+          <OrderSummary
+            product={selectedProduct}
+            customization={customization}
+            formData={orderData}
+            onBack={() => goTo('order')}
+            onConfirm={() => goTo('landing')}
+          />
+          <WhatsAppButton />
+        </Suspense>
+      </ErrorBoundary>
     );
   }
 
@@ -259,7 +285,6 @@ const App: React.FC = () => {
       <FAQ />
 
       <section className="bg-gradient-to-br from-[#858079] via-[#6B6862] to-[#514F4A] py-10 md:py-16 relative overflow-hidden">
-        {/* Subtle background glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl h-full bg-[#D4AF37]/5 blur-[100px] rounded-full pointer-events-none"></div>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-10">
           <div className="flex justify-center mb-3 md:mb-4">
