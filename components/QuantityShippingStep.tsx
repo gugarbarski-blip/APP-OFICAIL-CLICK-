@@ -79,8 +79,13 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
           },
           shipping,
         });
-      } catch {
-        setCepError('CEP não encontrado. Verifique e tente novamente.');
+      } catch (err: any) {
+        console.error('[CEP] erro no componente:', err?.message, err);
+        if (err?.message === 'NETWORK') {
+          setCepError('Erro de conexão com o servidor de CEP. Tente novamente.');
+        } else {
+          setCepError('CEP não encontrado. Verifique e tente novamente.');
+        }
       } finally {
         setCepLoading(false);
       }

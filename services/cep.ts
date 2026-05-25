@@ -4,11 +4,18 @@ export async function lookupCEP(cep: string): Promise<Omit<Address, 'cep' | 'num
   const cleaned = cep.replace(/\D/g, '');
   if (cleaned.length !== 8) throw new Error('CEP inválido');
 
-  const res = await fetch(`https://viacep.com.br/ws/${cleaned}/json/`);
-  if (!res.ok) throw new Error('Erro ao buscar CEP');
+  let res: Response;
+  try {
+    res = await fetch(`https://viacep.com.br/ws/${cleaned}/json/`);
+  } catch (e) {
+    console.error('[CEP] fetch falhou (rede/CORS):', e);
+    throw new Error('NETWORK');
+  }
+  if (!res.ok) throw new Error('NETWORK');
 
   const data = await res.json();
-  if (data.erro) throw new Error('CEP não encontrado');
+  console.log('[CEP] resposta ViaCEP:', data);
+  if (data.erro) throw new Error('NOT_FOUND');
 
   return {
     street: data.logradouro ?? '',
