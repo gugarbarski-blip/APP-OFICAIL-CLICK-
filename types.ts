@@ -106,11 +106,10 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
       'Peso: ~266g',
     ],
     basePrice: 24.00,
-    image: '/moleskine.webp',
-    cardImage: '/moleskine.webp',
+    image: '/Moleskine.SeuLogo.png',
+    cardImage: '/Moleskine.SeuLogo.png',
     customizations: {
       serigrafia: { label: 'Serigrafia 1 Cor', extraPrice: 0, description: 'Impressão em tinta de alta durabilidade na capa' },
-      laser: { label: 'Gravação a Laser', extraPrice: 5.00, description: 'Gravação permanente na capa da caderneta' },
     },
     minQuantity: 10,
   },
