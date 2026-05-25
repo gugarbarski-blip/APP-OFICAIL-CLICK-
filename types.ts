@@ -2,7 +2,7 @@ export type CustomizationType = 'serigrafia' | 'laser';
 
 export type AppStep = 'landing' | 'quantity' | 'customize' | 'order' | 'confirmation';
 
-export type ProductId = 'copo-475' | 'cuia-320' | 'ecobag';
+export type ProductId = 'copo-475' | 'cuia-320' | 'ecobag' | 'moleskine';
 
 export interface ProductDef {
   id: ProductId;
@@ -89,6 +89,30 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
       serigrafia: { label: 'Serigrafia 1 Cor', extraPrice: 0, description: 'Impressão em tinta de alta durabilidade sobre algodão' },
     },
     minQuantity: 25,
+  },
+  'moleskine': {
+    id: 'moleskine',
+    name: 'Caderneta Moleskine',
+    color: 'Preto',
+    description: 'Caderneta emborrachada com porta caneta elástico em nylon, marcador de página em cetim e fita elástica de nylon para fechar. Aproximadamente 80 folhas pardas pautadas.',
+    features: [
+      'Capa emborrachada flexível',
+      'Porta caneta elástico em nylon',
+      'Marcador de página em cetim',
+      'Fita elástica de fechamento',
+      '~80 folhas pardas pautadas',
+      'Altura: 21,2 cm · Largura: 14 cm',
+      'Área de gravação: 20 × 13 cm',
+      'Peso: ~266g',
+    ],
+    basePrice: 24.00,
+    image: '/moleskine.webp',
+    cardImage: '/moleskine.webp',
+    customizations: {
+      serigrafia: { label: 'Serigrafia 1 Cor', extraPrice: 0, description: 'Impressão em tinta de alta durabilidade na capa' },
+      laser: { label: 'Gravação a Laser', extraPrice: 5.00, description: 'Gravação permanente na capa da caderneta' },
+    },
+    minQuantity: 10,
   },
 };
 
