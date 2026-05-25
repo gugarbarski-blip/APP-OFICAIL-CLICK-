@@ -76,9 +76,9 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
         {/* ── RIGHT COLUMN ── */}
         <div className="order-1 lg:order-2 flex items-center justify-center">
           <img
-            src="/hero-produtos.nobg.webp"
+            src="/hero-produtos.webp"
             alt="Copo Térmico 475ml, Cuia 320ml e Ecobag personalizados"
-            className="w-full max-w-[480px] lg:max-w-[560px] h-auto object-contain drop-shadow-2xl"
+            className="w-full max-w-[480px] lg:max-w-[560px] h-auto object-contain"
             fetchPriority="high"
           />
         </div>
