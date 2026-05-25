@@ -83,7 +83,7 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
       'Sustentável e reutilizável',
     ],
     basePrice: 11.00,
-    image: '/EcobagSeuLogo.webp',
+    image: '/EcoBagPreview.semlogo.webp',
     cardImage: '/EcobagSeuLogo.webp',
     customizations: {
       serigrafia: { label: 'Serigrafia 1 Cor', extraPrice: 0, description: 'Impressão em tinta de alta durabilidade sobre algodão' },
