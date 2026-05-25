@@ -43,7 +43,7 @@ export function calcularFrete(orderValue: number, uf?: string): ShippingOption {
     service:     'Frete',
     price,
     deadlineDays: maxDays,
-    label:        `Frete — ${region} · ${minDays}–${maxDays} dias úteis`,
+    label:        `Frete — ${minDays}–${maxDays} dias úteis`,
     company:      'Frete',
   };
 }
