@@ -30,14 +30,18 @@ const REGION_CONFIG: Record<string, { region: string; minDays: number; maxDays: 
   TO: { region: 'Norte',        minDays: 14, maxDays: 20 },
 };
 
-export function calcularFrete(orderValue: number, uf?: string): ShippingOption {
-  const pct   = orderValue >= 1000 ? 0.07 : 0.10;
-  const price = parseFloat((orderValue * pct).toFixed(2));
+const REGIOES_TARIFA_ALTA = new Set(['Nordeste', 'Norte']);
 
-  const info    = uf ? REGION_CONFIG[uf.toUpperCase()] : null;
+export function calcularFrete(orderValue: number, uf?: string): ShippingOption {
   const minDays = info?.minDays ?? 10;
   const maxDays = info?.maxDays ?? 18;
   const region  = info?.region  ?? 'Brasil';
+
+  const tarifaAlta = REGIOES_TARIFA_ALTA.has(region);
+  const pct   = tarifaAlta
+    ? (orderValue >= 1000 ? 0.125 : 0.15)
+    : (orderValue >= 1000 ? 0.07  : 0.10);
+  const price = parseFloat((orderValue * pct).toFixed(2));
 
   return {
     service:     'Frete',
