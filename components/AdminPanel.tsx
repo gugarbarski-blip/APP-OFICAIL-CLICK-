@@ -68,7 +68,7 @@ export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ 
 
   const loadMetrics = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/metrics', { headers: authHeaders(token) });
+      const res = await fetch('/api/admin/pedidos?mode=metrics', { headers: authHeaders(token) });
       if (res.ok) setMetrics(await res.json());
     } catch {}
   }, [token]);
