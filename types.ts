@@ -82,7 +82,7 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
       'Peso: ~69g',
       'Sustentável e reutilizável',
     ],
-    basePrice: 18.00,
+    basePrice: 11.00,
     image: '/EcobagSeuLogo.webp',
     cardImage: '/EcobagSeuLogo.webp',
     customizations: {
