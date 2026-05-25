@@ -19,16 +19,6 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
         {/* ── LEFT COLUMN ── */}
         <div className="space-y-6 order-2 lg:order-1">
 
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-[#0a0a0a]">
-              <img src="/Logo.webp" alt="IB" className="w-full h-full object-cover" />
-            </div>
-            <span className="font-poppins font-extrabold text-2xl text-[#D4AF37] tracking-tight">
-              ImpreBrindes
-            </span>
-          </div>
-
           {/* Badge */}
           <div className="inline-flex items-center gap-2 border border-[#D4AF37]/50 text-[#D4AF37] px-4 py-1.5 rounded-full text-sm font-semibold">
             <Star size={13} className="fill-[#D4AF37]" />
