@@ -96,7 +96,7 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
     color: 'Preto',
     description: 'Caderneta emborrachada com porta caneta elástico em nylon, marcador de página em cetim e fita elástica de nylon para fechar. Aproximadamente 80 folhas pardas pautadas.',
     features: [
-      'Capa emborrachada flexível',
+      'Capa emborrachada em couro sintético',
       'Porta caneta elástico em nylon',
       'Marcador de página em cetim',
       'Fita elástica de fechamento',
