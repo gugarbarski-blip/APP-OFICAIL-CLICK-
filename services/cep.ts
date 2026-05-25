@@ -2,11 +2,21 @@ import { Address } from '../types';
 
 type CepResult = Omit<Address, 'cep' | 'number' | 'complement'>;
 
+async function fetchWithTimeout(url: string, ms = 5000): Promise<Response> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } finally {
+    clearTimeout(id);
+  }
+}
+
 async function fromViaCEP(cleaned: string): Promise<CepResult> {
-  const res = await fetch(`https://viacep.com.br/ws/${cleaned}/json/`);
-  if (!res.ok) throw new Error('viacep_error');
+  const res = await fetchWithTimeout(`https://viacep.com.br/ws/${cleaned}/json/`);
+  if (!res.ok) throw new Error('err');
   const data = await res.json();
-  if (data.erro) throw new Error('viacep_not_found');
+  if (data.erro) throw new Error('err');
   return {
     street: data.logradouro ?? '',
     neighborhood: data.bairro ?? '',
@@ -16,10 +26,10 @@ async function fromViaCEP(cleaned: string): Promise<CepResult> {
 }
 
 async function fromBrasilAPI(cleaned: string): Promise<CepResult> {
-  const res = await fetch(`https://brasilapi.com.br/api/cep/v2/${cleaned}`);
-  if (!res.ok) throw new Error('brasilapi_error');
+  const res = await fetchWithTimeout(`https://brasilapi.com.br/api/cep/v2/${cleaned}`);
+  if (!res.ok) throw new Error('err');
   const data = await res.json();
-  if (!data.state) throw new Error('brasilapi_not_found');
+  if (!data.state) throw new Error('err');
   return {
     street: data.street ?? '',
     neighborhood: data.neighborhood ?? '',
@@ -28,19 +38,32 @@ async function fromBrasilAPI(cleaned: string): Promise<CepResult> {
   };
 }
 
+async function fromOpenCEP(cleaned: string): Promise<CepResult> {
+  const res = await fetchWithTimeout(`https://opencep.com/v1/${cleaned}`);
+  if (!res.ok) throw new Error('err');
+  const data = await res.json();
+  if (!data.uf) throw new Error('err');
+  return {
+    street: data.logradouro ?? '',
+    neighborhood: data.bairro ?? '',
+    city: data.localidade ?? '',
+    state: data.uf ?? '',
+  };
+}
+
 export async function lookupCEP(cep: string): Promise<CepResult> {
   const cleaned = cep.replace(/\D/g, '');
   if (cleaned.length !== 8) throw new Error('CEP inválido');
 
-  try {
-    return await fromViaCEP(cleaned);
-  } catch {
+  const apis = [fromViaCEP, fromBrasilAPI, fromOpenCEP];
+  for (const api of apis) {
     try {
-      return await fromBrasilAPI(cleaned);
+      return await api(cleaned);
     } catch {
-      throw new Error('CEP não encontrado');
+      // tenta próxima
     }
   }
+  throw new Error('CEP não encontrado. Verifique e tente novamente.');
 }
 
 export function formatCEP(value: string): string {
