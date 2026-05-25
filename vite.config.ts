@@ -16,7 +16,6 @@ export default defineConfig(({ mode }) => {
           output: {
             manualChunks: {
               'vendor-react':    ['react', 'react-dom'],
-              'vendor-three':    ['three'],
               'vendor-pdfjs':    ['pdfjs-dist'],
               'vendor-supabase': ['@supabase/supabase-js'],
             },
