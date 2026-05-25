@@ -4,24 +4,34 @@ export async function lookupCEP(cep: string): Promise<Omit<Address, 'cep' | 'num
   const cleaned = cep.replace(/\D/g, '');
   if (cleaned.length !== 8) throw new Error('CEP inválido');
 
-  let res: Response;
+  // Tenta ViaCEP primeiro
   try {
-    res = await fetch(`https://viacep.com.br/ws/${cleaned}/json/`);
+    const res = await fetch(`https://viacep.com.br/ws/${cleaned}/json/`);
+    if (res.ok) {
+      const data = await res.json();
+      if (!data.erro) {
+        return {
+          street: data.logradouro ?? '',
+          neighborhood: data.bairro ?? '',
+          city: data.localidade ?? '',
+          state: data.uf ?? '',
+        };
+      }
+    }
   } catch (e) {
-    console.error('[CEP] fetch falhou (rede/CORS):', e);
-    throw new Error('NETWORK');
+    console.warn('[CEP] ViaCEP falhou, tentando BrasilAPI:', e);
   }
-  if (!res.ok) throw new Error('NETWORK');
 
-  const data = await res.json();
-  console.log('[CEP] resposta ViaCEP:', data);
-  if (data.erro) throw new Error('NOT_FOUND');
+  // Fallback: BrasilAPI
+  const res2 = await fetch(`https://brasilapi.com.br/api/cep/v1/${cleaned}`);
+  if (!res2.ok) throw new Error('CEP não encontrado');
+  const data2 = await res2.json();
 
   return {
-    street: data.logradouro ?? '',
-    neighborhood: data.bairro ?? '',
-    city: data.localidade ?? '',
-    state: data.uf ?? '',
+    street: data2.street ?? '',
+    neighborhood: data2.neighborhood ?? '',
+    city: data2.city ?? '',
+    state: data2.state ?? '',
   };
 }
 
