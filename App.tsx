@@ -3,6 +3,7 @@ import { Gift, ArrowRight, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { AppStep, Customization, OrderFormData, ProductDef, PRODUCTS } from './types';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
+import { HeroV2 } from './components/HeroV2';
 import { ProductShowcase } from './components/ProductShowcase';
 import { HowItWorks } from './components/HowItWorks';
 import { WhyChooseUs } from './components/WhyChooseUs';
@@ -149,6 +150,16 @@ const App: React.FC = () => {
     setCustomization(EMPTY_CUSTOMIZATION);
     goTo('quantity');
   };
+
+  // Rota de teste do novo Hero
+  if (pathname === '/teste') {
+    return (
+      <ErrorBoundary>
+        <HeroV2 onCtaClick={() => startOrder(PRODUCTS['copo-475'])} />
+        <WhatsAppButton />
+      </ErrorBoundary>
+    );
+  }
 
   // Rotas especiais
   if (pathname === '/meus-pedidos') {
