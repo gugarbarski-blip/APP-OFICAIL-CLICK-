@@ -88,7 +88,7 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
     customizations: {
       serigrafia: { label: 'Serigrafia 1 Cor', extraPrice: 0, description: 'Impressão em tinta de alta durabilidade sobre algodão' },
     },
-    minQuantity: 25,
+    minQuantity: 40,
   },
   'moleskine': {
     id: 'moleskine',
@@ -111,7 +111,7 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
     customizations: {
       serigrafia: { label: 'Serigrafia 1 Cor', extraPrice: 0, description: 'Impressão em tinta de alta durabilidade na capa' },
     },
-    minQuantity: 20,
+    minQuantity: 25,
   },
 };
 
