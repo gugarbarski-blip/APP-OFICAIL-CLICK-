@@ -4,17 +4,17 @@ import { Star } from 'lucide-react';
 const testimonials = [
   {
     name: 'Mariana Costa', role: 'Diretora de Marketing', company: 'TechSul Soluções',
-    text: 'Encomendamos 200 copos para o nosso evento anual e o resultado foi incrível. A qualidade superou as expectativas e a entrega foi pontual. Os clientes adoraram!',
+    text: 'Pedimos 150 copos térmicos para o nosso evento corporativo. A gravação a laser ficou impecável e a entrega chegou antes do prazo. Já estamos planejando o próximo pedido!',
     stars: 5, initials: 'MC',
   },
   {
     name: 'Roberto Almeida', role: 'Proprietário', company: 'Almeida Imóveis',
-    text: 'Usamos os copos como brinde para novos clientes. O acabamento é premium, parece muito mais caro do que realmente custa. A arte ficou perfeita com a gravação a laser.',
+    text: 'Usamos as ecobags como brinde de lançamento do empreendimento. O algodão é de boa qualidade, a serigrafia ficou nítida e o preço por unidade é muito competitivo.',
     stars: 5, initials: 'RA',
   },
   {
     name: 'Fernanda Souza', role: 'Gerente Comercial', company: 'GreenFood RS',
-    text: 'Atendimento excelente desde o primeiro contato. Aprovaram a arte rapidinho e o prazo foi cumprido. Com certeza vou pedir mais para o fim do ano.',
+    text: 'Encomendamos cadernetas Moleskine personalizadas para nossa equipe de vendas. Ficaram lindas com o logo em serigrafia. Atendimento ágil e produto entregue conforme o combinado.',
     stars: 5, initials: 'FS',
   },
 ];
@@ -33,7 +33,7 @@ export const Testimonials: React.FC = () => (
       <div className="text-center mb-8 md:mb-12">
         <span className="text-[#D4AF37] font-semibold text-sm uppercase tracking-wider">Depoimentos</span>
         <h2 className="font-poppins text-3xl sm:text-4xl font-bold text-white mt-2">O que nossos clientes dizem</h2>
-        <p className="text-gray-400 mt-3 max-w-lg mx-auto">Mais de 500 empresas já confiaram na ImpreBrindes</p>
+        <p className="text-gray-400 mt-3 max-w-lg mx-auto">Empresas de todo o Brasil já personalizaram seus brindes com a gente</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
-import { PRODUCT } from '../types';
+import { PRODUCTS } from '../types';
+
+const minPrice = Math.min(...Object.values(PRODUCTS).map(p => p.basePrice));
 
 interface StickyCtaBarProps {
   onCtaClick: () => void;
@@ -27,7 +29,7 @@ export const StickyCtaBar: React.FC<StickyCtaBarProps> = ({ onCtaClick }) => {
           <p className="text-gray-400 text-[11px] leading-none mb-0.5">A partir de</p>
           <div className="flex items-baseline gap-1">
             <span className="font-poppins font-extrabold text-[#F1C40F] text-xl leading-tight">
-              R$ {PRODUCT.basePrice.toFixed(2).replace('.', ',')}
+              R$ {minPrice.toFixed(2).replace('.', ',')}
             </span>
             <span className="text-gray-400 text-[11px]">/ un.</span>
           </div>

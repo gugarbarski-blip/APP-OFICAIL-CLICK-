@@ -4,7 +4,7 @@ import { ShoppingBag, Palette, CreditCard, Package } from 'lucide-react';
 const steps = [
   { icon: ShoppingBag, title: 'Escolha o Produto',     description: 'Navegue pelo catálogo e selecione o produto desejado.',                                     color: 'bg-blue-500' },
   { icon: Palette,     title: 'Personalize',           description: 'Escolha o tipo de gravação e faça upload da sua arte ou logo.',                             color: 'bg-primary' },
-  { icon: CreditCard,  title: 'Realize o Pagamento',   description: 'Pague com segurança via Mercado Pago: PIX, cartão ou boleto.',                              color: 'bg-accent' },
+  { icon: CreditCard,  title: 'Realize o Pagamento',   description: 'Pague com segurança via Mercado Pago: PIX ou cartão de crédito.',                         color: 'bg-accent' },
   { icon: Package,     title: 'Receba seu Brinde',      description: 'Entregamos em todo o Brasil com prazo garantido.',                                          color: 'bg-green-500' },
 ];
 

@@ -2,9 +2,9 @@ import React from 'react';
 import { Award, Zap, Users, Headphones } from 'lucide-react';
 
 const differentials = [
-  { icon: Award,      title: 'Qualidade Premium',         description: 'Copos em aço inox 18/8 com acabamento de alta durabilidade.' },
+  { icon: Award,      title: 'Qualidade Premium',         description: 'Aço inox 18/8, algodão cru e couro sintético — materiais selecionados com acabamento de alta durabilidade.' },
   { icon: Zap,        title: 'Entrega Rápida',            description: 'Produção ágil e envio expresso para todo o território nacional.' },
-  { icon: Users,      title: 'Pedido Mínimo Flexível',    description: 'Comece com apenas 10 unidades, ideal para qualquer empresa.' },
+  { icon: Users,      title: 'Pedido Mínimo Flexível',    description: 'A partir de 10 unidades para copos e cuias — ideal para empresas de qualquer tamanho.' },
   { icon: Headphones, title: 'Atendimento Especializado', description: 'Nossa equipe te acompanha em cada etapa do pedido.' },
 ];
 

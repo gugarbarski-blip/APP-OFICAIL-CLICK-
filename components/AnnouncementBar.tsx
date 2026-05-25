@@ -1,14 +1,15 @@
 import React from 'react';
-import { Trophy, Zap, Truck } from 'lucide-react';
+import { Trophy, Zap, Truck, BookOpen, ShoppingBag } from 'lucide-react';
 
-const items = [
-  { icon: Trophy, text: 'Um dos menores preços do Brasil' },
-  { icon: Zap,    text: 'Copo Térmico 475ml a partir de R$ 23,00/un.' },
-  { icon: Truck,  text: 'Entrega para todo o Brasil' },
-  { icon: Trophy, text: 'Um dos menores preços do Brasil' },
-  { icon: Zap,    text: 'Copo Térmico 475ml a partir de R$ 23,00/un.' },
-  { icon: Truck,  text: 'Entrega para todo o Brasil' },
+const BASE_ITEMS = [
+  { icon: Zap,        text: 'Copos Térmicos a partir de R$ 23,00/un.' },
+  { icon: ShoppingBag,text: 'Ecobag Algodão a partir de R$ 11,00/un.' },
+  { icon: BookOpen,   text: 'Caderneta Moleskine a partir de R$ 24,00/un.' },
+  { icon: Trophy,     text: 'Qualidade premium com o melhor preço' },
+  { icon: Truck,      text: 'Entrega para todo o Brasil' },
 ];
+
+const items = [...BASE_ITEMS, ...BASE_ITEMS];
 
 export const AnnouncementBar: React.FC = () => (
   <div className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-[#D4AF37] via-[#F1C40F] to-[#D4AF37] overflow-hidden h-8 flex items-center">

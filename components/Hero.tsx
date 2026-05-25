@@ -1,10 +1,14 @@
 import React from 'react';
 import { ArrowRight, Star } from 'lucide-react';
-import { PRODUCT } from '../types';
+import { PRODUCTS } from '../types';
 
 interface HeroProps {
   onCtaClick: () => void;
 }
+
+const minPrice = Math.min(...Object.values(PRODUCTS).map(p => p.basePrice));
+
+const productPills = ['Copos Térmicos', 'Ecobags', 'Moleskines', 'Cuias'];
 
 export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
   return (
@@ -28,31 +32,40 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 border border-[#D4AF37]/50 text-[#D4AF37] px-4 py-1.5 rounded-full text-sm font-semibold">
             <Star size={13} className="fill-[#D4AF37]" />
-            Brindes Personalizados Premium
+            Brindes Corporativos Premium
           </div>
 
           {/* Title */}
           <h1 className="font-poppins text-5xl sm:text-6xl font-extrabold leading-[1.05] text-[#EAB308]">
-            Copos Térmicos<br />
+            Brindes Corporativos<br />
             Personalizados
           </h1>
 
           {/* Description */}
           <p className="text-gray-300 text-base lg:text-lg leading-relaxed max-w-md">
-            Copos Térmicos 475ml personalizados com a identidade da sua empresa.
-            Qualidade premium e entrega para todo o Brasil.
+            Copos térmicos, ecobags e cadernetas Moleskine com a identidade
+            da sua empresa. Qualidade premium e entrega para todo o Brasil.
           </p>
+
+          {/* Product pills */}
+          <div className="flex flex-wrap gap-2">
+            {productPills.map(pill => (
+              <span key={pill} className="text-xs font-semibold text-gray-300 bg-white/8 border border-white/12 px-3 py-1 rounded-full">
+                {pill}
+              </span>
+            ))}
+          </div>
 
           {/* Price */}
           <div className="space-y-1">
             <p className="text-gray-400 text-sm">A partir de</p>
             <div className="flex items-baseline gap-2 flex-wrap">
               <span className="font-poppins text-5xl font-extrabold text-[#EAB308]">
-                R$ {PRODUCT.basePrice.toFixed(2).replace('.', ',')}
+                R$ {minPrice.toFixed(2).replace('.', ',')}
               </span>
               <span className="text-gray-400 text-base">/ unidade</span>
             </div>
-            <p className="text-gray-500 text-sm">Comece com apenas {PRODUCT.minQuantity} unidades</p>
+            <p className="text-gray-500 text-sm">4 produtos disponíveis · entrega para todo o Brasil</p>
           </div>
 
           {/* CTAs */}
@@ -68,7 +81,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
               href="#produto"
               className="flex items-center justify-center border border-white/20 hover:border-white/40 text-white font-semibold px-8 py-3.5 rounded-xl text-base transition-colors"
             >
-              Ver Detalhes
+              Ver Produtos
             </a>
           </div>
         </div>
@@ -77,7 +90,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
         <div className="order-1 lg:order-2 flex items-center justify-center">
           <img
             src="/Imagem.LadoDireito.webp"
-            alt="Copo Térmico 475ml, Cuia 320ml e Ecobag personalizados"
+            alt="Copos Térmicos, Cuia, Ecobag e Moleskine personalizados ImpreBrindes"
             className="w-full max-w-[480px] lg:max-w-[560px] h-auto object-contain"
             fetchPriority="high"
           />
