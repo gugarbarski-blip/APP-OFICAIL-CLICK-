@@ -1,69 +1,21 @@
 import { Address } from '../types';
 
-type CepResult = Omit<Address, 'cep' | 'number' | 'complement'>;
-
-async function fetchWithTimeout(url: string, ms = 5000): Promise<Response> {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), ms);
-  try {
-    return await fetch(url, { signal: controller.signal });
-  } finally {
-    clearTimeout(id);
-  }
-}
-
-async function fromViaCEP(cleaned: string): Promise<CepResult> {
-  const res = await fetchWithTimeout(`https://viacep.com.br/ws/${cleaned}/json/`);
-  if (!res.ok) throw new Error('err');
-  const data = await res.json();
-  if (data.erro) throw new Error('err');
-  return {
-    street: data.logradouro ?? '',
-    neighborhood: data.bairro ?? '',
-    city: data.localidade ?? '',
-    state: data.uf ?? '',
-  };
-}
-
-async function fromBrasilAPI(cleaned: string): Promise<CepResult> {
-  const res = await fetchWithTimeout(`https://brasilapi.com.br/api/cep/v2/${cleaned}`);
-  if (!res.ok) throw new Error('err');
-  const data = await res.json();
-  if (!data.state) throw new Error('err');
-  return {
-    street: data.street ?? '',
-    neighborhood: data.neighborhood ?? '',
-    city: data.city ?? '',
-    state: data.state ?? '',
-  };
-}
-
-async function fromOpenCEP(cleaned: string): Promise<CepResult> {
-  const res = await fetchWithTimeout(`https://opencep.com/v1/${cleaned}`);
-  if (!res.ok) throw new Error('err');
-  const data = await res.json();
-  if (!data.uf) throw new Error('err');
-  return {
-    street: data.logradouro ?? '',
-    neighborhood: data.bairro ?? '',
-    city: data.localidade ?? '',
-    state: data.uf ?? '',
-  };
-}
-
-export async function lookupCEP(cep: string): Promise<CepResult> {
+export async function lookupCEP(cep: string): Promise<Omit<Address, 'cep' | 'number' | 'complement'>> {
   const cleaned = cep.replace(/\D/g, '');
   if (cleaned.length !== 8) throw new Error('CEP inválido');
 
-  const apis = [fromViaCEP, fromBrasilAPI, fromOpenCEP];
-  for (const api of apis) {
-    try {
-      return await api(cleaned);
-    } catch {
-      // tenta próxima
-    }
-  }
-  throw new Error('CEP não encontrado. Verifique e tente novamente.');
+  const res = await fetch(`https://viacep.com.br/ws/${cleaned}/json/`);
+  if (!res.ok) throw new Error('Erro ao buscar CEP');
+
+  const data = await res.json();
+  if (data.erro) throw new Error('CEP não encontrado');
+
+  return {
+    street: data.logradouro ?? '',
+    neighborhood: data.bairro ?? '',
+    city: data.localidade ?? '',
+    state: data.uf ?? '',
+  };
 }
 
 export function formatCEP(value: string): string {
