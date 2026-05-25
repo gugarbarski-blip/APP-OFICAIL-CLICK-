@@ -25,7 +25,7 @@ const PrivacyPolicy        = lazy(() => import('./components/PrivacyPolicy').the
 const PosCompra            = lazy(() => import('./components/PosCompra').then(m => ({ default: m.PosCompra })));
 
 const Loader = () => (
-  <div className="min-h-screen bg-[#1a1917] flex items-center justify-center">
+  <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
     <div className="w-8 h-8 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
   </div>
 );
@@ -40,7 +40,7 @@ class ErrorBoundary extends React.Component<
   render() {
     if (this.state.error) {
       return (
-        <div className="min-h-screen bg-[#1a1917] flex items-center justify-center px-6">
+        <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-6">
           <div className="text-center">
             <p className="text-white text-lg mb-2">Algo deu errado nesta página.</p>
             <p className="text-gray-400 text-sm mb-6">Recarregue para continuar.</p>

@@ -22,7 +22,7 @@ export const StickyCtaBar: React.FC<StickyCtaBarProps> = ({ onCtaClick }) => {
       }`}
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
-      <div className="bg-[#1a1917]/95 backdrop-blur-lg border-t border-[#D4AF37]/25 px-4 py-3 flex items-center justify-between gap-3">
+      <div className="bg-[#0a0a0a]/95 backdrop-blur-lg border-t border-[#D4AF37]/25 px-4 py-3 flex items-center justify-between gap-3">
         <div className="flex-shrink-0">
           <p className="text-gray-400 text-[11px] leading-none mb-0.5">A partir de</p>
           <div className="flex items-baseline gap-1">

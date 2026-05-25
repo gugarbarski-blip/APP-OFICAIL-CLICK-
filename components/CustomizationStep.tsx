@@ -121,7 +121,7 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
   const canContinue   = value.artFile !== null && !pdfLoading;
 
   return (
-    <div className="min-h-screen pt-16 bg-[#1a1917]">
+    <div className="min-h-screen pt-16 bg-[#0a0a0a]">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-8">
           <button onClick={onBack} className="hover:text-[#D4AF37] transition-colors flex items-center gap-1">
@@ -172,7 +172,7 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
                       disabled={blocked}
                       className={`p-4 rounded-xl border-2 text-left transition-all ${
                         blocked
-                          ? 'border-white/5 bg-[#1a1917] opacity-50 cursor-not-allowed'
+                          ? 'border-white/5 bg-[#0a0a0a] opacity-50 cursor-not-allowed'
                           : selected
                             ? 'border-[#D4AF37] bg-[#D4AF37]/10'
                             : 'border-white/10 hover:border-white/20 bg-[#222019]'

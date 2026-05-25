@@ -96,7 +96,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, in
   };
 
   return (
-    <div className="min-h-screen pt-16 bg-[#1a1917]">
+    <div className="min-h-screen pt-16 bg-[#0a0a0a]">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
 
         {/* Breadcrumb */}
@@ -209,7 +209,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, in
                   value={d.name}
                   onChange={e => set('name', e.target.value)}
                   placeholder="João Silva"
-                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.name ? 'border-red-400' : 'border-white/15'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#0a0a0a] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.name ? 'border-red-400' : 'border-white/15'}`}
                 />
                 {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
               </div>
@@ -220,7 +220,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, in
                   value={d.email}
                   onChange={e => set('email', e.target.value)}
                   placeholder="joao@empresa.com.br"
-                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.email ? 'border-red-400' : 'border-white/15'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#0a0a0a] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.email ? 'border-red-400' : 'border-white/15'}`}
                 />
                 {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
               </div>
@@ -231,7 +231,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, in
                   value={d.phone}
                   onChange={e => set('phone', formatPhone(e.target.value))}
                   placeholder="(11) 99999-9999"
-                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.phone ? 'border-red-400' : 'border-white/15'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#0a0a0a] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.phone ? 'border-red-400' : 'border-white/15'}`}
                 />
                 {errors.phone && <p className="text-red-400 text-xs mt-1">{errors.phone}</p>}
               </div>
@@ -244,7 +244,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, in
                   value={d.cpfCnpj}
                   onChange={e => set('cpfCnpj', formatCpfCnpj(e.target.value))}
                   placeholder="000.000.000-00 ou 00.000.000/0000-00"
-                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.cpfCnpj ? 'border-red-400' : 'border-white/15'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#0a0a0a] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.cpfCnpj ? 'border-red-400' : 'border-white/15'}`}
                 />
                 {errors.cpfCnpj && <p className="text-red-400 text-xs mt-1">{errors.cpfCnpj}</p>}
               </div>
@@ -280,7 +280,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, in
                   value={d.address.street}
                   onChange={e => setAddr('street', e.target.value)}
                   placeholder="Rua das Flores"
-                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.street ? 'border-red-400' : 'border-white/15'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#0a0a0a] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.street ? 'border-red-400' : 'border-white/15'}`}
                 />
                 {errors.street && <p className="text-red-400 text-xs mt-1">{errors.street}</p>}
               </div>
@@ -291,7 +291,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, in
                   value={d.address.number}
                   onChange={e => setAddr('number', e.target.value)}
                   placeholder="123"
-                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.number ? 'border-red-400' : 'border-white/15'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#0a0a0a] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.number ? 'border-red-400' : 'border-white/15'}`}
                 />
                 {errors.number && <p className="text-red-400 text-xs mt-1">{errors.number}</p>}
               </div>
@@ -302,7 +302,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, in
                   value={d.address.complement}
                   onChange={e => setAddr('complement', e.target.value)}
                   placeholder="Apto 42"
-                  className="w-full border border-white/15 rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600"
+                  className="w-full border border-white/15 rounded-lg px-3 py-2.5 bg-[#0a0a0a] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600"
                 />
               </div>
               <div>
@@ -312,7 +312,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, in
                   value={d.address.neighborhood}
                   onChange={e => setAddr('neighborhood', e.target.value)}
                   placeholder="Centro"
-                  className="w-full border border-white/15 rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600"
+                  className="w-full border border-white/15 rounded-lg px-3 py-2.5 bg-[#0a0a0a] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600"
                 />
               </div>
               <div>
@@ -322,7 +322,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, in
                   value={d.address.city}
                   onChange={e => setAddr('city', e.target.value)}
                   placeholder="São Paulo"
-                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.city ? 'border-red-400' : 'border-white/15'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#0a0a0a] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 ${errors.city ? 'border-red-400' : 'border-white/15'}`}
                 />
                 {errors.city && <p className="text-red-400 text-xs mt-1">{errors.city}</p>}
               </div>
@@ -334,7 +334,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ product, customization, in
                   onChange={e => setAddr('state', e.target.value.toUpperCase())}
                   placeholder="SP"
                   maxLength={2}
-                  className="w-full border border-white/15 rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 uppercase"
+                  className="w-full border border-white/15 rounded-lg px-3 py-2.5 bg-[#0a0a0a] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-gray-600 uppercase"
                 />
               </div>
             </div>

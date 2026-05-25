@@ -110,7 +110,7 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
   const totalLaser = product.customizations.laser ? calcTotal(product, 'laser', d.quantity) : null;
 
   return (
-    <div className="min-h-screen pt-16 bg-[#1a1917]">
+    <div className="min-h-screen pt-16 bg-[#0a0a0a]">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-8">
@@ -174,7 +174,7 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
                     setQuantityInput(String(safe));
                     onChange({ ...d, quantity: safe });
                   }}
-                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] ${errors.quantity ? 'border-red-500' : 'border-white/15'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#0a0a0a] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] ${errors.quantity ? 'border-red-500' : 'border-white/15'}`}
                 />
                 {errors.quantity && <p className="text-red-400 text-xs mt-1">{errors.quantity}</p>}
               </div>
@@ -229,7 +229,7 @@ export const QuantityShippingStep: React.FC<QuantityShippingStepProps> = ({
                   onChange={e => handleCEP(e.target.value)}
                   placeholder="00000-000"
                   maxLength={9}
-                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#1a1917] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] pr-9 placeholder:text-gray-600 ${errors.cep || cepError ? 'border-red-500' : 'border-white/15'}`}
+                  className={`w-full border rounded-lg px-3 py-2.5 bg-[#0a0a0a] text-white focus:outline-none focus:ring-2 focus:ring-[#D4AF37] pr-9 placeholder:text-gray-600 ${errors.cep || cepError ? 'border-red-500' : 'border-white/15'}`}
                 />
                 {cepLoading && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">

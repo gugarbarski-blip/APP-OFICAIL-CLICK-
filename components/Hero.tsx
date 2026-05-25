@@ -8,7 +8,7 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
   return (
-    <section className="min-h-screen bg-[#1a1917] flex items-center relative overflow-hidden">
+    <section className="min-h-screen bg-[#0a0a0a] flex items-center relative overflow-hidden">
 
       <div className="max-w-7xl mx-auto px-6 lg:px-16 w-full grid lg:grid-cols-2 gap-12 lg:gap-8 items-center py-24 lg:py-0 relative z-10">
 
@@ -17,7 +17,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
 
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-[#1a1917]">
+            <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-[#0a0a0a]">
               <img src="/Logo.webp" alt="IB" className="w-full h-full object-cover" />
             </div>
             <span className="font-poppins font-extrabold text-2xl text-[#D4AF37] tracking-tight">
