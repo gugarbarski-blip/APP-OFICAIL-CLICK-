@@ -16,7 +16,7 @@ const H = 420;
 const PRINT_AREAS: Record<string, { x: number; y: number; w: number; h: number }> = {
   '/CopoPreview475.webp':        { x: 93,  y: 155, w: 68,  h: 129 },
   '/CopoCuia.webp':              { x: 63,  y: 144, w: 153, h: 127 },
-  '/EcoBagPreview.semlogo.webp': { x: 71,  y: 152, w: 159, h: 227 },
+  '/EcoBagPreview.semlogo.webp': { x: 99,  y: 190, w: 104, h: 151 },
 };
 const PRINT_DEFAULT = { x: 59, y: 71, w: 136, h: 272 };
 
