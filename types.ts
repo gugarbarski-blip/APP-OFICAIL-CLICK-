@@ -106,12 +106,12 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
       'Peso: ~266g',
     ],
     basePrice: 24.00,
-    image: '/Moleskine.SeuLogo.png',
-    cardImage: '/Moleskine.SeuLogo.png',
+    image: '/Moleskine.SeuLogo.nobg.webp',
+    cardImage: '/Moleskine.SeuLogo.nobg.webp',
     customizations: {
       serigrafia: { label: 'Serigrafia 1 Cor', extraPrice: 0, description: 'Impressão em tinta de alta durabilidade na capa' },
     },
-    minQuantity: 10,
+    minQuantity: 20,
   },
 };
 
