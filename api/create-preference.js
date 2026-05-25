@@ -1,6 +1,7 @@
 'use strict';
 
 const { getClientIp, isRateLimited } = require('./_ratelimit');
+const { encrypt } = require('./_crypto');
 
 const PRICES = {
   'copo-475': { serigrafia: 23.00, laser: 28.00 },
@@ -62,12 +63,12 @@ module.exports = async function handler(req, res) {
       status: 'aguardando_cartao',
       nome: buyerName || '',
       email: buyerEmail,
-      telefone: buyerPhone || '',
-      cpf_cnpj: buyerCpfCnpj || '',
+      telefone: encrypt(buyerPhone || ''),
+      cpf_cnpj: encrypt(buyerCpfCnpj || ''),
       produto: productName,
       quantidade: qty,
       valor_total: total,
-      endereco: address || '',
+      endereco: encrypt(address || ''),
       tipo_personalizacao: customizationType || '',
       cor_serigrafia: serigrafiaColor || '',
       arte_url: artUrl || null,

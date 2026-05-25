@@ -1,6 +1,7 @@
 'use strict';
 
-const crypto = require('crypto');
+const crypto   = require('crypto');
+const { encrypt } = require('./_crypto');
 
 function verifySignature(req, secret) {
   const sig = req.headers['x-signature'];
@@ -204,13 +205,13 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const webhookSecret = process.env.MP_WEBHOOK_SECRET;
-  if (webhookSecret) {
-    if (!verifySignature(req, webhookSecret)) {
-      console.warn('Webhook MP: assinatura inválida rejeitada');
-      return res.status(401).json({ error: 'invalid_signature' });
-    }
-  } else {
-    console.warn('Webhook MP: MP_WEBHOOK_SECRET não configurado — verificação desabilitada');
+  if (!webhookSecret) {
+    console.error('CRÍTICO: MP_WEBHOOK_SECRET não configurado — webhook bloqueado por segurança');
+    return res.status(503).json({ error: 'webhook_not_configured' });
+  }
+  if (!verifySignature(req, webhookSecret)) {
+    console.warn('Webhook MP: assinatura inválida rejeitada');
+    return res.status(401).json({ error: 'invalid_signature' });
   }
 
   console.log('Webhook MP recebido:', JSON.stringify({
@@ -298,12 +299,12 @@ module.exports = async function handler(req, res) {
       status: 'pago',
       nome,
       email: emailTo,
-      telefone: g('buyer_phone', 'buyerPhone'),
-      cpf_cnpj: g('buyer_cpf_cnpj', 'buyerCpfCnpj'),
+      telefone: encrypt(g('buyer_phone', 'buyerPhone')),
+      cpf_cnpj: encrypt(g('buyer_cpf_cnpj', 'buyerCpfCnpj')),
       produto: productName,
       quantidade: Number(meta.quantity) || 0,
       valor_total: valorTotal,
-      endereco: g('address', 'address'),
+      endereco: encrypt(g('address', 'address')),
       tipo_personalizacao: g('customization_type', 'customizationType'),
       cor_serigrafia: g('serigrafia_color', 'serigrafiaColor'),
       arte_url: meta.art_url || meta.artUrl || null,

@@ -1,6 +1,7 @@
 'use strict';
 
 const { createHmac, timingSafeEqual } = require('crypto');
+const { decrypt } = require('../_crypto');
 
 const TOKEN_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 
@@ -29,16 +30,35 @@ module.exports = async function handler(req, res) {
     return res.status(401).json({ error: 'Não autorizado' });
   }
 
-  const { createClient } = require('@supabase/supabase-js');
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_KEY;
-  const db = createClient(url, key);
+  const page     = Math.max(1, parseInt(req.query?.page) || 1);
+  const pageSize = Math.min(50, Math.max(1, parseInt(req.query?.pageSize) || 20));
+  const status   = req.query?.status;
+  const HIDDEN   = ['aguardando_pix', 'aguardando_cartao'];
 
-  const { data, error } = await db
-    .from('pedidos')
-    .select('*')
-    .order('created_at', { ascending: false });
+  const { createClient } = require('@supabase/supabase-js');
+  const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+
+  let query = db.from('pedidos').select('*', { count: 'exact' });
+
+  if (status && status !== 'todos') {
+    query = query.eq('status', status);
+  } else {
+    query = query.not('status', 'in', `(${HIDDEN.join(',')})`);
+  }
+
+  const from = (page - 1) * pageSize;
+  const { data, error, count } = await query
+    .order('created_at', { ascending: false })
+    .range(from, from + pageSize - 1);
 
   if (error) return res.status(500).json({ error: error.message });
-  return res.status(200).json({ pedidos: data });
+
+  const pedidos = (data || []).map(p => ({
+    ...p,
+    cpf_cnpj: decrypt(p.cpf_cnpj),
+    telefone:  decrypt(p.telefone),
+    endereco:  decrypt(p.endereco),
+  }));
+
+  return res.status(200).json({ pedidos, total: count ?? 0, page, pageSize });
 };

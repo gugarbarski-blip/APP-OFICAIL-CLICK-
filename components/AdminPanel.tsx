@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Package, RefreshCw, LogOut, Download, DollarSign, TrendingUp, BarChart3, ShoppingBag } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Package, RefreshCw, LogOut, Download, DollarSign, TrendingUp, BarChart3, ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   pendente:  { label: 'Pendente',   color: 'bg-yellow-100 text-yellow-800' },
@@ -28,66 +28,100 @@ interface Pedido {
   arte_url?: string;
 }
 
+interface Metrics {
+  statusCounts: Record<string, number>;
+  fatMes: number;
+  fatTotal: number;
+  ticket: number;
+  unidMes: number;
+  totalPedidos: number;
+  totalMes: number;
+  prodStats: { nome: string; pedidos: number; unidades: number }[];
+}
+
 function authHeaders(token: string) {
   return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 }
 
 const FILTER_TABS = [
-  { key: 'todos', label: 'Todos' },
-  { key: 'pago', label: 'Pago' },
-  { key: 'producao', label: 'Produção' },
-  { key: 'enviado', label: 'Enviado' },
-  { key: 'entregue', label: 'Entregue' },
-  { key: 'pendente', label: 'Pendente' },
+  { key: 'todos',     label: 'Todos' },
+  { key: 'pago',      label: 'Pago' },
+  { key: 'producao',  label: 'Produção' },
+  { key: 'enviado',   label: 'Enviado' },
+  { key: 'entregue',  label: 'Entregue' },
+  { key: 'pendente',  label: 'Pendente' },
   { key: 'cancelado', label: 'Cancelado' },
 ];
 
-export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ token, onLogout }) => {
-  const [pedidos, setPedidos] = useState<Pedido[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<string>('pago');
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
+const PAGE_SIZE = 20;
 
-  const load = async (silent = false) => {
-    if (!silent) setLoading(true);
-    else setRefreshing(true);
-    const res = await fetch('/api/admin/pedidos', { headers: authHeaders(token) });
+export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ token, onLogout }) => {
+  const [pedidos,      setPedidos]      = useState<Pedido[]>([]);
+  const [metrics,      setMetrics]      = useState<Metrics | null>(null);
+  const [total,        setTotal]        = useState(0);
+  const [page,         setPage]         = useState(1);
+  const [loading,      setLoading]      = useState(true);
+  const [updating,     setUpdating]     = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('pago');
+  const [lastUpdated,  setLastUpdated]  = useState<Date | null>(null);
+  const [refreshing,   setRefreshing]   = useState(false);
+
+  const loadMetrics = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/metrics', { headers: authHeaders(token) });
+      if (res.ok) setMetrics(await res.json());
+    } catch {}
+  }, [token]);
+
+  const load = useCallback(async (silent = false, pg = 1, sf = statusFilter) => {
+    if (!silent) setLoading(true); else setRefreshing(true);
+    const params = new URLSearchParams({ page: String(pg), pageSize: String(PAGE_SIZE) });
+    if (sf !== 'todos') params.set('status', sf);
+    const res = await fetch(`/api/admin/pedidos?${params}`, { headers: authHeaders(token) });
     if (res.status === 401) { onLogout(); return; }
-    const { pedidos: data } = await res.json();
-    const HIDDEN = ['aguardando_pix', 'aguardando_cartao'];
-    setPedidos((data || []).filter((p: Pedido) => !HIDDEN.includes(p.status)));
+    const { pedidos: data, total: tot } = await res.json();
+    setPedidos(data || []);
+    setTotal(tot || 0);
     setLastUpdated(new Date());
-    if (!silent) setLoading(false);
-    else setRefreshing(false);
-  };
+    if (!silent) setLoading(false); else setRefreshing(false);
+  }, [token, statusFilter, onLogout]);
 
   useEffect(() => {
-    load();
-    const interval = setInterval(() => load(true), 30000);
+    Promise.all([load(false, 1, statusFilter), loadMetrics()]);
+    const interval = setInterval(() => { load(true, page, statusFilter); loadMetrics(); }, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleFilterChange = (sf: string) => {
+    setStatusFilter(sf);
+    setPage(1);
+    load(false, 1, sf);
+  };
+
+  const handlePageChange = (pg: number) => {
+    setPage(pg);
+    load(false, pg, statusFilter);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const updateStatus = async (id: string, status: string) => {
     setUpdating(id);
     await fetch('/api/admin/update-status', {
-      method: 'POST',
-      headers: authHeaders(token),
-      body: JSON.stringify({ id, status }),
+      method: 'POST', headers: authHeaders(token), body: JSON.stringify({ id, status }),
     });
-    await load();
+    await Promise.all([load(true, page, statusFilter), loadMetrics()]);
     setUpdating(null);
   };
 
   const updateRastreio = async (id: string, codigo: string) => {
     await fetch('/api/admin/update-rastreio', {
-      method: 'POST',
-      headers: authHeaders(token),
-      body: JSON.stringify({ id, codigo }),
+      method: 'POST', headers: authHeaders(token), body: JSON.stringify({ id, codigo }),
     });
-    await load();
+    await load(true, page, statusFilter);
   };
+
+  const fmt = (v: number) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
     <div className="min-h-screen bg-gray-50 pt-6 px-4">
@@ -103,7 +137,7 @@ export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ 
                 {refreshing ? 'Atualizando...' : `Atualizado às ${lastUpdated.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`}
               </span>
             )}
-            <button onClick={() => load()} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">
+            <button onClick={() => { load(false, page, statusFilter); loadMetrics(); }} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">
               <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} /> Atualizar
             </button>
             <button onClick={onLogout} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">
@@ -113,62 +147,30 @@ export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ 
         </div>
 
         {/* ── Métricas de negócio ── */}
-        {(() => {
-          const PAID = ['pago', 'producao', 'enviado', 'entregue'];
-          const paidAll = pedidos.filter(p => PAID.includes(p.status));
-          const now = new Date();
-          const paidMes = paidAll.filter(p => {
-            const d = new Date(p.created_at);
-            return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-          });
-          const fatMes    = paidMes.reduce((s, p) => s + (p.valor_total || 0), 0);
-          const fatTotal  = paidAll.reduce((s, p) => s + (p.valor_total || 0), 0);
-          const ticket    = paidAll.length > 0 ? fatTotal / paidAll.length : 0;
-          const unidMes   = paidMes.reduce((s, p) => s + (p.quantidade || 0), 0);
-
-          const fmt = (v: number) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
+        {metrics && (() => {
           const cards = [
-            { icon: DollarSign, bg: 'bg-green-50',  ic: 'text-green-600',  label: 'Faturamento do Mês', value: fmt(fatMes),   sub: `${paidMes.length} pedido${paidMes.length !== 1 ? 's' : ''}` },
-            { icon: TrendingUp, bg: 'bg-blue-50',   ic: 'text-blue-600',   label: 'Faturamento Total',  value: fmt(fatTotal),  sub: `${paidAll.length} pedidos pagos` },
-            { icon: BarChart3,  bg: 'bg-purple-50', ic: 'text-purple-600', label: 'Ticket Médio',       value: fmt(ticket),    sub: 'por pedido pago' },
-            { icon: Package,    bg: 'bg-amber-50',  ic: 'text-amber-600',  label: 'Unidades no Mês',    value: String(unidMes), sub: 'copos personalizados' },
+            { icon: DollarSign, bg: 'bg-green-50',  ic: 'text-green-600',  label: 'Faturamento do Mês', value: fmt(metrics.fatMes),   sub: `${metrics.totalMes} pedido${metrics.totalMes !== 1 ? 's' : ''}` },
+            { icon: TrendingUp, bg: 'bg-blue-50',   ic: 'text-blue-600',   label: 'Faturamento Total',  value: fmt(metrics.fatTotal),  sub: `${metrics.totalPedidos} pedidos pagos` },
+            { icon: BarChart3,  bg: 'bg-purple-50', ic: 'text-purple-600', label: 'Ticket Médio',       value: fmt(metrics.ticket),    sub: 'por pedido pago' },
+            { icon: Package,    bg: 'bg-amber-50',  ic: 'text-amber-600',  label: 'Unidades no Mês',    value: String(metrics.unidMes), sub: 'unidades personalizadas' },
           ];
-
-          // Produto mais vendido
-          const prodMap: Record<string, { pedidos: number; unidades: number }> = {};
-          paidAll.forEach(p => {
-            const nome = p.produto?.split(' — ')[0]?.trim() || 'Desconhecido';
-            if (!prodMap[nome]) prodMap[nome] = { pedidos: 0, unidades: 0 };
-            prodMap[nome].pedidos++;
-            prodMap[nome].unidades += p.quantidade || 0;
-          });
-          const prodStats = Object.entries(prodMap)
-            .map(([nome, s]) => ({ nome, ...s }))
-            .sort((a, b) => b.unidades - a.unidades);
-
           return (
             <>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                 {cards.map(({ icon: Icon, bg, ic, label, value, sub }) => (
                   <div key={label} className="bg-white rounded-2xl border border-gray-200 p-4">
-                    <div className={`w-9 h-9 rounded-xl ${bg} flex items-center justify-center mb-3`}>
-                      <Icon size={18} className={ic} />
-                    </div>
+                    <div className={`w-9 h-9 rounded-xl ${bg} flex items-center justify-center mb-3`}><Icon size={18} className={ic} /></div>
                     <p className="text-xl font-bold text-gray-900 leading-tight">{value}</p>
                     <p className="text-xs text-gray-500 mt-0.5">{label}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
                   </div>
                 ))}
               </div>
-
-              {prodStats.length > 0 && (
+              {metrics.prodStats.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                  {prodStats.map(({ nome, pedidos: qtd, unidades }) => (
+                  {metrics.prodStats.map(({ nome, pedidos: qtd, unidades }) => (
                     <div key={nome} className="bg-white rounded-2xl border border-gray-200 p-4 flex items-center gap-4">
-                      <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
-                        <ShoppingBag size={18} className="text-amber-600" />
-                      </div>
+                      <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0"><ShoppingBag size={18} className="text-amber-600" /></div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-900 truncate">{nome}</p>
                         <p className="text-xs text-gray-500">{qtd} pedido{qtd !== 1 ? 's' : ''} · {unidades} unidades vendidas</p>
@@ -189,7 +191,7 @@ export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           {['pago','producao','enviado','entregue'].map(s => (
             <div key={s} className="bg-white rounded-2xl border border-gray-200 p-4 text-center">
-              <p className="text-2xl font-bold text-gray-900">{pedidos.filter(p => p.status === s).length}</p>
+              <p className="text-2xl font-bold text-gray-900">{metrics?.statusCounts[s] ?? '—'}</p>
               <p className="text-xs text-gray-500 mt-1">{STATUS_LABELS[s].label}</p>
             </div>
           ))}
@@ -198,22 +200,20 @@ export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ 
         {/* Filter tabs */}
         <div className="flex flex-wrap gap-2 mb-5">
           {FILTER_TABS.map(tab => {
-            const count = tab.key === 'todos' ? pedidos.length : pedidos.filter(p => p.status === tab.key).length;
+            const count = tab.key === 'todos'
+              ? Object.values(metrics?.statusCounts || {}).reduce((s, n) => s + n, 0)
+              : (metrics?.statusCounts[tab.key] ?? 0);
             const isActive = statusFilter === tab.key;
             return (
               <button
                 key={tab.key}
-                onClick={() => setStatusFilter(tab.key)}
+                onClick={() => handleFilterChange(tab.key)}
                 className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${
-                  isActive
-                    ? 'bg-gray-900 text-white border-gray-900'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
+                  isActive ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
                 }`}
               >
                 {tab.label}
-                <span className={`text-xs px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>
-                  {count}
-                </span>
+                <span className={`text-xs px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>{count}</span>
               </button>
             );
           })}
@@ -221,93 +221,119 @@ export const AdminPanel: React.FC<{ token: string; onLogout: () => void }> = ({ 
 
         {loading ? (
           <div className="text-center py-20 text-gray-400">Carregando pedidos...</div>
-        ) : pedidos.filter(p => statusFilter === 'todos' || p.status === statusFilter).length === 0 ? (
+        ) : pedidos.length === 0 ? (
           <div className="text-center py-20 text-gray-400">Nenhum pedido com status "{FILTER_TABS.find(t => t.key === statusFilter)?.label}".</div>
         ) : (
-          <div className="space-y-4">
-            {pedidos.filter(p => statusFilter === 'todos' || p.status === statusFilter).map(p => (
-              <div key={p.id} className="bg-white rounded-2xl border border-gray-200 p-5">
-                <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs text-gray-400 font-mono">#{p.id.slice(0,8)}</span>
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_LABELS[p.status]?.color || 'bg-gray-100 text-gray-600'}`}>
-                        {STATUS_LABELS[p.status]?.label || p.status}
-                      </span>
+          <>
+            <div className="space-y-4">
+              {pedidos.map(p => (
+                <div key={p.id} className="bg-white rounded-2xl border border-gray-200 p-5">
+                  <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs text-gray-400 font-mono">#{p.id.slice(0,8)}</span>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_LABELS[p.status]?.color || 'bg-gray-100 text-gray-600'}`}>
+                          {STATUS_LABELS[p.status]?.label || p.status}
+                        </span>
+                      </div>
+                      <p className="font-semibold text-gray-900">{p.nome}</p>
+                      <p className="text-sm text-gray-500">{p.email}</p>
+                      {p.telefone && <p className="text-sm text-gray-500">{p.telefone}</p>}
+                      {p.cpf_cnpj && <p className="text-xs text-gray-400">CPF/CNPJ: {p.cpf_cnpj}</p>}
                     </div>
-                    <p className="font-semibold text-gray-900">{p.nome}</p>
-                    <p className="text-sm text-gray-500">{p.email}</p>
-                    {p.telefone && <p className="text-sm text-gray-500">{p.telefone}</p>}
-                    {p.cpf_cnpj && <p className="text-xs text-gray-400">CPF/CNPJ: {p.cpf_cnpj}</p>}
+                    <div className="text-right">
+                      <p className="font-poppins text-xl font-bold text-primary">R$ {p.valor_total?.toFixed(2).replace('.', ',')}</p>
+                      <p className="text-xs text-gray-400">{new Date(p.created_at).toLocaleDateString('pt-BR')}</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-poppins text-xl font-bold text-primary">R$ {p.valor_total?.toFixed(2).replace('.', ',')}</p>
-                    <p className="text-xs text-gray-400">{new Date(p.created_at).toLocaleDateString('pt-BR')}</p>
-                  </div>
-                </div>
 
-                <div className="grid sm:grid-cols-2 gap-3 text-sm text-gray-600 mb-4 bg-gray-50 rounded-xl p-3">
-                  <div><span className="text-gray-400">Produto:</span> {p.produto}</div>
-                  <div><span className="text-gray-400">Quantidade:</span> {p.quantidade} unid.</div>
-                  <div><span className="text-gray-400">Personalização:</span> {p.tipo_personalizacao} {p.cor_serigrafia ? `— ${p.cor_serigrafia}` : ''}</div>
-                  <div className="sm:col-span-2"><span className="text-gray-400">Endereço:</span> {p.endereco}</div>
-                  {p.codigo_rastreio && <div><span className="text-gray-400">Rastreio:</span> <span className="font-mono font-semibold">{p.codigo_rastreio}</span></div>}
-                  {p.arte_url && (
-                    <div className="sm:col-span-2">
-                      <span className="text-gray-400">Arte do cliente:</span>{' '}
+                  <div className="grid sm:grid-cols-2 gap-3 text-sm text-gray-600 mb-4 bg-gray-50 rounded-xl p-3">
+                    <div><span className="text-gray-400">Produto:</span> {p.produto}</div>
+                    <div><span className="text-gray-400">Quantidade:</span> {p.quantidade} unid.</div>
+                    <div><span className="text-gray-400">Personalização:</span> {p.tipo_personalizacao} {p.cor_serigrafia ? `— ${p.cor_serigrafia}` : ''}</div>
+                    <div className="sm:col-span-2"><span className="text-gray-400">Endereço:</span> {p.endereco}</div>
+                    {p.codigo_rastreio && <div><span className="text-gray-400">Rastreio:</span> <span className="font-mono font-semibold">{p.codigo_rastreio}</span></div>}
+                    {p.arte_url && (
+                      <div className="sm:col-span-2">
+                        <span className="text-gray-400">Arte do cliente:</span>{' '}
+                        <button
+                          onClick={async () => {
+                            try {
+                              const res = await fetch(p.arte_url!);
+                              const blob = await res.blob();
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = url;
+                              const ext = p.arte_url!.split('.').pop()?.split('?')[0] || 'png';
+                              a.download = `arte-${p.id.slice(0, 8)}.${ext}`;
+                              a.click();
+                              URL.revokeObjectURL(url);
+                            } catch {
+                              window.open(p.arte_url!, '_blank');
+                            }
+                          }}
+                          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium underline cursor-pointer"
+                        >
+                          <Download size={13} />
+                          Baixar arquivo
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 items-center">
+                    <span className="text-xs text-gray-500 font-medium">Atualizar status:</span>
+                    {Object.entries(STATUS_LABELS).map(([key, val]) => (
                       <button
-                        onClick={async () => {
-                          try {
-                            const res = await fetch(p.arte_url!);
-                            const blob = await res.blob();
-                            const url = URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url;
-                            const ext = p.arte_url!.split('.').pop()?.split('?')[0] || 'png';
-                            a.download = `arte-${p.id.slice(0, 8)}.${ext}`;
-                            a.click();
-                            URL.revokeObjectURL(url);
-                          } catch {
-                            window.open(p.arte_url!, '_blank');
-                          }
-                        }}
-                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium underline cursor-pointer"
+                        key={key}
+                        disabled={p.status === key || updating === p.id}
+                        onClick={() => updateStatus(p.id, key)}
+                        className={`text-xs px-3 py-1 rounded-full border transition-all ${
+                          p.status === key ? val.color + ' border-transparent font-bold' : 'border-gray-200 text-gray-600 hover:border-gray-400'
+                        }`}
                       >
-                        <Download size={13} />
-                        Baixar arquivo
+                        {val.label}
                       </button>
-                    </div>
-                  )}
+                    ))}
+                    <input
+                      placeholder="Código de rastreio"
+                      className="ml-auto text-xs border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary"
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          const val = (e.target as HTMLInputElement).value.trim();
+                          if (val) { updateRastreio(p.id, val); (e.target as HTMLInputElement).value = ''; }
+                        }
+                      }}
+                    />
+                  </div>
                 </div>
+              ))}
+            </div>
 
-                <div className="flex flex-wrap gap-2 items-center">
-                  <span className="text-xs text-gray-500 font-medium">Atualizar status:</span>
-                  {Object.entries(STATUS_LABELS).map(([key, val]) => (
-                    <button
-                      key={key}
-                      disabled={p.status === key || updating === p.id}
-                      onClick={() => updateStatus(p.id, key)}
-                      className={`text-xs px-3 py-1 rounded-full border transition-all ${
-                        p.status === key ? val.color + ' border-transparent font-bold' : 'border-gray-200 text-gray-600 hover:border-gray-400'
-                      }`}
-                    >
-                      {val.label}
-                    </button>
-                  ))}
-                  <input
-                    placeholder="Código de rastreio"
-                    className="ml-auto text-xs border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary"
-                    onKeyDown={e => {
-                      if (e.key === 'Enter') {
-                        const val = (e.target as HTMLInputElement).value.trim();
-                        if (val) { updateRastreio(p.id, val); (e.target as HTMLInputElement).value = ''; }
-                      }
-                    }}
-                  />
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200 pb-6">
+                <p className="text-sm text-gray-500">
+                  {total} pedido{total !== 1 ? 's' : ''} · página {page} de {totalPages}
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    disabled={page <= 1}
+                    onClick={() => handlePageChange(page - 1)}
+                    className="flex items-center gap-1 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft size={15} /> Anterior
+                  </button>
+                  <button
+                    disabled={page >= totalPages}
+                    onClick={() => handlePageChange(page + 1)}
+                    className="flex items-center gap-1 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Próxima <ChevronRight size={15} />
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
     </div>
