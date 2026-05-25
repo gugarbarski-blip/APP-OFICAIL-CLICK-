@@ -1,111 +1,146 @@
 import React from 'react';
-import { ArrowRight, Star, Truck, Shield } from 'lucide-react';
+import { ArrowRight, Star } from 'lucide-react';
 import { PRODUCT } from '../types';
 
 interface HeroProps {
   onCtaClick: () => void;
 }
 
-const CupSVG: React.FC = () => (
-  <img src="/Copo.webp" alt="Copo Térmico 475ml" className="w-full h-full object-contain drop-shadow-2xl" />
-);
-
-
 export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
   return (
-    <section className="min-h-screen pt-16 bg-gradient-to-br from-[#2a2520] via-[#1e1b17] to-[#151310] flex items-center relative overflow-hidden">
-      {/* Luzes de fundo para simular a iluminação da foto */}
-      <div className="absolute top-0 left-1/4 w-full h-full bg-white/5 blur-[120px] rounded-full pointer-events-none"></div>
+    <section className="min-h-screen bg-[#0a0a0a] flex items-center relative overflow-hidden">
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-16 grid md:grid-cols-2 gap-4 md:gap-12 items-center relative z-10">
-        {/* Textos */}
-        <div className="text-white space-y-4 md:space-y-6 order-2 md:order-1">
+      <div className="max-w-7xl mx-auto px-6 lg:px-16 w-full grid lg:grid-cols-2 gap-12 lg:gap-8 items-center py-24 lg:py-0 relative z-10">
 
-          {/* Logo Grande do Hero (ImpreBrindes Bronze) */}
-          <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-8">
-            <img
-              src="/Logo.webp"
-              alt="ImpreBrindes Logo"
-              className="h-12 md:h-20 w-auto object-contain drop-shadow-[0_4px_15px_rgba(212,175,55,0.4)]"
-            />
-            <span className="font-poppins font-extrabold text-2xl sm:text-3xl md:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#F1C40F] drop-shadow-md tracking-tight">
+        {/* ── LEFT COLUMN ── */}
+        <div className="space-y-6 order-2 lg:order-1">
+
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-[#111]">
+              <img src="/Logo.webp" alt="IB" className="w-full h-full object-cover" />
+            </div>
+            <span className="font-poppins font-extrabold text-2xl text-[#D4AF37] tracking-tight">
               ImpreBrindes
             </span>
           </div>
 
-          <div className="inline-flex items-center gap-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#F1C40F] px-3 py-1.5 rounded-full text-sm font-semibold shadow-sm">
-            <Star size={14} className="fill-[#F1C40F] text-[#F1C40F]" />
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 border border-[#D4AF37]/50 text-[#D4AF37] px-4 py-1.5 rounded-full text-sm font-semibold">
+            <Star size={13} className="fill-[#D4AF37]" />
             Brindes Personalizados Premium
           </div>
 
-          <h1 className="font-poppins text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight drop-shadow-lg">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#F1C40F] to-[#D4AF37]">
-              Copos Térmicos<br />
-              Personalizados
-            </span>
+          {/* Title */}
+          <h1 className="font-poppins text-5xl sm:text-6xl font-extrabold leading-[1.05] text-[#EAB308]">
+            Copos Térmicos<br />
+            Personalizados
           </h1>
 
-          <p className="text-gray-200 text-base md:text-lg leading-relaxed font-medium max-w-md">
+          {/* Description */}
+          <p className="text-gray-300 text-base lg:text-lg leading-relaxed max-w-md">
             Copos Térmicos 475ml personalizados com a identidade da sua empresa.
             Qualidade premium e entrega para todo o Brasil.
           </p>
 
           {/* Price */}
-          <div className="flex flex-col gap-1">
+          <div className="space-y-1">
+            <p className="text-gray-400 text-sm">A partir de</p>
             <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-gray-300 text-sm font-medium">A partir de</span>
-              <span className="font-poppins text-4xl sm:text-5xl font-extrabold text-[#eab308] drop-shadow-md">
+              <span className="font-poppins text-5xl font-extrabold text-[#EAB308]">
                 R$ {PRODUCT.basePrice.toFixed(2).replace('.', ',')}
               </span>
-              <span className="text-gray-300 text-sm font-medium">/ unidade</span>
+              <span className="text-gray-400 text-base">/ unidade</span>
             </div>
-            <p className="text-gray-400 text-sm">Comece com apenas {PRODUCT.minQuantity} unidades</p>
+            <p className="text-gray-500 text-sm">Comece com apenas {PRODUCT.minQuantity} unidades</p>
           </div>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-2 md:pt-4">
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <button
-              onClick={() => document.getElementById('produto')?.scrollIntoView({ behavior: 'smooth' })}
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#D4AF37] to-[#d49924] hover:from-[#d49924] hover:to-[#c28511] text-gray-900 font-extrabold px-8 py-3.5 md:py-4 rounded-xl text-base transition-all shadow-[0_8px_20px_rgba(212,175,55,0.4)] hover:-translate-y-0.5"
+              onClick={onCtaClick}
+              className="flex items-center justify-center gap-2 bg-[#D4AF37] hover:bg-[#c9a82e] active:bg-[#b8971e] text-black font-bold px-8 py-3.5 rounded-xl text-base transition-colors"
             >
               Compre Já!
               <ArrowRight size={18} />
             </button>
             <a
               href="#produto"
-              className="flex items-center justify-center gap-2 border-2 border-white/20 hover:border-[#D4AF37] text-white font-semibold px-8 py-3.5 md:py-4 rounded-xl text-base transition-colors bg-white/5 backdrop-blur-sm"
+              className="flex items-center justify-center border border-white/20 hover:border-white/40 text-white font-semibold px-8 py-3.5 rounded-xl text-base transition-colors"
             >
               Ver Detalhes
             </a>
           </div>
-
-          {/* Trust badges */}
-          <div className="flex flex-wrap gap-4 md:gap-6 pt-3 md:pt-4 border-t border-white/10 mt-2 md:mt-6">
-            <div className="flex items-center gap-2 text-gray-300 text-xs font-semibold uppercase tracking-wider">
-              <Truck size={15} className="text-[#F1C40F]" />
-              Entrega para todo o Brasil
-            </div>
-            <div className="flex items-center gap-2 text-gray-300 text-xs font-semibold uppercase tracking-wider">
-              <Shield size={15} className="text-[#F1C40F]" />
-              Garantia de satisfação
-            </div>
-          </div>
         </div>
 
-        {/* Cup photo area */}
-        <div className="order-1 md:order-2 flex justify-center relative">
-          <div className="relative w-full max-w-[200px] sm:max-w-xs md:max-w-lg">
+        {/* ── RIGHT COLUMN ── */}
+        <div className="order-1 lg:order-2 relative flex items-center justify-center h-[420px] sm:h-[520px] lg:h-screen max-h-[700px]">
 
+          {/* Golden circle ring */}
+          <div
+            className="absolute rounded-full pointer-events-none"
+            style={{
+              width: '520px',
+              height: '520px',
+              border: '2px solid rgba(212,175,55,0.45)',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+            }}
+          />
+
+          {/* Warm glow beneath products */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              width: '420px',
+              height: '140px',
+              bottom: '80px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'radial-gradient(ellipse at 50% 100%, rgba(200,130,20,0.28) 0%, transparent 70%)',
+            }}
+          />
+
+          {/* Products */}
+          <div
+            className="relative z-10 flex items-end justify-center gap-2 sm:gap-4"
+            style={{ paddingBottom: '80px' }}
+          >
             <img
-              src="/mockup-copo-preto.webp"
-              alt="Copo Térmico 475ml personalizado - ImpreBrindes"
-              className="relative w-full h-auto object-contain drop-shadow-2xl z-10"
-              style={{ filter: 'drop-shadow(0 35px 35px rgba(0,0,0,0.6))' }}
+              src="/CopoTermicoSeuLogo.nobg.webp"
+              alt="Copo Térmico 475ml"
+              className="object-contain drop-shadow-2xl"
+              style={{ height: '280px' }}
               fetchPriority="high"
             />
-            {/* Sombra base do copo */}
-            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-3/4 h-8 bg-black/60 blur-xl rounded-[100%] z-0"></div>
+            <img
+              src="/CopoCuiaSeuNome.nobg.webp"
+              alt="Copo Cuia 320ml"
+              className="object-contain drop-shadow-2xl"
+              style={{ height: '210px', marginBottom: '4px' }}
+            />
+            <img
+              src="/EcobagSeuLogo.webp"
+              alt="Sacola Ecobag"
+              className="object-contain drop-shadow-2xl"
+              style={{ height: '240px', mixBlendMode: 'multiply' }}
+            />
           </div>
+
+          {/* Platform disc */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              width: '480px',
+              height: '48px',
+              bottom: '60px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'radial-gradient(ellipse at 50% 0%, #2e2e2e 0%, #111 60%, transparent 100%)',
+              borderRadius: '50%',
+            }}
+          />
         </div>
       </div>
     </section>
