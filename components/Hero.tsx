@@ -78,12 +78,12 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
               Compre Já!
               <ArrowRight size={18} />
             </button>
-            <a
-              href="#produto"
+            <button
+              onClick={() => document.getElementById('produto')?.scrollIntoView({ behavior: 'smooth' })}
               className="flex items-center justify-center border border-white/20 hover:border-white/40 text-white font-semibold px-8 py-3.5 rounded-xl text-base transition-colors"
             >
               Ver Produtos
-            </a>
+            </button>
           </div>
         </div>
 
