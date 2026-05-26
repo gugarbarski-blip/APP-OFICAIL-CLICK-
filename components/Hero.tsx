@@ -14,7 +14,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
   return (
     <section className="min-h-screen bg-[#0a0a0a] flex items-center relative overflow-hidden">
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-16 w-full grid lg:grid-cols-2 gap-12 lg:gap-8 items-center py-24 lg:py-0 relative z-10">
+      <div className="max-w-7xl mx-auto px-6 lg:px-16 w-full grid lg:grid-cols-2 gap-12 lg:gap-8 items-center py-28 lg:py-24 relative z-10">
 
         {/* ── LEFT COLUMN ── */}
         <div className="space-y-6 order-2 lg:order-1">
