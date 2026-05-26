@@ -1,5 +1,5 @@
 import React from 'react';
-import { Instagram, Mail, Phone } from 'lucide-react';
+import { Instagram, Mail, MapPin, ShieldCheck } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   const year = new Date().getFullYear();
@@ -56,6 +56,14 @@ export const Footer: React.FC = () => {
               <li className="flex items-center gap-2">
                 <Instagram size={14} className="text-[#D4AF37] flex-shrink-0" />
                 @imprebrindes
+              </li>
+              <li className="flex items-start gap-2">
+                <MapPin size={14} className="text-[#D4AF37] flex-shrink-0 mt-0.5" />
+                <span>Protásio Alves, 6441<br />Porto Alegre – RS</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <ShieldCheck size={14} className="text-[#D4AF37] flex-shrink-0" />
+                CNPJ 92.869.650/0001-96
               </li>
             </ul>
           </div>
