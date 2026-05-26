@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Star } from 'lucide-react';
+import { ArrowRight, Star, ShieldCheck, Building2 } from 'lucide-react';
 import { PRODUCTS } from '../types';
 
 interface HeroProps {
@@ -73,6 +73,18 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
             >
               Ver Produtos
             </a>
+          </div>
+
+          {/* Trust signals */}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-1">
+            <div className="flex items-center gap-1.5 text-gray-400">
+              <Building2 size={13} className="text-[#D4AF37] flex-shrink-0" />
+              <span className="text-xs">Grupo Impresul · desde <span className="text-gray-300 font-semibold">1968</span></span>
+            </div>
+            <div className="flex items-center gap-1.5 text-gray-400">
+              <ShieldCheck size={13} className="text-[#D4AF37] flex-shrink-0" />
+              <span className="text-xs">CNPJ <span className="text-gray-300 font-semibold">92.869.650/0001-96</span></span>
+            </div>
           </div>
         </div>
 
