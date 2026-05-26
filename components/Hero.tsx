@@ -14,10 +14,10 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
   return (
     <section className="min-h-screen bg-[#0a0a0a] flex items-center relative overflow-hidden">
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-16 w-full grid lg:grid-cols-2 gap-12 lg:gap-8 items-center py-28 lg:py-24 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-16 w-full grid lg:grid-cols-2 gap-12 lg:gap-8 items-center py-28 lg:py-24 relative z-10">
 
         {/* ── LEFT COLUMN ── */}
-        <div className="space-y-6 order-2 lg:order-1">
+        <div className="space-y-5 order-2 lg:order-1">
 
           {/* Badge */}
           <div className="inline-flex items-center gap-2 border border-[#D4AF37]/50 text-[#D4AF37] px-4 py-1.5 rounded-full text-sm font-semibold">
@@ -26,8 +26,9 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
           </div>
 
           {/* Title */}
-          <h1 className="font-poppins text-5xl sm:text-6xl font-extrabold leading-[1.05] text-[#EAB308]">
-            Brindes Corporativos<br />
+          <h1 className="font-poppins text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.05] text-[#EAB308]">
+            Brindes<br />
+            Corporativos<br />
             Personalizados
           </h1>
 
@@ -55,11 +56,21 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
               </span>
               <span className="text-gray-400 text-base">/ unidade</span>
             </div>
-            <p className="text-gray-500 text-sm">4 produtos disponíveis · entrega para todo o Brasil</p>
+            {/* Trust signals — abaixo do preço */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 pt-1">
+              <div className="flex items-center gap-1.5 text-gray-400">
+                <Building2 size={13} className="text-[#D4AF37] flex-shrink-0" />
+                <span className="text-xs">Grupo Impresul · desde <span className="text-gray-300 font-semibold">1968</span></span>
+              </div>
+              <div className="flex items-center gap-1.5 text-gray-400">
+                <ShieldCheck size={13} className="text-[#D4AF37] flex-shrink-0" />
+                <span className="text-xs">CNPJ <span className="text-gray-300 font-semibold">92.869.650/0001-96</span></span>
+              </div>
+            </div>
           </div>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row gap-3 pt-1">
             <button
               onClick={onCtaClick}
               className="flex items-center justify-center gap-2 bg-[#D4AF37] hover:bg-[#c9a82e] active:bg-[#b8971e] text-black font-bold px-8 py-3.5 rounded-xl text-base transition-colors"
@@ -74,18 +85,6 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
               Ver Produtos
             </a>
           </div>
-
-          {/* Trust signals */}
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-1">
-            <div className="flex items-center gap-1.5 text-gray-400">
-              <Building2 size={13} className="text-[#D4AF37] flex-shrink-0" />
-              <span className="text-xs">Grupo Impresul · desde <span className="text-gray-300 font-semibold">1968</span></span>
-            </div>
-            <div className="flex items-center gap-1.5 text-gray-400">
-              <ShieldCheck size={13} className="text-[#D4AF37] flex-shrink-0" />
-              <span className="text-xs">CNPJ <span className="text-gray-300 font-semibold">92.869.650/0001-96</span></span>
-            </div>
-          </div>
         </div>
 
         {/* ── RIGHT COLUMN ── */}
@@ -93,7 +92,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
           <img
             src="/Imagem.LadoDireito.webp"
             alt="Copos Térmicos, Cuia, Ecobag e Moleskine personalizados ImpreBrindes"
-            className="w-full max-w-[480px] lg:max-w-[560px] h-auto object-contain"
+            className="w-full max-w-[380px] sm:max-w-[480px] lg:max-w-[560px] h-auto object-contain"
             fetchPriority="high"
           />
         </div>
