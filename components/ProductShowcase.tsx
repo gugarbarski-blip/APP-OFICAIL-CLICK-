@@ -50,12 +50,12 @@ const ProductCard: React.FC<{ product: ProductDef; onSelect: () => void }> = ({ 
         </div>
 
         <div className="mt-auto">
-          <div className="flex items-baseline gap-1 mb-1.5 sm:mb-4 flex-wrap">
-            <span className="text-gray-400 text-xs">a partir de</span>
-            <span className="font-poppins text-xl sm:text-3xl font-bold text-[#F1C40F]">
+          <div className="flex items-baseline gap-1 mb-1.5 sm:mb-4">
+            <span className="text-gray-400 text-xs whitespace-nowrap">a partir de</span>
+            <span className="font-poppins text-xl sm:text-2xl font-bold text-[#F1C40F] whitespace-nowrap">
               R$ {product.basePrice.toFixed(2).replace('.', ',')}
             </span>
-            <span className="text-gray-400 text-xs hidden sm:inline">/ un.</span>
+            <span className="text-gray-400 text-xs whitespace-nowrap">/ un.</span>
           </div>
           <p className="text-gray-500 text-xs mb-2 sm:mb-4 hidden sm:block">Pedido mínimo: {product.minQuantity} unidades</p>
           <button
