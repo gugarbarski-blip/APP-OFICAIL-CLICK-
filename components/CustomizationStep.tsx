@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { X, ArrowRight, ArrowLeft, Zap, Printer, FileText, Loader } from 'lucide-react';
 import { Customization, CustomizationType, ProductDef, SerigrafiaColor, SERIGRAFIA_COLORS, calcUnitPrice } from '../types';
-import { ArtPreviewCanvas } from './ArtPreviewCanvas';
 
 const SERIGRAFIA_MIN_QTY = 25;
 
@@ -154,8 +153,7 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
         </h2>
         <p className="text-gray-400 mb-8">Escolha o tipo de personalização e faça upload da sua arte</p>
 
-        <div className="grid md:grid-cols-2 gap-10 items-start">
-          {/* ── Left column: options ── */}
+        <div>
           <div className="space-y-6">
             {/* Tipo */}
             <div>
@@ -319,21 +317,6 @@ export const CustomizationStep: React.FC<CustomizationStepProps> = ({
             </div>
           </div>
 
-          {/* ── Right column: preview ── */}
-          <div className="flex flex-col items-center gap-4">
-            <p className="font-semibold text-white text-sm">Preview da Arte no Copo</p>
-            <ArtPreviewCanvas
-              artUrl={value.artPreviewUrl}
-              cupImageUrl={product.image}
-              customizationType={value.type}
-              serigrafiaColorHex={serigrafiaHex}
-            />
-            {value.artPreviewUrl && (
-              <p className="text-xs text-gray-400 text-center">
-                Preview ilustrativo · cor aplicada: <strong>{SERIGRAFIA_COLORS.find(c => c.key === value.serigrafiaColor)?.label}</strong>
-              </p>
-            )}
-          </div>
         </div>
       </div>
     </div>

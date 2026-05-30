@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Package, MapPin, User, Palette, AlertCircle, QrCode, Copy, CheckCheck, Loader2, CreditCard } from 'lucide-react';
 import { Customization, OrderFormData, ProductDef, SERIGRAFIA_COLORS, calcUnitPrice, calcTotal } from '../types';
-import { ArtPreviewCanvas } from './ArtPreviewCanvas';
 
 interface OrderSummaryProps {
   product: ProductDef;
@@ -234,9 +233,6 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({ product, customizati
               Produto
             </h3>
             <div className="flex gap-6 items-start">
-              <div className="w-28 flex-shrink-0">
-                <ArtPreviewCanvas artUrl={customization.artPreviewUrl} cupImageUrl={product.image} />
-              </div>
               <div className="space-y-2 flex-1">
                 <p className="font-semibold text-gray-900">{product.name}</p>
                 <p className="text-gray-500 text-sm">Cor: {product.color}</p>
