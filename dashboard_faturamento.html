@@ -217,8 +217,24 @@
       <div class="chart-wrap"><canvas id="chartAnual" height="220"></canvas></div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">Participação por Loja</div>
-      <div class="chart-sub">% do faturamento total histórico</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+        <div class="chart-title">Participação por Loja</div>
+        <select id="pizza-ano" onchange="renderPizza()" style="background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:0.78rem;cursor:pointer;outline:none;">
+          <option value="todos">Histórico</option>
+          <option value="2026">2026</option>
+          <option value="2025" selected>2025</option>
+          <option value="2024">2024</option>
+          <option value="2023">2023</option>
+          <option value="2022">2022</option>
+          <option value="2021">2021</option>
+          <option value="2020">2020</option>
+          <option value="2019">2019</option>
+          <option value="2018">2018</option>
+          <option value="2017">2017</option>
+          <option value="2016">2016</option>
+        </select>
+      </div>
+      <div class="chart-sub">% do faturamento por ano selecionado</div>
       <div class="chart-wrap"><canvas id="chartPizza" height="220"></canvas></div>
     </div>
   </div>
@@ -268,6 +284,7 @@ const DATA = {
   por_ano: [{"Ano":2010,"Valor_RS":5252.28},{"Ano":2011,"Valor_RS":38234.13},{"Ano":2012,"Valor_RS":74501.42},{"Ano":2013,"Valor_RS":335545.4},{"Ano":2014,"Valor_RS":741609.46},{"Ano":2015,"Valor_RS":859735.24},{"Ano":2016,"Valor_RS":1875703.49},{"Ano":2017,"Valor_RS":1809396.03},{"Ano":2018,"Valor_RS":1703692.79},{"Ano":2019,"Valor_RS":1714688.95},{"Ano":2020,"Valor_RS":1605280.43},{"Ano":2021,"Valor_RS":2776192.98},{"Ano":2022,"Valor_RS":5645002.94},{"Ano":2023,"Valor_RS":7991357.32},{"Ano":2024,"Valor_RS":10595484.03},{"Ano":2025,"Valor_RS":13198483.27},{"Ano":2026,"Valor_RS":5707382.64}],
   recente: [{"Periodo_ISO":"2024-01","Valor_RS":635877.09},{"Periodo_ISO":"2024-02","Valor_RS":635692.32},{"Periodo_ISO":"2024-03","Valor_RS":813356.25},{"Periodo_ISO":"2024-04","Valor_RS":838004.37},{"Periodo_ISO":"2024-05","Valor_RS":441485.36},{"Periodo_ISO":"2024-06","Valor_RS":842585.57},{"Periodo_ISO":"2024-07","Valor_RS":1017037.59},{"Periodo_ISO":"2024-08","Valor_RS":1024326.82},{"Periodo_ISO":"2024-09","Valor_RS":998399.6},{"Periodo_ISO":"2024-10","Valor_RS":1248090.15},{"Periodo_ISO":"2024-11","Valor_RS":1109094.49},{"Periodo_ISO":"2024-12","Valor_RS":991534.42},{"Periodo_ISO":"2025-01","Valor_RS":780604.48},{"Periodo_ISO":"2025-02","Valor_RS":842864.88},{"Periodo_ISO":"2025-03","Valor_RS":997799.31},{"Periodo_ISO":"2025-04","Valor_RS":984551.17},{"Periodo_ISO":"2025-05","Valor_RS":1133121.0},{"Periodo_ISO":"2025-06","Valor_RS":939768.67},{"Periodo_ISO":"2025-07","Valor_RS":1161320.81},{"Periodo_ISO":"2025-08","Valor_RS":1109568.09},{"Periodo_ISO":"2025-09","Valor_RS":1192981.32},{"Periodo_ISO":"2025-10","Valor_RS":1457008.27},{"Periodo_ISO":"2025-11","Valor_RS":1273843.79},{"Periodo_ISO":"2025-12","Valor_RS":1325051.48},{"Periodo_ISO":"2026-01","Valor_RS":837660.37},{"Periodo_ISO":"2026-02","Valor_RS":769963.77},{"Periodo_ISO":"2026-03","Valor_RS":1428575.21},{"Periodo_ISO":"2026-04","Valor_RS":1169477.13},{"Periodo_ISO":"2026-05","Valor_RS":1273386.64},{"Periodo_ISO":"2026-06","Valor_RS":228319.52}],
   comp: [{"Loja":"Andradas","2024":992135.08,"2025":1176956.14},{"Loja":"Anita","2024":713565.37,"2025":1100285.88},{"Loja":"AssisBrasil","2024":1034581.06,"2025":1020741.93},{"Loja":"Azenha","2024":0,"2025":507623.62},{"Loja":"Cachoeirinha","2024":308086.76,"2025":429955.81},{"Loja":"Canoas","2024":745355.93,"2025":706752.27},{"Loja":"Goethe","2024":731860.7,"2025":1308644.76},{"Loja":"Gravataí","2024":148229.78,"2025":323471.42},{"Loja":"Ipiranga","2024":466190.59,"2025":563944.86},{"Loja":"Nilo","2024":2301746.61,"2025":2491629.84},{"Loja":"Novo Hamburgo","2024":0,"2025":227588.42},{"Loja":"Osvaldo","2024":0,"2025":413777.06},{"Loja":"Otavio","2024":0,"2025":85775.97},{"Loja":"Site/Protasio","2024":1962624.17,"2025":1605250.88},{"Loja":"Wenceslau","2024":1191107.98,"2025":1236084.41}],
+  por_ano_loja: {"2010":[{"Loja":"Site/Protasio","Valor_RS":5252.28}],"2011":[{"Loja":"Site/Protasio","Valor_RS":38234.13}],"2012":[{"Loja":"Site/Protasio","Valor_RS":74501.42}],"2013":[{"Loja":"Site/Protasio","Valor_RS":335545.4}],"2014":[{"Loja":"Site/Protasio","Valor_RS":741609.46}],"2015":[{"Loja":"Site/Protasio","Valor_RS":859735.24}],"2016":[{"Loja":"Site/Protasio","Valor_RS":1459367.84},{"Loja":"Nilo","Valor_RS":416335.65}],"2017":[{"Loja":"Site/Protasio","Valor_RS":1001052.17},{"Loja":"Nilo","Valor_RS":808343.86}],"2018":[{"Loja":"Nilo","Valor_RS":916491.73},{"Loja":"Site/Protasio","Valor_RS":787201.06}],"2019":[{"Loja":"Nilo","Valor_RS":938185.18},{"Loja":"Site/Protasio","Valor_RS":776503.77}],"2020":[{"Loja":"Nilo","Valor_RS":803566.29},{"Loja":"Site/Protasio","Valor_RS":801714.14}],"2021":[{"Loja":"Site/Protasio","Valor_RS":1187891.01},{"Loja":"Nilo","Valor_RS":1111103.11},{"Loja":"Wenceslau","Valor_RS":294526.3},{"Loja":"AssisBrasil","Valor_RS":182672.56}],"2022":[{"Loja":"Nilo","Valor_RS":1868180.8},{"Loja":"Site/Protasio","Valor_RS":1497886.21},{"Loja":"AssisBrasil","Valor_RS":792325.08},{"Loja":"Andradas","Valor_RS":775625.54},{"Loja":"Wenceslau","Valor_RS":710985.31}],"2023":[{"Loja":"Nilo","Valor_RS":2307799.67},{"Loja":"Site/Protasio","Valor_RS":1612870.78},{"Loja":"AssisBrasil","Valor_RS":981753.33},{"Loja":"Andradas","Valor_RS":952929.88},{"Loja":"Wenceslau","Valor_RS":921175.48},{"Loja":"Canoas","Valor_RS":562348.15},{"Loja":"Ipiranga","Valor_RS":285555.87},{"Loja":"Anita","Valor_RS":267723.36},{"Loja":"Goethe","Valor_RS":99200.8}],"2024":[{"Loja":"Nilo","Valor_RS":2301746.61},{"Loja":"Site/Protasio","Valor_RS":1962624.17},{"Loja":"Wenceslau","Valor_RS":1191107.98},{"Loja":"AssisBrasil","Valor_RS":1034581.06},{"Loja":"Andradas","Valor_RS":992135.08},{"Loja":"Canoas","Valor_RS":745355.93},{"Loja":"Goethe","Valor_RS":731860.7},{"Loja":"Anita","Valor_RS":713565.37},{"Loja":"Ipiranga","Valor_RS":466190.59},{"Loja":"Cachoeirinha","Valor_RS":308086.76},{"Loja":"Gravataí","Valor_RS":148229.78}],"2025":[{"Loja":"Nilo","Valor_RS":2491629.84},{"Loja":"Site/Protasio","Valor_RS":1605250.88},{"Loja":"Goethe","Valor_RS":1308644.76},{"Loja":"Wenceslau","Valor_RS":1236084.41},{"Loja":"Andradas","Valor_RS":1176956.14},{"Loja":"Anita","Valor_RS":1100285.88},{"Loja":"AssisBrasil","Valor_RS":1020741.93},{"Loja":"Canoas","Valor_RS":706752.27},{"Loja":"Ipiranga","Valor_RS":563944.86},{"Loja":"Azenha","Valor_RS":507623.62},{"Loja":"Cachoeirinha","Valor_RS":429955.81},{"Loja":"Osvaldo","Valor_RS":413777.06},{"Loja":"Gravataí","Valor_RS":323471.42},{"Loja":"Novo Hamburgo","Valor_RS":227588.42},{"Loja":"Otavio","Valor_RS":85775.97}],"2026":[{"Loja":"Nilo","Valor_RS":1079999.62},{"Loja":"Goethe","Valor_RS":693389.1},{"Loja":"Site/Protasio","Valor_RS":563546.77},{"Loja":"Wenceslau","Valor_RS":546737.09},{"Loja":"Andradas","Valor_RS":524747.78},{"Loja":"Anita","Valor_RS":425547.92},{"Loja":"AssisBrasil","Valor_RS":322249.12},{"Loja":"Osvaldo","Valor_RS":260818.55},{"Loja":"Canoas","Valor_RS":250305.01},{"Loja":"Ipiranga","Valor_RS":221343.72},{"Loja":"Azenha","Valor_RS":220418.55},{"Loja":"Novo Hamburgo","Valor_RS":206939.89},{"Loja":"Cachoeirinha","Valor_RS":177447.75},{"Loja":"Gravataí","Valor_RS":151871.55},{"Loja":"São Leopoldo","Valor_RS":46291.64},{"Loja":"Cristóvão","Valor_RS":15655.38}]},
   ult_mes: [{"Loja":"Andradas","Variacao_Pct":-58},{"Loja":"Anita","Variacao_Pct":-75},{"Loja":"AssisBrasil","Variacao_Pct":-81},{"Loja":"Azenha","Variacao_Pct":-71},{"Loja":"Cachoeirinha","Variacao_Pct":-82},{"Loja":"Canoas","Variacao_Pct":-74},{"Loja":"Cristóvão","Variacao_Pct":null},{"Loja":"Goethe","Variacao_Pct":-78},{"Loja":"Gravataí","Variacao_Pct":-64},{"Loja":"Ipiranga","Variacao_Pct":-82},{"Loja":"Nilo","Variacao_Pct":-78},{"Loja":"Novo Hamburgo","Variacao_Pct":-46},{"Loja":"Osvaldo","Variacao_Pct":-63},{"Loja":"Otavio","Variacao_Pct":null},{"Loja":"Site/Protasio","Variacao_Pct":null},{"Loja":"São Leopoldo","Variacao_Pct":null},{"Loja":"Wenceslau","Variacao_Pct":-76}]
 };
 
@@ -338,10 +355,22 @@ function renderAnual() {
 function renderPizza() {
   destroyChart('chartPizza');
   const ctx = document.getElementById('chartPizza').getContext('2d');
-  const top8 = DATA.por_loja.slice(0,8);
-  const outros = DATA.por_loja.slice(8).reduce((a,b) => a + b.Valor, 0);
-  const labels = [...top8.map(d => d.Loja), 'Demais'];
-  const vals = [...top8.map(d => d.Valor), outros];
+  const anoSel = document.getElementById('pizza-ano').value;
+
+  let source;
+  if (anoSel === 'todos') {
+    source = DATA.por_loja.map(d => ({ Loja: d.Loja, Valor: d.Valor }));
+  } else {
+    source = (DATA.por_ano_loja[anoSel] || []).map(d => ({ Loja: d.Loja, Valor: d.Valor_RS }));
+  }
+  source = source.sort((a,b) => b.Valor - a.Valor);
+
+  const top8 = source.slice(0, 8);
+  const outrosVal = source.slice(8).reduce((a,b) => a + b.Valor, 0);
+  const labels = [...top8.map(d => d.Loja), ...(outrosVal > 0 ? ['Demais'] : [])];
+  const vals   = [...top8.map(d => d.Valor), ...(outrosVal > 0 ? [outrosVal] : [])];
+  const total  = vals.reduce((a,b) => a + b, 0);
+
   charts['chartPizza'] = new Chart(ctx, {
     type: 'doughnut',
     data: {
@@ -353,7 +382,7 @@ function renderPizza() {
       cutout: '62%',
       plugins: {
         legend: { position: 'right', labels: { color: '#8892a4', font:{size:11}, boxWidth: 12, padding: 8 } },
-        tooltip: { callbacks: { label: ctx => `${ctx.label}: ${fmt(ctx.raw)} (${(ctx.raw/DATA.por_loja.reduce((a,b)=>a+b.Valor,0)*100).toFixed(1)}%)` } }
+        tooltip: { callbacks: { label: ctx => `${ctx.label}: ${fmt(ctx.raw)} (${(ctx.raw/total*100).toFixed(1)}%)` } }
       }
     }
   });
