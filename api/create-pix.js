@@ -4,8 +4,8 @@ const { getClientIp, isRateLimited } = require('./_ratelimit');
 const { encrypt } = require('./_crypto');
 
 const PRICES = {
-  'copo-475': { serigrafia: 23.00, laser: 28.00 },
-  'cuia-320':  { serigrafia: 23.00, laser: 28.00 },
+  'copo-475': { serigrafia: 32.50, laser: 37.50 },
+  'cuia-320':  { serigrafia: 32.50, laser: 37.50 },
 };
 
 function getServerPrice(productId, customizationType) {

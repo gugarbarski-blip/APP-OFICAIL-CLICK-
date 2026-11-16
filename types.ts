@@ -37,7 +37,7 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
       'Largura: 9,1 cm',
       'Circunferência: 29,3 cm',
     ],
-    basePrice: 23.00,
+    basePrice: 32.50,
     image: '/CopoPreview475.webp',
     cardImage: '/CopoTermicoSeuLogo.webp',
     customizations: {
@@ -60,7 +60,7 @@ export const PRODUCTS: Record<ProductId, ProductDef> = {
       'Cor: Preto fosco',
       'Formato cuia ergonômico',
     ],
-    basePrice: 23.00,
+    basePrice: 32.50,
     image: '/CopoCuia.webp',
     cardImage: '/CopoCuiaSeuNome.webp',
     customizations: {
