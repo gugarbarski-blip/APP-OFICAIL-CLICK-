@@ -3,7 +3,7 @@ import { Trophy, Zap, Truck, BookOpen, ShoppingBag } from 'lucide-react';
 
 const BASE_ITEMS = [
   { icon: Zap,        text: 'Copos Térmicos a partir de R$ 32,50/un.' },
-  { icon: ShoppingBag,text: 'Ecobag Algodão a partir de R$ 11,00/un.' },
+  { icon: ShoppingBag,text: 'Ecobag Algodão a partir de R$ 19,00/un.' },
   { icon: BookOpen,   text: 'Caderneta Moleskine a partir de R$ 24,00/un.' },
   { icon: Trophy,     text: 'Qualidade premium com o melhor preço' },
   { icon: Truck,      text: 'Entrega para todo o Brasil' },
